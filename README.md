@@ -16,9 +16,9 @@
 ## Screenshots
 
 <div align="center">
-  <img src="images/screenshot-desktop.png" alt="trackable. Desktop" width="700" />
+  <img src="static/img/screenshot-desktop.png" alt="trackable. Desktop" width="700" />
   <br/><br/>
-  <img src="images/screenshot-mobile.png" alt="trackable. Mobile" width="300" />
+  <img src="static/img/screenshot-mobile.png" alt="trackable. Mobile" width="300" />
 </div>
 
 ---
