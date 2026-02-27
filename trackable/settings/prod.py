@@ -5,7 +5,7 @@ DEBUG = False
 # WhiteNoise: komprimiert + cache-busting Dateinamen (z.B. app.abc123.js)
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
 DATABASES = {
@@ -52,3 +52,4 @@ if not _hosts:
         "ALLOWED_HOSTS muss in der .env gesetzt sein (z.B. meine-domain.com)."
     )
 ALLOWED_HOSTS = [h.strip() for h in _hosts.split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]

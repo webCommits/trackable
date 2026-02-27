@@ -11,15 +11,15 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(","
 
 INSTALLED_APPS = [
     "django.contrib.admin",
-    "trackable.accounts",
-    "trackable.profiles",
-    "trackable.timetracking",
-    "django.contrib.contenttypes",
     "django.contrib.auth",
+    "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+    "trackable.accounts",
+    "trackable.profiles",
+    "trackable.timetracking",
     "trackable.core",
 ]
 
