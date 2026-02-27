@@ -31,7 +31,7 @@
 - **📊 Monthly overview** — Automatic calculation of total hours and earnings
 - **📄 PDF export** — Export monthly tables as landscape PDFs
 - **📧 Monthly email reports** — Automated summary email on the last day of each month
-- **🔐 Authentication** — Registration, login, and password reset included
+- **🔐 Authentication** — Login and password reset; accounts are created by a superuser via `/admin`
 - **💾 Automatic backups** — Weekly SQLite database backups
 - **🌍 English & German** — Auto-detects browser language; English by default, German when device locale is `de`
 - **🎨 Catppuccin design** — Clean, mobile-first dark theme
@@ -45,9 +45,10 @@
 | Backend | Django 5.0, Gunicorn |
 | Frontend | Django Templates, CSS3, Vanilla JS |
 | Database | SQLite (persistent Docker volume) |
+| Static files | WhiteNoise (served directly via Gunicorn) |
 | PDF | ReportLab |
 | Email | Django SMTP with html2text |
-| Hosting | Docker, Docker Compose |
+| Hosting | Docker, Docker Compose, Coolify |
 | PWA | Web App Manifest |
 
 ---
@@ -95,31 +96,25 @@ DEFAULT_FROM_EMAIL=noreply@yourdomain.com
 docker-compose -f docker-compose.prod.yaml up -d --build
 ```
 
-The app starts on `127.0.0.1:8000`. Point your reverse proxy at this address.
+On startup the container automatically runs `migrate`, `collectstatic`, and `compilemessages`.
 
-### 4. Reverse proxy (Nginx example)
+### 4. Reverse proxy
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name yourdomain.com;
+A production-ready Nginx config is included at `nginx/trackable.conf` (TLS, HSTS, rate limiting, gzip).
 
-    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+For **Coolify**: set the compose file to `docker-compose.prod.yaml`, set the port to `8000`, and configure environment variables in the Coolify UI. Coolify's Traefik proxy handles SSL automatically.
 
-    location / {
-        proxy_pass         http://127.0.0.1:8000\;
-        proxy_set_header   Host $host;
-        proxy_set_header   X-Real-IP $remote_addr;
-        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto $scheme;
-    }
-}
+> Static files are served directly by Gunicorn via WhiteNoise — no separate static file location in the reverse proxy needed.
+
+### 5. Create the first user
+
+There is no public registration. Create a superuser and manage all accounts via `/admin`:
+
+```bash
+docker exec -it trackable-app python manage.py createsuperuser
 ```
 
-### 5. Create your account
-
-Open `https://yourdomain.com/accounts/register/` to create the first user.
+Then open `https://yourdomain.com/admin/` to create additional user accounts.
 
 ### Updating
 
@@ -130,7 +125,14 @@ docker-compose -f docker-compose.prod.yaml up -d --build
 
 ### Coolify
 
-trackable. is fully compatible with [Coolify](https://coolify.io). Point it at this repository, set the compose file to `docker-compose.prod.yaml`, and configure the environment variables in the Coolify UI.
+trackable. is fully compatible with [Coolify](https://coolify.io):
+
+1. Add a new resource → Docker Compose
+2. Point it at this repository
+3. Set compose file to `docker-compose.prod.yaml`
+4. Set port to `8000`
+5. Add all environment variables from the table below
+6. Deploy — Traefik handles SSL automatically
 
 ---
 

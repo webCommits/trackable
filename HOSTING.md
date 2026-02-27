@@ -168,35 +168,46 @@ deine-domain.com www.deine-domain.com {
 sudo systemctl reload caddy
 ```
 
-## Coolify-Integration (optional)
+## Coolify-Deployment (empfohlen)
 
-### 1. Coolify auf dem Server installieren
+Coolify ist der empfohlene Weg, Trackable zu hosten. Traefik übernimmt SSL, Deployments und Rollbacks automatisch.
+
+### 1. Coolify installieren
 
 ```bash
-# Coolify via Curl installieren
 curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 ```
 
 ### 2. Trackable in Coolify hinzufügen
 
-1. Coolify Dashboard öffnen (http://<server-ip>:8000)
-2. Neues Projekt erstellen
-3. Repository-URL angeben (GitHub, GitLab, etc.)
+1. Coolify Dashboard öffnen
+2. Neues Projekt → Neue Ressource → **Docker Compose**
+3. Repository-URL eintragen (GitHub, GitLab, etc.)
 4. Build-Konfiguration:
-   - Dockerfile-Path: `Dockerfile`
-   - Docker Compose-Path: `docker-compose.prod.yaml`
-5. Environment-Variablen in Coolify hinzufügen
-6. Domain konfigurieren
-7. Deployen
+   - Compose-Datei: `docker-compose.prod.yaml`
+   - **Port: `8000`** (Container-interner Port — nicht den Host-Port ändern)
+5. Environment-Variablen aus der Tabelle unten in der Coolify-UI eintragen
+6. Domain konfigurieren → Deployen
 
-### 3. Coolify Automatisierung
+> **Hinweis:** Die `ports`-Zeile in `docker-compose.prod.yaml` ist für Coolify irrelevant. Traefik routet direkt über das interne Docker-Netzwerk (`coolify`) auf Port 8000.
 
-Coolify übernimmt automatisch:
-- SSL-Zertifikate (via Traefik)
-- Deployment auf Push
+### 3. Was Coolify automatisch übernimmt
+
+- SSL-Zertifikate (via Traefik + Let's Encrypt)
+- Deployment bei Git-Push
 - Rollbacks
-- Logs-Monitoring
+- Log-Monitoring
 - Health-Checks
+
+### 4. Ersten Superuser anlegen
+
+Nach dem ersten Deployment im Coolify-Terminal oder per SSH:
+
+```bash
+docker exec -it trackable-app python manage.py createsuperuser
+```
+
+Danach unter `https://deine-domain.com/admin/` weitere Benutzer anlegen. Eine öffentliche Registrierung gibt es nicht.
 
 ## Wartung und Überwachung
 
@@ -317,13 +328,6 @@ sudo docker-compose -f docker-compose.prod.yaml pull
 
 ## Performance-Optimierung
 
-### Static Files optimieren
-
-```bash
-# Static files sammeln
-docker-compose -f docker-compose.prod.yaml exec app python manage.py collectstatic --noinput
-```
-
 ### Gunicorn-Worker anpassen
 
 In `docker-compose.prod.yaml`:
@@ -408,10 +412,11 @@ Bei Problemen:
 
 ## Next Steps nach Deployment
 
-1. **Erster Login**: Als erster Benutzer registrieren
-2. **Profil erstellen**: Erstes Arbeitsprofil anlegen
-3. **Testen**: Zeit eintragen, Tabelle ansehen, PDF exportieren
-4. **E-Mail testen**: Passwort-Reset und monatliche E-Mails prüfen
-5. **Backup-Test**: Backup-Skript testen
-6. **Monitoring einrichten**: Uptime-Monitoring und Alerts konfigurieren
-7. **Dokumentation**: Passwörter und Zugangsdaten sicher aufbewahren
+1. **Superuser erstellen**: `docker exec -it trackable-app python manage.py createsuperuser`
+2. **Benutzer anlegen**: Unter `/admin/` Benutzerkonten für alle Nutzer erstellen (keine öffentliche Registrierung)
+3. **Profil erstellen**: Erstes Arbeitsprofil anlegen
+4. **Testen**: Zeit eintragen, Tabelle ansehen, PDF exportieren
+5. **E-Mail testen**: Passwort-Reset und monatliche E-Mails prüfen
+6. **Backup-Test**: Backup-Skript testen
+7. **Monitoring einrichten**: Uptime-Monitoring und Alerts konfigurieren
+8. **Zugangsdaten**: Passwörter und Zugangsdaten sicher aufbewahren
