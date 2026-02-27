@@ -11,7 +11,6 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 import html2text
-from trackable.accounts.forms import UserRegistrationForm
 from trackable.accounts.models import User
 
 
@@ -22,23 +21,6 @@ class CustomLoginView(LoginView):
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy("login")
-
-
-def register(request):
-    if request.method == "POST":
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get("username")
-            messages.success(
-                request, f"Account für {username} wurde erfolgreich erstellt!"
-            )
-            login(request, user)
-            return redirect("home")
-    else:
-        form = UserRegistrationForm()
-
-    return render(request, "accounts/register.html", {"form": form})
 
 
 def password_reset_request(request):

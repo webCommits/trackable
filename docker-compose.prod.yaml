@@ -15,6 +15,7 @@ services:
       - "127.0.0.1:8001:8000"  # nur localhost; Nginx/Caddy als Reverse Proxy zwingend
     command: >
       sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
              python manage.py compilemessages &&
              gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     restart: unless-stopped
