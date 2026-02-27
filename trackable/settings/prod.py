@@ -2,6 +2,12 @@ from .base import *
 
 DEBUG = False
 
+# WhiteNoise: komprimiert + cache-busting Dateinamen (z.B. app.abc123.js)
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
