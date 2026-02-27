@@ -31,9 +31,11 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "echo '0 2 * * 0 cd /app && python manage.py backup_db' > /etc/crontabs/root && 
-             echo '59 23 L * * cd /app && python manage.py send_monthly_emails' >> /etc/crontabs/root && 
-             crond -f"
+      sh -c "mkdir -p /etc/cron.d &&
+             echo '0 2 * * 0 appuser cd /app && python manage.py backup_db' > /etc/cron.d/trackable &&
+             echo '59 23 28-31 * * appuser [ \$(date +\\%d -d tomorrow) -eq 1 ] && cd /app && python manage.py send_monthly_emails' >> /etc/cron.d/trackable &&
+             chmod 0644 /etc/cron.d/trackable &&
+             cron -f"
     restart: unless-stopped
     depends_on:
       - app
