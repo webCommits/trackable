@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile.title }} - Trackable{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h1 style="color: var(--ctp-mauve); margin-bottom: 5px;">{{ profile.title }}</h1>
+            <p style="color: var(--ctp-subtext0);">{{ profile.position }}</p>
+        </div>
+        <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 30px;">
+            + Zeit eintragen
+        </a>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="card" style="text-align: center;">
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">Wochenstunden</p>
+            <p style="font-size: 2rem; font-weight: bold; color: var(--ctp-mauve);">{{ profile.weekly_hours }}h</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">Stundenlohn</p>
+            <p style="font-size: 2rem; font-weight: bold; color: var(--ctp-green);">€{{ profile.hourly_rate }}/h</p>
+        </div>
+        {% if profile.address %}
+        <div class="card" style="grid-column: 1 / -1;">
+            <p style="color: var(--ctp-subtext0); margin-bottom: 5px;">Adresse</p>
+            <p style="color: var(--ctp-text);">{{ profile.address }}</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <h2 style="margin-bottom: 20px; color: var(--ctp-mauve);">Monatsübersicht</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        {% for month in months %}
+        <div class="card">
+            <h3 style="color: var(--ctp-mauve); margin-bottom: 15px;">{{ month.month_name }}</h3>
+            <p style="color: var(--ctp-subtext0); margin-bottom: 5px;">
+                <strong>Arbeitsstunden:</strong> {{ month.hours|floatformat:2 }}h
+            </p>
+            <p style="color: var(--ctp-subtext0); margin-bottom: 15px;">
+                <strong>Verdienst:</strong> €{{ month.earnings|floatformat:2 }}
+            </p>
+            <a href="/table/{{ profile.id }}/{{ month.year }}/{{ month.month }}/" class="btn btn-primary" style="width: 100%;">
+                Details ansehen
+            </a>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--ctp-subtext0);">
+            <h3 style="margin-bottom: 20px;">Noch keine Zeiten erfasst</h3>
+            <p style="margin-bottom: 20px;">Beginnen Sie jetzt, Ihre Arbeitszeiten zu erfassen.</p>
+            <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary">+ Zeit eintragen</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

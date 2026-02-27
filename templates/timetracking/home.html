@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Overview" %}{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
+    <div>
+        {% blocktrans with name=user.first_name|default:user.username %}<h1>Hello, {{ name }}!</h1>{% endblocktrans %}
+        <p style="color: var(--ctp-subtext0); margin-top: 6px;">{% trans "Select a profile to add time entries or view monthly stats." %}</p>
+    </div>
+    {% if profiles %}
+    <div style="display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; align-self:center;">
+        <a href="/profiles/" class="btn btn-secondary btn-sm">{% trans "Manage profiles" %}</a>
+        <a href="/profiles/create/" class="btn btn-primary btn-sm">+ {% trans "New profile" %}</a>
+    </div>
+    {% endif %}
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px;">
+    {% for profile in profiles %}
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+            <div>
+                <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:5px;">{{ profile.position }}</div>
+                <h2 style="font-size:1.15rem; margin:0; line-height:1.2;">{{ profile.title }}</h2>
+            </div>
+            <span class="badge badge-mauve" style="flex-shrink:0;">{{ profile.hourly_rate }} €/h</span>
+        </div>
+        <div style="display:flex; gap:8px; font-size:.78rem; color:var(--ctp-subtext0); margin-bottom:16px; flex-wrap:wrap;">
+            <span>🕐 {{ profile.weekly_hours }}h / {% trans "week" %}</span>
+            {% if profile.address %}<span>📍 {{ profile.address }}</span>{% endif %}
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary btn-sm" style="flex:1; justify-content:center;">+ {% trans "Add time" %}</a>
+            <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary btn-sm">{% trans "Monthly overview" %}</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

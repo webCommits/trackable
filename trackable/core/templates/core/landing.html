@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "trackable. – Self-Hosted Time Tracking" %}{% endblock %}
+{% block meta_description %}{% trans "trackable. is an open-source, self-hosted time tracker for freelancers and employees. Monthly tables, PDF export, email reports – all under your control." %}{% endblock %}
+{% block body_class %}lp-body{% endblock %}
+
+{% block content_outer %}
+<main class="page-main">
+
+    {# ── HERO ── #}
+    <section class="lp-hero">
+        <div class="container">
+            <div class="lp-hero-inner">
+                <div class="lp-hero-text">
+                    <div class="lp-hero-label">
+                        <span class="lp-hero-label-dot"></span>
+                        Self-Hosted &middot; Open Source
+                    </div>
+                    <h1 class="lp-hero-title">trackable.</h1>
+                    <p class="lp-hero-subtitle">
+                        {% blocktrans %}The time tracker you truly <strong style="color:var(--ctp-text)">own</strong>. No subscription, no cloud, no compromises &mdash; simply on your own server.{% endblocktrans %}
+                    </p>
+                    <div class="lp-hero-actions">
+                        {% if user.is_authenticated %}
+                            <a href="/app/" class="btn btn-primary btn-lg">{% trans "Go to Dashboard" %} &rarr;</a>
+                        {% else %}
+                            <a href="/accounts/register/" class="btn btn-primary btn-lg">{% trans "Get started" %} &rarr;</a>
+                            <a href="/accounts/login/"    class="btn btn-secondary btn-lg">{% trans "Log in" %}</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="lp-hero-visual">
+                    <div class="lp-mockup">
+                        <div class="lp-mockup-bar">
+                            <span class="lp-mockup-dot"></span>
+                            <span class="lp-mockup-dot"></span>
+                            <span class="lp-mockup-dot"></span>
+                            <span class="lp-mockup-title">{% trans "Monthly report – February 2026" %}</span>
+                        </div>
+                        <div class="lp-mockup-row">
+                            <span class="lp-mockup-row-label">{% trans "Mon, 03.02." %}  08:00 – 17:00</span>
+                            <span class="lp-mockup-row-val">8.5 h</span>
+                        </div>
+                        <div class="lp-mockup-row">
+                            <span class="lp-mockup-row-label">{% trans "Tue, 04.02." %}  08:30 – 16:30</span>
+                            <span class="lp-mockup-row-val">7.5 h</span>
+                        </div>
+                        <div class="lp-mockup-row">
+                            <span class="lp-mockup-row-label">{% trans "Wed, 05.02." %}  09:00 – 18:00</span>
+                            <span class="lp-mockup-row-val">8.0 h</span>
+                        </div>
+                        <div class="lp-mockup-row">
+                            <span class="lp-mockup-row-label">{% trans "Thu, 06.02." %}  08:00 – 17:30</span>
+                            <span class="lp-mockup-row-val">9.0 h</span>
+                        </div>
+                        <div class="lp-mockup-row">
+                            <span class="lp-mockup-row-label">{% trans "Fri, 07.02." %}  08:00 – 16:00</span>
+                            <span class="lp-mockup-row-val">7.5 h</span>
+                        </div>
+                        <div class="lp-mockup-total">
+                            <span>{% trans "Total February" %}</span>
+                            <span>162.0 h &nbsp;&middot;&nbsp; 2.430,00 &euro;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── FEATURES ── #}
+    <section class="lp-section">
+        <div class="container">
+            <div class="lp-section-header">
+                <span class="lp-section-eyebrow">Features</span>
+                <h2 class="lp-section-title">{% trans "Everything you need." %}<br><em>{% trans "Nothing you don't." %}</em></h2>
+                <p class="lp-section-sub">{% trans "trackable. is lean, fast, and focused on the essentials – without bloated SaaS features you'll never use." %}</p>
+            </div>
+
+            <div class="lp-features">
+                <div class="lp-feature-card">
+                    <span class="lp-feature-icon">&#x23F1;</span>
+                    <div class="lp-feature-title">{% trans "Quick time entry" %}</div>
+                    <p class="lp-feature-desc">{% trans "Enter start and end time, add your break – done. No tracking, no timer, no stress." %}</p>
+                </div>
+                <div class="lp-feature-card">
+                    <span class="lp-feature-icon">&#x1F4CA;</span>
+                    <div class="lp-feature-title">{% trans "Automatic monthly tables" %}</div>
+                    <p class="lp-feature-desc">{% trans "Total hours and earnings are calculated automatically and displayed in a clear table." %}</p>
+                </div>
+                <div class="lp-feature-card">
+                    <span class="lp-feature-icon">&#x1F4C4;</span>
+                    <div class="lp-feature-title">{% trans "PDF export" %}</div>
+                    <p class="lp-feature-desc">{% trans "Export your monthly tables as a professional landscape PDF – ready to submit to your employer." %}</p>
+                </div>
+                <div class="lp-feature-card">
+                    <span class="lp-feature-icon">&#x1F4E7;</span>
+                    <div class="lp-feature-title">{% trans "Automatic email reports" %}</div>
+                    <p class="lp-feature-desc">{% trans "On the last day of each month you receive your monthly report automatically by email." %}</p>
+                </div>
+                <div class="lp-feature-card">
+                    <span class="lp-feature-icon">&#x1F4F1;</span>
+                    <div class="lp-feature-title">{% trans "Progressive Web App" %}</div>
+                    <p class="lp-feature-desc">{% trans "Installable on your smartphone's home screen like a native app – no app store needed." %}</p>
+                </div>
+                <div class="lp-feature-card">
+                    <span class="lp-feature-icon">&#x1F3E2;</span>
+                    <div class="lp-feature-title">{% trans "Multi-profile support" %}</div>
+                    <p class="lp-feature-desc">{% trans "Multiple jobs at once? No problem. Manage as many profiles as you need, each with its own hourly rate." %}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── SELF-HOSTING SPLIT ── #}
+    <section class="lp-section lp-section-dark">
+        <div class="container">
+            <div class="lp-split">
+                <div class="lp-split-text">
+                    <span class="lp-section-eyebrow">Self-Hosting</span>
+                    <h2>{% trans "Your data." %}<br><em>{% trans "Your server." %}</em><br>{% trans "Your control." %}</h2>
+                    <p>{% trans "trackable. runs entirely on your own infrastructure. No cloud, no subscription, no vendor lock-in. You decide where your time tracking data lives." %}</p>
+                    <ul class="lp-checklist">
+                        <li>{% trans "Deploy with Docker in under 5 minutes" %}</li>
+                        <li>{% trans "Compatible with Coolify, Portainer, and more" %}</li>
+                        <li>{% trans "SQLite database with automatic backups" %}</li>
+                        <li>{% trans "No external tracking or analytics" %}</li>
+                        <li>{% trans "Fully open source on GitHub" %}</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="lp-code-block">
+                        <div class="lp-code-header">
+                            <span class="lp-code-header-dot lp-mockup-dot" style="background:var(--ctp-red)"></span>
+                            <span class="lp-code-header-dot lp-mockup-dot" style="background:var(--ctp-yellow)"></span>
+                            <span class="lp-code-header-dot lp-mockup-dot" style="background:var(--ctp-green)"></span>
+                            <span class="lp-code-header-title">docker-compose.prod.yaml</span>
+                        </div>
+                        <div class="lp-code-body">
+<span class="lp-code-line lp-code-comment"># 1. {% trans "Clone repository" %}</span>
+<span class="lp-code-line"><span class="lp-code-dollar">$</span><span class="lp-code-cmd">git clone</span> <span class="lp-code-str">https://github.com/you/trackable\</span\>\</span\>
+<span class="lp-code-line"><span class="lp-code-dollar">$</span><span class="lp-code-cmd">cd</span> trackable</span>
+<span class="lp-code-line">&nbsp;</span>
+<span class="lp-code-line lp-code-comment"># 2. {% trans "Configure environment" %}</span>
+<span class="lp-code-line"><span class="lp-code-dollar">$</span><span class="lp-code-cmd">cp</span> .env.example .env</span>
+<span class="lp-code-line"><span class="lp-code-dollar">$</span><span class="lp-code-cmd">nano</span> .env</span>
+<span class="lp-code-line">&nbsp;</span>
+<span class="lp-code-line lp-code-comment"># 3. {% trans "Launch the app" %}</span>
+<span class="lp-code-line"><span class="lp-code-dollar">$</span><span class="lp-code-cmd">docker-compose</span> <span class="lp-code-flag">-f</span> docker-compose.prod.yaml <span class="lp-code-flag">up -d</span></span>
+<span class="lp-code-line">&nbsp;</span>
+<span class="lp-code-line" style="color:var(--ctp-green)">&#x2713; {% trans "trackable. is running on port 8000" %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── CTA ── #}
+    <section class="lp-cta">
+        <div class="container">
+            <div class="lp-cta-box">
+                <h2>{% trans "Ready to get started?" %}</h2>
+                <p>{% trans "Set up trackable. in minutes and take control of your working time. Free, forever." %}</p>
+                <div class="lp-cta-actions">
+                    {% if user.is_authenticated %}
+                        <a href="/app/" class="btn btn-primary btn-lg">{% trans "Go to Dashboard" %} &rarr;</a>
+                    {% else %}
+                        <a href="/accounts/register/" class="btn btn-primary btn-lg">{% trans "Register for free" %}</a>
+                        <a href="/accounts/login/"    class="btn btn-secondary btn-lg">{% trans "Already registered?" %}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock content_outer %}

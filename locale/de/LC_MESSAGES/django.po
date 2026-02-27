@@ -1,0 +1,405 @@
+# German translations for trackable.
+# Copyright (C) 2026 webCommits web Designs
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: trackable\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-27 00:00+0100\n"
+"PO-Revision-Date: 2026-02-27 00:00+0100\n"
+"Last-Translator: webCommits\n"
+"Language: de\n"
+"Language-Team: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# base.html
+msgid "trackable. – Your personal time tracker."
+msgstr "trackable. – Deine persönliche Arbeitszeiterfassung."
+
+msgid "Time Tracking"
+msgstr "Zeiterfassung"
+
+msgid "Open menu"
+msgstr "Menü öffnen"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Profiles"
+msgstr "Profile"
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Logout"
+msgstr "Abmelden"
+
+msgid "Login"
+msgstr "Anmelden"
+
+msgid "Register"
+msgstr "Registrieren"
+
+msgid "All rights reserved."
+msgstr "Alle Rechte vorbehalten."
+
+msgid "Imprint"
+msgstr "Impressum"
+
+msgid "Privacy"
+msgstr "Datenschutz"
+
+# accounts/login.html
+msgid "Username"
+msgstr "Benutzername"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "Log in"
+msgstr "Einloggen"
+
+msgid "Forgot your password?"
+msgstr "Passwort vergessen?"
+
+msgid "No account yet?"
+msgstr "Noch kein Konto?"
+
+# accounts/register.html
+msgid "E-Mail"
+msgstr "E-Mail"
+
+msgid "First name"
+msgstr "Vorname"
+
+msgid "Last name"
+msgstr "Nachname"
+
+msgid "Confirm password"
+msgstr "Passwort bestätigen"
+
+msgid "Already have an account?"
+msgstr "Bereits ein Konto?"
+
+# accounts/settings.html
+msgid "Enable monthly email reports"
+msgstr "Monatliche E-Mail-Berichte aktivieren"
+
+msgid "You will receive an automated email on the last day of each month with a summary of all your working hours."
+msgstr "Sie erhalten am letzten Tag jedes Monats automatisch eine E-Mail mit einer Zusammenfassung aller Arbeitszeiten."
+
+msgid "Save"
+msgstr "Speichern"
+
+# accounts/password_reset.html
+msgid "Reset password"
+msgstr "Passwort zurücksetzen"
+
+msgid "Send reset link"
+msgstr "Reset-Link senden"
+
+msgid "Back to login"
+msgstr "Zurück zum Login"
+
+# accounts/password_reset_confirm.html
+msgid "New password"
+msgstr "Neues Passwort"
+
+msgid "Change password"
+msgstr "Passwort ändern"
+
+# profiles/detail.html
+msgid "Add time entry"
+msgstr "Zeit eintragen"
+
+msgid "Weekly hours"
+msgstr "Wochenstunden"
+
+msgid "Hourly rate"
+msgstr "Stundenlohn"
+
+msgid "Monthly overview"
+msgstr "Monatsübersicht"
+
+msgid "Working hours"
+msgstr "Arbeitsstunden"
+
+msgid "Earnings"
+msgstr "Verdienst"
+
+msgid "Details"
+msgstr "Details"
+
+msgid "No time entries yet"
+msgstr "Noch keine Zeiten erfasst"
+
+msgid "Record your first work session now."
+msgstr "Trage jetzt deine erste Arbeitszeit ein."
+
+# profiles/list.html
+msgid "Manage your work profiles."
+msgstr "Verwalte deine Arbeitsprofile."
+
+msgid "New profile"
+msgstr "Neues Profil"
+
+msgid "week"
+msgstr "Woche"
+
+msgid "Open"
+msgstr "Öffnen"
+
+msgid "No profile yet"
+msgstr "Noch kein Profil"
+
+msgid "Create your first work profile to start tracking time."
+msgstr "Erstelle dein erstes Arbeitsprofil, um Zeiten zu erfassen."
+
+msgid "Create profile"
+msgstr "Profil erstellen"
+
+# profiles/create.html
+msgid "Create new profile"
+msgstr "Neues Profil erstellen"
+
+msgid "Job title"
+msgstr "Jobtitel"
+
+msgid "Position"
+msgstr "Stelle"
+
+msgid "Address (optional)"
+msgstr "Adresse (optional)"
+
+msgid "Hourly rate (€)"
+msgstr "Stundenlohn (€)"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+# timetracking/home.html
+msgid "Overview"
+msgstr "Übersicht"
+
+msgid "Hello, %(name)s!"
+msgstr "Hallo, %(name)s!"
+
+msgid "Select a profile to add time entries or view monthly stats."
+msgstr "Wähle ein Profil, um Zeiten einzutragen oder den Monatsverlauf anzusehen."
+
+msgid "Manage profiles"
+msgstr "Profile verwalten"
+
+msgid "Add time"
+msgstr "Zeit eintragen"
+
+# timetracking/add_entry.html
+msgid "Add time – %(title)s"
+msgstr "Zeit eintragen – %(title)s"
+
+msgid "Back"
+msgstr "Zurück"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Start time"
+msgstr "Startzeit"
+
+msgid "End time"
+msgstr "Endzeit"
+
+msgid "Break (hours)"
+msgstr "Pause (Stunden)"
+
+msgid "Default: 0 hours"
+msgstr "Standard: 0 Stunden"
+
+msgid "Save entry"
+msgstr "Zeit speichern"
+
+# timetracking/monthly_table.html
+msgid "Back to profile"
+msgstr "Zurück zum Profil"
+
+msgid "Export PDF"
+msgstr "PDF exportieren"
+
+msgid "Address"
+msgstr "Adresse"
+
+msgid "Total hours"
+msgstr "Gesamtstunden"
+
+msgid "Total earnings"
+msgstr "Gesamtverdienst"
+
+msgid "Start"
+msgstr "Beginn"
+
+msgid "End"
+msgstr "Ende"
+
+msgid "Break"
+msgstr "Pause"
+
+msgid "No entries for this month."
+msgstr "Keine Einträge für diesen Monat vorhanden."
+
+# emails/password_reset_email.html
+msgid "Reset your password"
+msgstr "Passwort zurücksetzen"
+
+msgid "Hi"
+msgstr "Hallo"
+
+msgid "You requested a password reset. Click the button below to set a new password:"
+msgstr "Sie haben angefordert, Ihr Passwort zurückzusetzen. Klicken Sie auf den untenstehenden Button, um ein neues Passwort zu setzen:"
+
+msgid "This link expires in 24 hours. If you did not request a reset, you can safely ignore this email."
+msgstr "Dieser Link ist 24 Stunden gültig. Wenn Sie Ihr Passwort nicht zurücksetzen möchten, können Sie diese E-Mail ignorieren."
+
+msgid "This is an automated email from trackable. Please do not reply."
+msgstr "Dies ist eine automatische E-Mail von trackable. Bitte antworten Sie nicht auf diese E-Mail."
+
+# core/landing.html
+msgid "trackable. – Self-Hosted Time Tracking"
+msgstr "trackable. – Self-Hosted Zeiterfassung"
+
+msgid "trackable. is an open-source, self-hosted time tracker for freelancers and employees. Monthly tables, PDF export, email reports – all under your control."
+msgstr "trackable. ist ein quelloffener, selbst-gehosteter Zeiterfasser für Freelancer und Arbeitnehmer. Monatstabellen, PDF-Export, E-Mail-Berichte – alles unter deiner Kontrolle."
+
+msgid "The time tracker you truly <strong style=\"color:var(--ctp-text)\">own</strong>. No subscription, no cloud, no compromises &mdash; simply on your own server."
+msgstr "Der Zeiterfasser, den du wirklich <strong style=\"color:var(--ctp-text)\">besitzt</strong>. Kein Abo, keine Cloud, keine Kompromisse – einfach auf deinem eigenen Server."
+
+msgid "Go to Dashboard"
+msgstr "Zum Dashboard"
+
+msgid "Get started"
+msgstr "Jetzt loslegen"
+
+msgid "Monthly report – February 2026"
+msgstr "Monatsbericht – Februar 2026"
+
+msgid "Mon, 03.02."
+msgstr "Mo, 03.02."
+
+msgid "Tue, 04.02."
+msgstr "Di, 04.02."
+
+msgid "Wed, 05.02."
+msgstr "Mi, 05.02."
+
+msgid "Thu, 06.02."
+msgstr "Do, 06.02."
+
+msgid "Fri, 07.02."
+msgstr "Fr, 07.02."
+
+msgid "Total February"
+msgstr "Gesamt Februar"
+
+msgid "Everything you need."
+msgstr "Alles, was du brauchst."
+
+msgid "Nothing you don't."
+msgstr "Nichts, was du nicht brauchst."
+
+msgid "trackable. is lean, fast, and focused on the essentials – without bloated SaaS features you'll never use."
+msgstr "trackable. ist schlank, schnell und auf die wesentlichen Dinge fokussiert – ohne aufgeblähte SaaS-Features, die du sowieso nie nutzt."
+
+msgid "Quick time entry"
+msgstr "Schnelle Zeiterfassung"
+
+msgid "Enter start and end time, add your break – done. No tracking, no timer, no stress."
+msgstr "Trag Start- und Endzeit ein, gib deine Pause an – fertig. Kein Tracking, kein Timer, kein Stress."
+
+msgid "Automatic monthly tables"
+msgstr "Automatische Monatstabellen"
+
+msgid "Total hours and earnings are calculated automatically and displayed in a clear table."
+msgstr "Gesamtstunden und Verdienst werden automatisch berechnet und übersichtlich als Tabelle dargestellt."
+
+msgid "PDF export"
+msgstr "PDF-Export"
+
+msgid "Export your monthly tables as a professional landscape PDF – ready to submit to your employer."
+msgstr "Exportiere deine Monatstabellen als professionelles PDF im Querformat – bereit zum Einreichen beim Arbeitgeber."
+
+msgid "Automatic email reports"
+msgstr "Automatische E-Mail-Berichte"
+
+msgid "On the last day of each month you receive your monthly report automatically by email."
+msgstr "Am letzten Tag jedes Monats erhältst du deinen Monatsbericht automatisch per E-Mail."
+
+msgid "Progressive Web App"
+msgstr "Progressive Web App"
+
+msgid "Installable on your smartphone's home screen like a native app – no app store needed."
+msgstr "Installierbar auf dem Homescreen deines Smartphones wie eine native App – ohne App Store."
+
+msgid "Multi-profile support"
+msgstr "Multi-Profil-Support"
+
+msgid "Multiple jobs at once? No problem. Manage as many profiles as you need, each with its own hourly rate."
+msgstr "Mehrere Jobs gleichzeitig? Kein Problem. Verwalte beliebig viele Profile mit eigenem Stundenlohn pro Profil."
+
+msgid "Your data."
+msgstr "Deine Daten."
+
+msgid "Your server."
+msgstr "Dein Server."
+
+msgid "Your control."
+msgstr "Deine Kontrolle."
+
+msgid "trackable. runs entirely on your own infrastructure. No cloud, no subscription, no vendor lock-in. You decide where your time tracking data lives."
+msgstr "trackable. läuft vollständig auf deiner eigenen Infrastruktur. Keine Cloud, kein Abo, kein Vendor-Lock-in. Du entscheidest, wo deine Arbeitszeitdaten liegen."
+
+msgid "Deploy with Docker in under 5 minutes"
+msgstr "Deployment per Docker in unter 5 Minuten"
+
+msgid "Compatible with Coolify, Portainer, and more"
+msgstr "Kompatibel mit Coolify, Portainer und Co."
+
+msgid "SQLite database with automatic backups"
+msgstr "SQLite-Datenbank mit automatischen Backups"
+
+msgid "No external tracking or analytics"
+msgstr "Kein externes Tracking oder Analytics"
+
+msgid "Fully open source on GitHub"
+msgstr "Vollständig quelloffen auf GitHub"
+
+msgid "Clone repository"
+msgstr "Repository klonen"
+
+msgid "Configure environment"
+msgstr "Umgebung konfigurieren"
+
+msgid "Launch the app"
+msgstr "Starten"
+
+msgid "trackable. is running on port 8000"
+msgstr "trackable. läuft auf Port 8000"
+
+msgid "Ready to get started?"
+msgstr "Bereit anzufangen?"
+
+msgid "Set up trackable. in minutes and take control of your working time. Free, forever."
+msgstr "Richte trackable. in wenigen Minuten ein und übernimm die Kontrolle über deine Arbeitszeit. Kostenlos, für immer."
+
+msgid "Register for free"
+msgstr "Kostenfrei registrieren"
+
+msgid "Already registered?"
+msgstr "Bereits registriert?"
+
+msgid "Switch to light mode"
+msgstr "Zum hellen Design wechseln"
+
+msgid "Switch to dark mode"
+msgstr "Zum dunklen Design wechseln"

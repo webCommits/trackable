@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Trackable{% endblock %}
+
+{% block content %}
+<div class="content" style="max-width: 400px; margin: 0 auto;">
+    <h2 style="text-align: center; margin-bottom: 30px; color: var(--ctp-mauve);">Login</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">Benutzername</label>
+            {{ form.username }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">Passwort</label>
+            {{ form.password }}
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Einloggen</button>
+    </form>
+    <p style="text-align: center; margin-top: 20px;">
+        <a href="/accounts/password-reset/">Passwort vergessen?</a>
+    </p>
+    <p style="text-align: center; margin-top: 10px;">
+        Noch kein Konto? <a href="/accounts/register/">Registrieren</a>
+    </p>
+</div>
+{% endblock %}

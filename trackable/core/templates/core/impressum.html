@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Impressum{% endblock %}
+
+{% block content %}
+<div class="content" style="max-width: 720px; margin: 0 auto;">
+    <h1>Impressum</h1>
+    <p class="text-muted" style="margin-bottom: 2rem;">Angaben gemäß § 5 TMG</p>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>Verantwortlich</h2>
+        <hr class="divider">
+        <p>
+            <strong style="color: var(--ctp-text);">webCommits web Designs</strong><br>
+            <a href="https://www.webcommits.info" target="_blank" rel="noopener">www.webcommits.info</a>
+        </p>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>Haftungsausschluss</h2>
+        <hr class="divider">
+        <h3 style="margin-bottom: .5rem;">Haftung für Inhalte</h3>
+        <p>
+            Die Inhalte dieser Webanwendung wurden mit größter Sorgfalt erstellt.
+            Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte wird keine Gewähr übernommen.
+        </p>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>Urheberrecht</h2>
+        <hr class="divider">
+        <p>
+            Die durch den Seitenbetreiber erstellten Inhalte und Werke unterliegen dem deutschen Urheberrecht.
+            &copy; {% now "Y" %} webCommits web Designs. Alle Rechte vorbehalten.
+        </p>
+    </section>
+
+    <div style="margin-top: 2rem;">
+        <a href="javascript:history.back()" class="btn btn-secondary btn-sm">← Zurück</a>
+    </div>
+</div>
+{% endblock %}

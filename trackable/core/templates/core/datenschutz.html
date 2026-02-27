@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Datenschutz{% endblock %}
+
+{% block content %}
+<div class="content" style="max-width: 720px; margin: 0 auto;">
+    <h1>Datenschutzerklärung</h1>
+    <p class="text-muted" style="margin-bottom: 2rem;">Zuletzt aktualisiert: {% now "d.m.Y" %}</p>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>1. Verantwortlicher</h2>
+        <hr class="divider">
+        <p>
+            Verantwortlicher im Sinne der DSGVO ist:<br>
+            <strong style="color: var(--ctp-text);">webCommits web Designs</strong><br>
+            <a href="https://www.webcommits.info" target="_blank" rel="noopener">www.webcommits.info</a>
+        </p>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>2. Erhobene Daten</h2>
+        <hr class="divider">
+        <p>
+            Diese Anwendung erhebt und speichert ausschließlich Daten, die du selbst eingibst:
+        </p>
+        <ul style="color: var(--ctp-subtext1); margin: 1rem 0 0 1.5rem; line-height: 1.9;">
+            <li>Benutzername und E-Mail-Adresse (Registrierung / Login)</li>
+            <li>Arbeitszeit-Einträge (Datum, Start-/Endzeit, Pausen)</li>
+            <li>Profil-Daten (Titel, Position, Stundenlohn)</li>
+        </ul>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>3. Zweck der Verarbeitung</h2>
+        <hr class="divider">
+        <p>
+            Deine Daten werden ausschließlich zum Betrieb der Zeiterfassungs-Funktionen dieser Anwendung
+            verwendet. Eine Weitergabe an Dritte findet nicht statt.
+        </p>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>4. Datenspeicherung</h2>
+        <hr class="divider">
+        <p>
+            Alle Daten werden lokal in einer SQLite-Datenbank auf dem Server gespeichert.
+            Es werden keine externen Analyse-Dienste, Tracking-Cookies oder Werbenetzwerke verwendet.
+        </p>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>5. Deine Rechte</h2>
+        <hr class="divider">
+        <p>
+            Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung
+            deiner gespeicherten Daten. Wende dich dafür an den Verantwortlichen über
+            <a href="https://www.webcommits.info" target="_blank" rel="noopener">webcommits.info</a>.
+        </p>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+        <h2>6. Externe Schriftarten</h2>
+        <hr class="divider">
+        <p>
+            Diese Anwendung lädt die Schriftart <em>Inter</em> von Google Fonts. Dabei kann deine
+            IP-Adresse an Google-Server übermittelt werden. Weitere Informationen findest du in der
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Datenschutzerklärung von Google</a>.
+        </p>
+    </section>
+
+    <div style="margin-top: 2rem;">
+        <a href="javascript:history.back()" class="btn btn-secondary btn-sm">← Zurück</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ profile.title }}{% endblock %}
+{% block nav_profiles %}active{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-wrap:wrap; gap:14px;">
+    <div>
+        <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:6px;">{{ profile.position }}</div>
+        <h1 style="margin:0; line-height:1.1;">{{ profile.title }}</h1>
+        {% if profile.address %}<p style="color:var(--ctp-subtext0); margin-top:6px; font-size:.85rem;">📍 {{ profile.address }}</p>{% endif %}
+    </div>
+    <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary btn-lg">+ {% trans "Add time entry" %}</a>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:14px; margin-bottom:36px;">
+    <div class="card" style="text-align:center; padding:20px;">
+        <p style="color:var(--ctp-subtext0); font-size:.8rem; margin-bottom:8px; text-transform:uppercase; letter-spacing:.06em;">{% trans "Weekly hours" %}</p>
+        <p style="font-size:2.2rem; font-weight:800; color:var(--ctp-mauve); line-height:1;">{{ profile.weekly_hours }}<span style="font-size:1rem; font-weight:500;">h</span></p>
+    </div>
+    <div class="card" style="text-align:center; padding:20px;">
+        <p style="color:var(--ctp-subtext0); font-size:.8rem; margin-bottom:8px; text-transform:uppercase; letter-spacing:.06em;">{% trans "Hourly rate" %}</p>
+        <p style="font-size:2.2rem; font-weight:800; color:var(--ctp-green); line-height:1;">{{ profile.hourly_rate }}<span style="font-size:1rem; font-weight:500;"> €/h</span></p>
+    </div>
+</div>
+
+<h2 style="margin-bottom:18px;">{% trans "Monthly overview" %}</h2>
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px;">
+    {% for month in months %}
+    <div class="card">
+        <div style="font-size:.75rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:8px;">{{ month.month_name }}</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:14px;">
+            <div>
+                <div style="font-size:1.6rem; font-weight:800; line-height:1; color:var(--ctp-text);">{{ month.hours|floatformat:1 }}<span style="font-size:.85rem; font-weight:500; color:var(--ctp-subtext0);">h</span></div>
+                <div style="font-size:.75rem; color:var(--ctp-subtext0); margin-top:2px;">{% trans "Working hours" %}</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:1.6rem; font-weight:800; line-height:1; color:var(--ctp-green);">{{ month.earnings|floatformat:0 }}<span style="font-size:.85rem; font-weight:500; color:var(--ctp-subtext0);"> €</span></div>
+                <div style="font-size:.75rem; color:var(--ctp-subtext0); margin-top:2px;">{% trans "Earnings" %}</div>
+            </div>
+        </div>
+        <a href="/table/{{ profile.id }}/{{ month.year }}/{{ month.month }}/" class="btn btn-secondary btn-sm btn-full">{% trans "Details" %} &rarr;</a>
+    </div>
+    {% empty %}
+    <div style="grid-column:1/-1; text-align:center; padding:50px 20px; color:var(--ctp-subtext0);">
+        <div style="font-size:2.5rem; margin-bottom:16px;">⏱</div>
+        <h3 style="margin-bottom:10px;">{% trans "No time entries yet" %}</h3>
+        <p style="margin-bottom:24px;">{% trans "Record your first work session now." %}</p>
+        <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary">+ {% trans "Add time entry" %}</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

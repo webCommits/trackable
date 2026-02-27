@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Einstellungen - Trackable{% endblock %}
+
+{% block content %}
+<div class="content" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="margin-bottom: 30px; color: var(--ctp-mauve);">Einstellungen</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="email_notifications_enabled" {% if user.email_notifications_enabled %}checked{% endif %}>
+                Monatliche E-Mail-Berichte aktivieren
+            </label>
+            <small style="display: block; margin-top: 5px; color: var(--ctp-subtext0);">
+                Sie erhalten am letzten Tag jedes Monats automatisch eine E-Mail mit einer Zusammenfassung aller Arbeitszeiten.
+            </small>
+        </div>
+        <button type="submit" class="btn btn-primary">Speichern</button>
+    </form>
+</div>
+{% endblock %}

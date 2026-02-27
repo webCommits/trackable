@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Profiles" %}{% endblock %}
+{% block nav_profiles %}active{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
+    <div>
+        <h1>{% trans "Profiles" %}</h1>
+        <p style="color:var(--ctp-subtext0); margin-top:4px;">{% trans "Manage your work profiles." %}</p>
+    </div>
+    <a href="/profiles/create/" class="btn btn-primary">+ {% trans "New profile" %}</a>
+</div>
+
+{% if profiles %}
+<div style="display:flex; flex-direction:column; gap:10px;">
+    {% for profile in profiles %}
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:16px 20px; margin-bottom:0;">
+        <div style="flex:1; min-width:180px;">
+            <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:3px;">{{ profile.position }}</div>
+            <div style="font-weight:600; font-size:.95rem; color:var(--ctp-text);">{{ profile.title }}</div>
+        </div>
+        <div style="display:flex; gap:24px; flex-shrink:0; font-size:.82rem; color:var(--ctp-subtext0);">
+            <span>🕐 {{ profile.weekly_hours }}h / {% trans "week" %}</span>
+            <span>💶 {{ profile.hourly_rate }} €/h</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+            <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary btn-sm">{% trans "Open" %}</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="content" style="text-align:center; padding:60px 20px; max-width:480px; margin:0 auto;">
+    <div style="font-size:2.5rem; margin-bottom:18px;">🗂</div>
+    <h2 style="margin-bottom:10px;">{% trans "No profile yet" %}</h2>
+    <p style="color:var(--ctp-subtext0); margin-bottom:28px;">{% trans "Create your first work profile to start tracking time." %}</p>
+    <a href="/profiles/create/" class="btn btn-primary btn-lg">+ {% trans "Create profile" %}</a>
+</div>
+{% endif %}
+{% endblock %}

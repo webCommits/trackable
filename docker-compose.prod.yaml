@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: trackable-app
+    volumes:
+      - db_data:/app/data
+    environment:
+      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8000:8000"  # nur localhost; Nginx/Caddy als Reverse Proxy zwingend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py compilemessages &&
+             gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    restart: unless-stopped
+  
+  cron:
+    build: .
+    container_name: trackable-cron
+    volumes:
+      - db_data:/app/data
+    environment:
+      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    command: >
+      sh -c "echo '0 2 * * 0 cd /app && python manage.py backup_db' > /etc/crontabs/root && 
+             echo '59 23 L * * cd /app && python manage.py send_monthly_emails' >> /etc/crontabs/root && 
+             crond -f"
+    restart: unless-stopped
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+    driver: local

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Settings" %}{% endblock %}
+{% block nav_settings %}active{% endblock %}
+
+{% block content %}
+<div class="content" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="margin-bottom: 30px; color: var(--ctp-mauve);">{% trans "Settings" %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="email_notifications_enabled" {% if user.email_notifications_enabled %}checked{% endif %}>
+                <span>
+                    {% trans "Enable monthly email reports" %}
+                    <small style="display:block; margin-top:4px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ctp-subtext0);">{% trans "You will receive an automated email on the last day of each month with a summary of all your working hours." %}</small>
+                </span>
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+    </form>
+</div>
+{% endblock %}
