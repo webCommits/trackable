@@ -18,7 +18,13 @@ COPY . .
 
 RUN mkdir -p /app/data/backups
 
-# Non-root user für sicheren Container-Betrieb
+# Crontab zur Buildzeit als root einrichten
+RUN echo '0 2 * * 0 root cd /app && python manage.py backup_db >> /var/log/cron.log 2>&1' > /etc/cron.d/trackable \
+    && echo '59 23 * * * root [ "$(date +\%d -d tomorrow)" = "01" ] && cd /app && python manage.py send_monthly_emails >> /var/log/cron.log 2>&1' >> /etc/cron.d/trackable \
+    && chmod 0644 /etc/cron.d/trackable \
+    && touch /var/log/cron.log
+
+# Non-root user für sicheren Container-Betrieb (nur app, nicht cron)
 RUN adduser --disabled-password --gecos '' appuser \
     && chown -R appuser:appuser /app
 USER appuser
