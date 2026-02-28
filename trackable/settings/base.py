@@ -41,9 +41,8 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR.parent / "templates"],
-        "APP_DIRS": False,
+        "APP_DIRS": True,
         "OPTIONS": {
-            "loaders": ["django.template.loaders.filesystem.Loader"],
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
