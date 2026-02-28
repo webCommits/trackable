@@ -34,25 +34,25 @@ def profile_detail(request, pk):
 
     from datetime import datetime
 
-    current_date = timezone.now()
+    current_date = timezone.now().date()
+
+    # Collect all (year, month) tuples that actually have entries,
+    # plus always include the current month.
+    entry_months = set(
+        profile.time_entries.values_list("date__year", "date__month").distinct()
+    )
+    entry_months.add((current_date.year, current_date.month))
+
     months = []
-
-    for month in range(1, 13):
-        year = current_date.year
-        if month > current_date.month:
-            year -= 1
-
+    for year, month in sorted(entry_months, reverse=True):
         hours = profile.get_monthly_hours(year, month)
-        if hours > 0 or month == current_date.month:
-            months.append({
-                "year": year,
-                "month": month,
-                "month_name": datetime(year, month, 1).strftime("%B %Y"),
-                "hours": hours,
-                "earnings": profile.get_monthly_earnings(year, month),
-            })
-
-    months.reverse()
+        months.append({
+            "year": year,
+            "month": month,
+            "month_name": datetime(year, month, 1).strftime("%B %Y"),
+            "hours": hours,
+            "earnings": profile.get_monthly_earnings(year, month),
+        })
 
     return render(request, "profiles/detail.html", {"profile": profile, "months": months})
 
