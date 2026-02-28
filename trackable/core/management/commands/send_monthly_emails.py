@@ -43,8 +43,20 @@ class Command(BaseCommand):
                 if not entries:
                     continue
 
+                from trackable.timetracking.models import VacationEntry
+                import calendar as cal_module
+                from datetime import datetime as dt
+                last_day = cal_module.monthrange(today.year, today.month)[1]
+                vacation_entries = list(
+                    profile.vacation_entries.filter(
+                        start_date__lte=dt(today.year, today.month, last_day).date(),
+                        end_date__gte=dt(today.year, today.month, 1).date(),
+                    ).order_by("start_date")
+                )
+                total_vacation_days = sum(v.workdays for v in vacation_entries)
+
                 pdf_buffer = self.generate_pdf(
-                    profile, today.year, today.month, entries
+                    profile, today.year, today.month, entries, vacation_entries
                 )
 
                 html_message = render_to_string(
@@ -61,6 +73,8 @@ class Command(BaseCommand):
                         "total_earnings": profile.get_monthly_earnings(
                             today.year, today.month
                         ),
+                        "vacation_entries": vacation_entries,
+                        "total_vacation_days": total_vacation_days,
                     },
                 )
 
@@ -77,7 +91,7 @@ class Command(BaseCommand):
                     )
 
                     pdf_buffer = self.generate_pdf(
-                        profile, today.year, today.month, entries
+                        profile, today.year, today.month, entries, vacation_entries
                     )
 
                     self.stdout.write(
@@ -92,7 +106,7 @@ class Command(BaseCommand):
                         )
                     )
 
-    def generate_pdf(self, profile, year, month, entries):
+    def generate_pdf(self, profile, year, month, entries, vacation_entries=None):
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=landscape(A4))
         elements = []
@@ -113,7 +127,7 @@ class Command(BaseCommand):
 
         total_hours = profile.get_monthly_hours(year, month)
 
-        data = [["Datum", "Start", "Ende", "Pause", "Arbeitsstunden"]]
+        data = [["Datum", "Start", "Ende", "Pause", "Arbeitsstunden", "Tätigkeit"]]
 
         for entry in entries:
             date_str = entry.date.strftime("%d.%m.%Y")
@@ -121,12 +135,13 @@ class Command(BaseCommand):
             end_str = entry.end_time.strftime("%H:%M")
             pause_str = f"{entry.pause_duration}h"
             hours_str = f"{entry.hours_worked:.2f}h"
-            data.append([date_str, start_str, end_str, pause_str, hours_str])
+            notes_str = entry.notes or ""
+            data.append([date_str, start_str, end_str, pause_str, hours_str, notes_str])
 
-        data.append(["", "", "", "Gesamt:", f"{total_hours:.2f}h"])
+        data.append(["", "", "", "", "Gesamt:", f"{total_hours:.2f}h"])
 
         table = Table(
-            data, colWidths=[1.5 * inch, 1 * inch, 1 * inch, 1 * inch, 1.5 * inch]
+            data, colWidths=[1.3*inch, 0.85*inch, 0.85*inch, 0.85*inch, 1.2*inch, 3.4*inch]
         )
         table.setStyle(
             TableStyle(

@@ -1,64 +1,119 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ month_name }} - {{ profile.title }}{% endblock %}
 
 {% block content %}
 <div class="content">
-    <div style="margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
-        <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary">← Zurück zu Profil</a>
-        <a href="/export/{{ profile.id }}/{{ year }}/{{ month }}/" class="btn btn-primary">
-            PDF Exportieren
-        </a>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px;">
+        <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary">← {% trans "Back to profile" %}</a>
+        <a href="/export/{{ profile.id }}/{{ year }}/{{ month }}/" class="btn btn-primary">{% trans "Export PDF" %}</a>
+        <a href="/export-csv/{{ profile.id }}/{{ year }}/{{ month }}/" class="btn btn-secondary" style="color: var(--ctp-green); border-color: rgba(64,160,43,.3);">{% trans "Export CSV" %}</a>
     </div>
-    
+
     <div style="margin-bottom: 30px;">
-        <h1 style="color: var(--ctp-mauve); margin-bottom: 10px;">{{ profile.title }} - {{ month_name }}</h1>
-        <p style="color: var(--ctp-subtext0); margin-bottom: 5px;"><strong>Position:</strong> {{ profile.position }}</p>
+        <h1 style="color: var(--ctp-mauve); margin-bottom: 10px;">{{ profile.title }} – {{ month_name }}</h1>
+        <p style="color: var(--ctp-subtext0); margin-bottom: 5px;"><strong>{% trans "Position" %}:</strong> {{ profile.position }}</p>
         {% if profile.address %}
-            <p style="color: var(--ctp-subtext0); margin-bottom: 5px;"><strong>Adresse:</strong> {{ profile.address }}</p>
+            <p style="color: var(--ctp-subtext0); margin-bottom: 5px;"><strong>{% trans "Address" %}:</strong> {{ profile.address }}</p>
         {% endif %}
     </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
         <div class="card" style="text-align: center;">
-            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">Gesamtstunden</p>
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Total hours" %}</p>
             <p style="font-size: 2.5rem; font-weight: bold; color: var(--ctp-mauve);">{{ total_hours|floatformat:2 }}h</p>
         </div>
         <div class="card" style="text-align: center;">
-            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">Gesamtverdienst</p>
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Total earnings" %}</p>
             <p style="font-size: 2.5rem; font-weight: bold; color: var(--ctp-green);">€{{ total_earnings|floatformat:2 }}</p>
         </div>
+        {% if total_vacation_days %}
+        <div class="card" style="text-align: center;">
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Vacation days" %}</p>
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--ctp-teal);">{{ total_vacation_days }}</p>
+        </div>
+        {% endif %}
     </div>
-    
-    <div style="overflow-x: auto;">
+
+    <!-- Time entries -->
+    <h2 style="margin-bottom: 16px;">{% trans "Working hours" %}</h2>
+    <div style="overflow-x: auto; margin-bottom: 40px;">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Datum</th>
-                    <th>Start</th>
-                    <th>Ende</th>
-                    <th>Pause</th>
-                    <th>Arbeitsstunden</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Start" %}</th>
+                    <th>{% trans "End" %}</th>
+                    <th>{% trans "Break" %}</th>
+                    <th>{% trans "Hours" %}</th>
+                    <th>{% trans "Activity" %}</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                {% for entry in entries %}
+                {% for entry in time_entries %}
                 <tr>
                     <td>{{ entry.date|date:"d.m.Y" }}</td>
                     <td>{{ entry.start_time|time:"H:i" }}</td>
                     <td>{{ entry.end_time|time:"H:i" }}</td>
                     <td>{{ entry.pause_duration }}h</td>
                     <td><strong>{{ entry.hours_worked|floatformat:2 }}h</strong></td>
+                    <td style="color: var(--ctp-subtext1); font-size: .9em;">{{ entry.notes|default:"" }}</td>
+                    <td style="white-space: nowrap;">
+                        <a href="/entry/{{ entry.pk }}/edit/" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
+                        <form method="post" action="/entry/{{ entry.pk }}/delete/" style="display:inline" onsubmit="return confirm('{% trans "Delete this entry?" %}')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm" style="background: rgba(210,15,57,.15); color: var(--ctp-red); border-color: rgba(210,15,57,.25);">{% trans "Delete" %}</button>
+                        </form>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: var(--ctp-subtext0);">
-                        Keine Einträge für diesen Monat vorhanden.
+                    <td colspan="7" style="text-align: center; color: var(--ctp-subtext0);">
+                        {% trans "No entries for this month." %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <!-- Vacation entries -->
+    {% if vacation_entries %}
+    <h2 style="margin-bottom: 16px; color: var(--ctp-teal);">{% trans "Vacation / Absence" %}</h2>
+    <div style="overflow-x: auto; margin-bottom: 40px;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "Period" %}</th>
+                    <th>{% trans "Workdays" %}</th>
+                    <th>{% trans "Weeks" %}</th>
+                    <th>{% trans "Description" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vacation_entries %}
+                <tr style="color: var(--ctp-teal);">
+                    <td>{{ v.start_date|date:"d.m.Y" }} – {{ v.end_date|date:"d.m.Y" }}</td>
+                    <td><strong>{{ v.workdays }}</strong></td>
+                    <td>{{ v.weeks }}</td>
+                    <td>{{ v.notes|default:"" }}</td>
+                </tr>
+                {% endfor %}
+                <tr style="font-weight: bold;">
+                    <td>{% trans "Total" %}</td>
+                    <td>{{ total_vacation_days }}</td>
+                    <td></td><td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 10px;">
+        <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary">+ {% trans "Add time entry" %}</a>
+        <a href="/vacation/{{ profile.id }}/add/" class="btn btn-secondary" style="margin-left: 10px;">+ {% trans "Add vacation" %}</a>
     </div>
 </div>
 {% endblock %}

@@ -10,6 +10,7 @@ class Profile(models.Model):
     address = models.CharField(max_length=500, blank=True, null=True)
     weekly_hours = models.DecimalField(max_digits=4, decimal_places=2)
     hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    internal_notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

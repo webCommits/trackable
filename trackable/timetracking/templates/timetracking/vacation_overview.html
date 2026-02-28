@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Vacation overview" %} – {{ profile.title }}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 30px;">
+        <div>
+            <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary">← {% trans "Back to profile" %}</a>
+        </div>
+        <a href="/vacation/{{ profile.id }}/add/" class="btn btn-primary" style="background: var(--ctp-teal);">
+            + {% trans "Add vacation" %}
+        </a>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <h1 style="color: var(--ctp-teal); margin-bottom: 5px;">🏖 {% trans "Vacation overview" %}</h1>
+        <p style="color: var(--ctp-subtext0);">{{ profile.title }} – {{ profile.position }}</p>
+    </div>
+
+    <!-- Year filter -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;">
+        {% for y in year_range %}
+        <a href="?year={{ y }}"
+           class="btn btn-sm {% if y == year %}btn-primary{% else %}btn-secondary{% endif %}"
+           style="{% if y == year %}background: var(--ctp-teal); border-color: var(--ctp-teal);{% endif %}">
+            {{ y }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Summary card -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="card" style="text-align: center; border-color: rgba(23,146,153,.3);">
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Vacation days" %} {{ year }}</p>
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--ctp-teal);">{{ total_days }}</p>
+            <p style="color: var(--ctp-subtext0); font-size: .85em;">{% trans "workdays (Mon–Fri)" %}</p>
+        </div>
+        <div class="card" style="text-align: center; border-color: rgba(23,146,153,.3);">
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Vacation weeks" %} {{ year }}</p>
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--ctp-teal);">
+                {% if total_days %}{{ total_days|floatformat:0 }}{% with w=total_days|divisibleby:5 %}{% endwith %}
+                {# simple display – exact weeks shown per entry #}
+                {% else %}0{% endif %}
+            </p>
+            <p style="color: var(--ctp-subtext0); font-size: .85em;">{% trans "days total" %}</p>
+        </div>
+    </div>
+
+    <!-- Vacation list -->
+    {% if vacations %}
+    <div style="overflow-x: auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "Start" %}</th>
+                    <th>{% trans "End" %}</th>
+                    <th>{% trans "Workdays" %}</th>
+                    <th>{% trans "Weeks" %}</th>
+                    <th>{% trans "Description" %}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vacations %}
+                <tr>
+                    <td>{{ v.start_date|date:"d.m.Y" }}</td>
+                    <td>{{ v.end_date|date:"d.m.Y" }}</td>
+                    <td><strong style="color: var(--ctp-teal);">{{ v.workdays }}</strong></td>
+                    <td style="color: var(--ctp-subtext1);">{{ v.weeks }}</td>
+                    <td style="color: var(--ctp-subtext1);">{{ v.notes|default:"–" }}</td>
+                    <td>
+                        <form method="post" action="/vacation/delete/{{ v.pk }}/"
+                              onsubmit="return confirm('{% trans "Delete this vacation entry?" %}')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm"
+                                    style="background: rgba(210,15,57,.15); color: var(--ctp-red); border-color: rgba(210,15,57,.25);">
+                                {% trans "Delete" %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr style="font-weight: bold; border-top: 2px solid var(--ctp-overlay0);">
+                    <td colspan="2">{% trans "Total" %}</td>
+                    <td style="color: var(--ctp-teal);">{{ total_days }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 50px 20px; color: var(--ctp-subtext0);">
+        <p style="font-size: 3rem; margin-bottom: 16px;">🏖</p>
+        <h3 style="margin-bottom: 12px;">{% trans "No vacation entries for" %} {{ year }}</h3>
+        <a href="/vacation/{{ profile.id }}/add/" class="btn btn-primary" style="background: var(--ctp-teal);">
+            + {% trans "Add vacation" %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

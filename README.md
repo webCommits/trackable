@@ -25,11 +25,23 @@
 
 ## Features
 
+### Time tracking
 - **📱 PWA** — Installable on iOS, Android, and desktop directly from the browser
-- **⏰ Time tracking** — Quickly log start time, end time, and breaks per day
-- **🗂 Multiple profiles** — Separate tracking for different clients or jobs
-- **📊 Monthly overview** — Automatic calculation of total hours and earnings
-- **📄 PDF export** — Export monthly tables as landscape PDFs
+- **⏰ Time tracking** — Quickly log start time, end time, breaks, and optional activity notes per day
+- **🗂 Multiple profiles** — Separate tracking for different clients or jobs, with edit and delete support
+- **📊 Monthly overview** — Automatic calculation of total hours and earnings per profile
+
+### Exports
+- **📄 PDF export** — Export monthly tables as landscape PDFs, fully translated (EN/DE)
+- **📊 CSV export** — Export monthly time entries as semicolon-separated CSV, Excel-compatible (BOM)
+
+### Business features
+- **🏖 Vacation tracking** — Log vacation periods per profile; workdays are calculated automatically (Mon–Fri, excluding public holidays)
+- **🎌 Public holiday management** — Configure public holidays via Django Admin; they are automatically excluded from vacation workday counts
+- **🔒 Internal profile notes** — Attach private notes to each profile (e.g. contract details, department, payroll hints) — visible only to the account owner
+- **📝 Time entry notes** — Add a short activity description to each time entry
+
+### System
 - **📧 Monthly email reports** — Automated summary email on the last day of each month
 - **🔐 Authentication** — Login and password reset; accounts are created by a superuser via `/admin`
 - **💾 Automatic backups** — Weekly SQLite database backups
@@ -47,6 +59,7 @@
 | Database | SQLite (persistent Docker volume) |
 | Static files | WhiteNoise (served directly via Gunicorn) |
 | PDF | ReportLab |
+| CSV | Python stdlib `csv` (semicolon-separated, Excel-compatible BOM) |
 | Email | Django SMTP with html2text |
 | Hosting | Docker, Docker Compose, Coolify |
 | PWA | Web App Manifest |
@@ -114,7 +127,10 @@ There is no public registration. Create a superuser and manage all accounts via 
 docker exec -it trackable-app python manage.py createsuperuser
 ```
 
-Then open `https://yourdomain.com/admin/` to create additional user accounts.
+Then open `https://yourdomain.com/admin/` to:
+- Create additional user accounts
+- Add and manage **public holidays** (used to calculate accurate vacation workday counts)
+- Review or edit any data directly
 
 ### Updating
 
@@ -194,7 +210,28 @@ python manage.py runserver
 
 trackable. ships with **English** (default) and **German** translations.
 
-Language is detected automatically from the `Accept-Language` header sent by the browser or device — no configuration needed. Set your OS or browser language to German and the interface switches automatically.
+Language is detected automatically from the `Accept-Language` header sent by the browser or device — no configuration needed. Set your OS or browser language to German and the interface switches automatically. PDF and CSV exports respect the active language as well.
+
+---
+
+## Business & Team Use
+
+trackable. works well as a lightweight time-tracking solution for small businesses or freelancers with multiple clients.
+
+### Public holidays
+
+Configure country- or region-specific public holidays once via Django Admin (`/admin/core/holiday/`). They are automatically excluded from vacation workday calculations across all profiles — no manual adjustment needed.
+
+### Profile internal notes
+
+Each profile supports a private **Internal notes** field — visible only to the logged-in owner. Use it for contract details, department assignments, payroll notes, or any other context that should travel with the profile but not appear in exports.
+
+### Exports at a glance
+
+| Format | Location | Use case |
+|---|---|---|
+| PDF (landscape A4) | Monthly table → "Export PDF" | Filing, payroll submission |
+| CSV (semicolon, BOM) | Monthly table → "Export CSV" | Excel, DATEV, further processing |
 
 ---
 

@@ -1,36 +1,49 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Profil erstellen - Trackable{% endblock %}
+{% block title %}{% if edit %}{% trans "Edit profile" %}{% else %}{% trans "Create profile" %}{% endif %} - Trackable{% endblock %}
 
 {% block content %}
 <div class="content" style="max-width: 600px; margin: 0 auto;">
-    <h2 style="text-align: center; margin-bottom: 30px; color: var(--ctp-mauve);">Neues Profil erstellen</h2>
+    <h2 style="text-align: center; margin-bottom: 30px; color: var(--ctp-mauve);">
+        {% if edit %}{% trans "Edit profile" %}{% else %}{% trans "Create new profile" %}{% endif %}
+    </h2>
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
-            <label for="{{ form.title.id_for_label }}">Jobtitel</label>
+            <label for="{{ form.title.id_for_label }}">{% trans "Job title" %}</label>
             {{ form.title }}
         </div>
         <div class="form-group">
-            <label for="{{ form.position.id_for_label }}">Stelle</label>
+            <label for="{{ form.position.id_for_label }}">{% trans "Position" %}</label>
             {{ form.position }}
         </div>
         <div class="form-group">
-            <label for="{{ form.address.id_for_label }}">Adresse (optional)</label>
+            <label for="{{ form.address.id_for_label }}">{% trans "Address (optional)" %}</label>
             {{ form.address }}
         </div>
         <div class="form-group">
-            <label for="{{ form.weekly_hours.id_for_label }}">Wochenstunden</label>
+            <label for="{{ form.weekly_hours.id_for_label }}">{% trans "Weekly hours" %}</label>
             {{ form.weekly_hours }}
         </div>
         <div class="form-group">
-            <label for="{{ form.hourly_rate.id_for_label }}">Stundenlohn (€)</label>
+            <label for="{{ form.hourly_rate.id_for_label }}">{% trans "Hourly rate (€)" %}</label>
             {{ form.hourly_rate }}
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Profil erstellen</button>
+        <div class="form-group">
+            <label for="{{ form.internal_notes.id_for_label }}">{% trans "Internal notes (optional)" %}</label>
+            {{ form.internal_notes }}
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            {% if edit %}{% trans "Save changes" %}{% else %}{% trans "Create profile" %}{% endif %}
+        </button>
     </form>
     <p style="text-align: center; margin-top: 20px;">
-        <a href="/profiles/" class="btn btn-secondary">Abbrechen</a>
+        {% if edit %}
+        <a href="/profiles/{{ profile.pk }}/" class="btn btn-secondary">{% trans "Cancel" %}</a>
+        {% else %}
+        <a href="/profiles/" class="btn btn-secondary">{% trans "Cancel" %}</a>
+        {% endif %}
     </p>
 </div>
 {% endblock %}

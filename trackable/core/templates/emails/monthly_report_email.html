@@ -115,8 +115,26 @@
                     <span class="summary-label">Gesamtverdienst</span>
                     <span class="summary-value success">€{{ total_earnings|floatformat:2 }}</span>
                 </div>
+                {% if total_vacation_days %}
+                <div class="summary-item">
+                    <span class="summary-label">Urlaubstage (Arbeitstage)</span>
+                    <span class="summary-value" style="color: #179299;">{{ total_vacation_days }}</span>
+                </div>
+                {% endif %}
             </div>
-            
+
+            {% if vacation_entries %}
+            <div class="summary" style="margin-top: 20px;">
+                <h3 style="color: #179299; margin: 0 0 16px 0; font-size: 16px;">Urlaub / Abwesenheiten</h3>
+                {% for v in vacation_entries %}
+                <div class="summary-item">
+                    <span class="summary-label">{{ v.start_date|date:"d.m.Y" }} – {{ v.end_date|date:"d.m.Y" }}{% if v.notes %} · {{ v.notes }}{% endif %}</span>
+                    <span class="summary-value" style="color: #179299; font-size: 15px;">{{ v.workdays }} {% if v.workdays == 1 %}Tag{% else %}Tage{% endif %}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <p>Vielen Dank für die Nutzung von Trackable!</p>
         </div>
         <div class="footer">

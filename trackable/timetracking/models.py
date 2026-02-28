@@ -11,6 +11,7 @@ class TimeEntry(models.Model):
     end_time = models.TimeField()
     pause_duration = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     hours_worked = models.DecimalField(max_digits=4, decimal_places=2, editable=False)
+    notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -37,3 +38,43 @@ class TimeEntry(models.Model):
     def save(self, *args, **kwargs):
         self.hours_worked = self.calculate_hours()
         super().save(*args, **kwargs)
+
+
+class VacationEntry(models.Model):
+    profile = models.ForeignKey(
+        "profiles.Profile", on_delete=models.CASCADE, related_name="vacation_entries"
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    notes = models.CharField(max_length=200, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-start_date"]
+
+    def __str__(self):
+        return f"{self.start_date} – {self.end_date} ({self.profile.title})"
+
+    @property
+    def workdays(self):
+        """Mon–Fri days in the vacation period, minus public holidays."""
+        from datetime import timedelta
+        from trackable.core.models import Holiday
+
+        holiday_dates = set(
+            Holiday.objects.filter(
+                date__range=[self.start_date, self.end_date]
+            ).values_list("date", flat=True)
+        )
+
+        count = 0
+        current = self.start_date
+        while current <= self.end_date:
+            if current.weekday() < 5 and current not in holiday_dates:
+                count += 1
+            current += timedelta(days=1)
+        return count
+
+    @property
+    def weeks(self):
+        return round(self.workdays / 5, 1)
