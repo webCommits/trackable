@@ -21,7 +21,7 @@ services:
              python manage.py compilemessages &&
              gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health/ 2>/dev/null | grep -q ok || wget -qO /dev/null http://localhost:8000/ 2>/dev/null"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')\" 2>/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
