@@ -26,7 +26,8 @@ RUN echo '0 2 * * 0 root cd /app && python manage.py backup_db >> /var/log/cron.
 
 # Non-root user für sicheren Container-Betrieb (nur app, nicht cron)
 RUN adduser --disabled-password --gecos '' appuser \
-    && chown -R appuser:appuser /app
+    && chown -R appuser:appuser /app \
+    && chmod 775 /app/data
 USER appuser
 
 EXPOSE 8000
