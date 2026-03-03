@@ -20,12 +20,6 @@ services:
              python manage.py collectstatic --noinput &&
              python manage.py compilemessages &&
              gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
-    healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')\" 2>/dev/null"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     restart: unless-stopped
   
   cron:
