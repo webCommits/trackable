@@ -243,7 +243,7 @@ msgid "Total earnings"
 msgstr "Gesamtverdienst"
 
 msgid "Start"
-msgstr "Beginn"
+msgstr "Start"
 
 msgid "End"
 msgstr "Ende"
@@ -623,3 +623,12 @@ msgstr "Arbeitstage"
 
 msgid "Vacation / Absences"
 msgstr "Urlaub / Abwesenheiten"
+
+msgid "Pause"
+msgstr "Pause"
+
+msgid "Resume"
+msgstr "Fortsetzen"
+
+msgid "Stop"
+msgstr "Stopp"

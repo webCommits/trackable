@@ -21,7 +21,14 @@ urlpatterns = [
         views.export_csv,
         name="export_csv",
     ),
-    path("vacation/<int:profile_id>/", views.vacation_overview, name="vacation_overview"),
+    path(
+        "vacation/<int:profile_id>/", views.vacation_overview, name="vacation_overview"
+    ),
     path("vacation/<int:profile_id>/add/", views.add_vacation, name="add_vacation"),
     path("vacation/delete/<int:pk>/", views.delete_vacation, name="delete_vacation"),
+    path("timer/<int:profile_id>/start/", views.start_timer, name="start_timer"),
+    path("timer/<int:profile_id>/pause/", views.pause_timer, name="pause_timer"),
+    path("timer/<int:profile_id>/resume/", views.resume_timer, name="resume_timer"),
+    path("timer/<int:profile_id>/stop/", views.stop_timer, name="stop_timer"),
+    path("timer/<int:profile_id>/status/", views.timer_status, name="timer_status"),
 ]

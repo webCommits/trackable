@@ -40,6 +40,30 @@ class TimeEntry(models.Model):
         super().save(*args, **kwargs)
 
 
+class ActiveTimer(models.Model):
+    """Tracks a running timer for a profile. One per profile per user."""
+
+    profile = models.ForeignKey(
+        "profiles.Profile", on_delete=models.CASCADE, related_name="active_timers"
+    )
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="active_timers"
+    )
+    start_time = models.DateTimeField()
+    pause_time = models.DateTimeField(null=True, blank=True)
+    total_paused_seconds = models.IntegerField(default=0)
+    is_paused = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ["profile", "user"]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        status = "paused" if self.is_paused else "running"
+        return f"{self.profile.title} - {status} since {self.start_time}"
+
+
 class VacationEntry(models.Model):
     profile = models.ForeignKey(
         "profiles.Profile", on_delete=models.CASCADE, related_name="vacation_entries"

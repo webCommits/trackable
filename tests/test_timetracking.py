@@ -119,7 +119,7 @@ class TimeEntryViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Arbeitsstunden")
+        self.assertContains(response, "Working hours")
 
     def test_pdf_export(self):
         today = date.today()

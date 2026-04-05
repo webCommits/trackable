@@ -28,6 +28,7 @@
 ### Time tracking
 - **📱 PWA** — Installable on iOS, Android, and desktop directly from the browser
 - **⏰ Time tracking** — Quickly log start time, end time, breaks, and optional activity notes per day
+- **⏱ Live Timer** — Start/Pause/Resume/Stop timer with one click; automatically creates time entries
 - **🗂 Multiple profiles** — Separate tracking for different clients or jobs, with edit and delete support
 - **📊 Monthly overview** — Automatic calculation of total hours and earnings per profile
 
@@ -138,6 +139,76 @@ Then open `https://yourdomain.com/admin/` to:
 git pull
 docker-compose -f docker-compose.prod.yaml up -d --build
 ```
+
+Migrations, static files, and translations are applied automatically on rebuild.
+
+---
+
+## Database Backups
+
+### Manual Backup
+
+Create an immediate backup of your SQLite database:
+
+```bash
+# Copy database from container to host
+docker exec trackable-app cp /app/data/db.sqlite3 /tmp/db_backup_$(date +%Y%m%d_%H%M%S).sqlite3
+
+# Download to your local machine (optional)
+docker cp trackable-app:/app/data/db.sqlite3 ./db_backup_$(date +%Y%m%d).sqlite3
+```
+
+### Automated Backups with Cron
+
+The built-in `backup_db` management command creates backups automatically. Configure the schedule via `.env`:
+
+```env
+BACKUP_SCHEDULE=weekly        # Options: daily, weekly
+BACKUP_FILENAME=db_backup.sqlite3
+```
+
+#### Custom Cron Job (Advanced)
+
+For more control, set up a cron job on your host system:
+
+1. **Create backup script** `/opt/trackable/backup.sh`:
+
+```bash
+#!/bin/bash
+BACKUP_DIR="/opt/trackable/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p $BACKUP_DIR
+docker exec trackable-app cp /app/data/db.sqlite3 /tmp/backup_$DATE.sqlite3
+docker cp trackable-app:/tmp/backup_$DATE.sqlite3 $BACKUP_DIR/
+docker exec trackable-app rm /tmp/backup_$DATE.sqlite3
+
+# Keep only last 10 backups
+ls -t $BACKUP_DIR/*.sqlite3 | tail -n +11 | xargs -r rm
+```
+
+Make it executable:
+```bash
+chmod +x /opt/trackable/backup.sh
+```
+
+2. **Add cron job** (run `crontab -e`):
+
+```cron
+# Daily backup at 2:00 AM
+0 2 * * * /opt/trackable/backup.sh
+
+# Weekly backup (Sundays at 3:00 AM)
+0 3 * * 0 /opt/trackable/backup.sh
+```
+
+3. **Verify backups**:
+
+```bash
+ls -la /opt/trackable/backups/
+```
+
+> 💡 **Tip**: Mount the backup directory as a Docker volume or sync to cloud storage (e.g., rclone, rsync) for off-site backups.
 
 ### Coolify
 

@@ -14,17 +14,30 @@ from datetime import datetime, timedelta
 import calendar
 import csv
 import io
+from datetime import time as time_obj
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from trackable.timetracking.forms import TimeEntryForm, VacationEntryForm
-from trackable.timetracking.models import TimeEntry, VacationEntry
+from trackable.timetracking.models import TimeEntry, VacationEntry, ActiveTimer
 from trackable.profiles.models import Profile
 
 
 @login_required
 def home(request):
     profiles = request.user.profiles.all()
+    active_timers = {
+        timer.profile_id: timer
+        for timer in ActiveTimer.objects.filter(user=request.user).select_related(
+            "profile"
+        )
+    }
     if profiles.count() == 0:
         return redirect("profile_create")
-    return render(request, "timetracking/home.html", {"profiles": profiles})
+    return render(
+        request,
+        "timetracking/home.html",
+        {"profiles": profiles, "active_timers": active_timers},
+    )
 
 
 @login_required
@@ -36,11 +49,17 @@ def add_entry(request, profile_id):
             entry = form.save(commit=False)
             entry.profile = profile
             entry.save()
-            messages.success(request, _("Time entry for %(date)s was saved successfully!") % {"date": entry.date})
+            messages.success(
+                request,
+                _("Time entry for %(date)s was saved successfully!")
+                % {"date": entry.date},
+            )
             return redirect("profile_detail", pk=profile.pk)
     else:
         form = TimeEntryForm()
-    return render(request, "timetracking/add_entry.html", {"form": form, "profile": profile})
+    return render(
+        request, "timetracking/add_entry.html", {"form": form, "profile": profile}
+    )
 
 
 @login_required
@@ -52,10 +71,19 @@ def edit_entry(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, _("Time entry was updated successfully!"))
-            return redirect("monthly_table", profile_id=profile.pk, year=entry.date.year, month=entry.date.month)
+            return redirect(
+                "monthly_table",
+                profile_id=profile.pk,
+                year=entry.date.year,
+                month=entry.date.month,
+            )
     else:
         form = TimeEntryForm(instance=entry)
-    return render(request, "timetracking/add_entry.html", {"form": form, "profile": profile, "edit": True})
+    return render(
+        request,
+        "timetracking/add_entry.html",
+        {"form": form, "profile": profile, "edit": True},
+    )
 
 
 @login_required
@@ -84,20 +112,25 @@ def monthly_table(request, profile_id, year, month):
     total_earnings = profile.get_monthly_earnings(year, month)
     total_vacation_days = sum(v.workdays for v in vacation_entries)
     month_name = datetime(year, month, 1).strftime("%B %Y")
-    return render(request, "timetracking/monthly_table.html", {
-        "profile": profile,
-        "time_entries": time_entries,
-        "vacation_entries": vacation_entries,
-        "year": year,
-        "month": month,
-        "month_name": month_name,
-        "total_hours": total_hours,
-        "total_earnings": total_earnings,
-        "total_vacation_days": total_vacation_days,
-    })
+    return render(
+        request,
+        "timetracking/monthly_table.html",
+        {
+            "profile": profile,
+            "time_entries": time_entries,
+            "vacation_entries": vacation_entries,
+            "year": year,
+            "month": month,
+            "month_name": month_name,
+            "total_hours": total_hours,
+            "total_earnings": total_earnings,
+            "total_vacation_days": total_vacation_days,
+        },
+    )
 
 
 # ── Vacation ──────────────────────────────────────────────────────────────────
+
 
 @login_required
 def add_vacation(request, profile_id):
@@ -115,7 +148,9 @@ def add_vacation(request, profile_id):
                 return redirect("vacation_overview", profile_id=profile.pk)
     else:
         form = VacationEntryForm()
-    return render(request, "timetracking/add_vacation.html", {"form": form, "profile": profile})
+    return render(
+        request, "timetracking/add_vacation.html", {"form": form, "profile": profile}
+    )
 
 
 @login_required
@@ -132,24 +167,34 @@ def delete_vacation(request, pk):
 def vacation_overview(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
     from django.utils.timezone import now
+
     current_year = now().year
     year = int(request.GET.get("year", current_year))
     vacations = (
-        profile.vacation_entries.filter(start_date__year=year) |
-        profile.vacation_entries.filter(end_date__year=year)
-    ).distinct().order_by("start_date")
+        (
+            profile.vacation_entries.filter(start_date__year=year)
+            | profile.vacation_entries.filter(end_date__year=year)
+        )
+        .distinct()
+        .order_by("start_date")
+    )
     total_days = sum(v.workdays for v in vacations)
     year_range = range(current_year - 2, current_year + 2)
-    return render(request, "timetracking/vacation_overview.html", {
-        "profile": profile,
-        "vacations": vacations,
-        "year": year,
-        "year_range": year_range,
-        "total_days": total_days,
-    })
+    return render(
+        request,
+        "timetracking/vacation_overview.html",
+        {
+            "profile": profile,
+            "vacations": vacations,
+            "year": year,
+            "year_range": year_range,
+            "total_days": total_days,
+        },
+    )
 
 
 # ── PDF Export ────────────────────────────────────────────────────────────────
+
 
 @login_required
 def export_pdf(request, profile_id, year, month):
@@ -178,8 +223,11 @@ def export_pdf(request, profile_id, year, month):
 
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
-        "CustomTitle", parent=styles["Heading1"],
-        fontSize=18, textColor=colors.HexColor("#8839ef"), spaceAfter=20,
+        "CustomTitle",
+        parent=styles["Heading1"],
+        fontSize=18,
+        textColor=colors.HexColor("#8839ef"),
+        spaceAfter=20,
     )
 
     elements.append(Paragraph(f"{profile.title} - {month_name}", title_style))
@@ -189,83 +237,183 @@ def export_pdf(request, profile_id, year, month):
     elements.append(Spacer(1, 20))
 
     # Time entries table
-    data = [[_g("Date"), _g("Start"), _g("End"), _g("Break"), _g("Hours"), _g("Activity")]]
+    data = [
+        [_g("Date"), _g("Start"), _g("End"), _g("Break"), _g("Hours"), _g("Activity")]
+    ]
     for entry in time_entries:
-        data.append([
-            entry.date.strftime("%d.%m.%Y"),
-            entry.start_time.strftime("%H:%M"),
-            entry.end_time.strftime("%H:%M"),
-            f"{entry.pause_duration}h",
-            f"{entry.hours_worked:.2f}h",
-            entry.notes or "",
-        ])
-    data.append(["", "", "", "", _g("Total:"), f"{total_hours:.2f}h"])
-
-    col_widths = [1.3*inch, 0.85*inch, 0.85*inch, 0.85*inch, 1.2*inch, 3.4*inch]
-    table = Table(data, colWidths=col_widths)
-    table.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, 0),  colors.HexColor("#8839ef")),
-        ("TEXTCOLOR",     (0, 0), (-1, 0),  colors.white),
-        ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
-        ("FONTSIZE",      (0, 0), (-1, 0),  11),
-        ("ALIGN",         (0, 0), (-1, 0),  "CENTER"),
-        ("BOTTOMPADDING", (0, 0), (-1, 0),  10),
-        ("BACKGROUND",    (0, 1), (-1, -2), colors.white),
-        ("GRID",          (0, 0), (-1, -2), 0.5, colors.HexColor("#dce0e8")),
-        ("FONTNAME",      (0, 0), (-1, -2), "Helvetica"),
-        ("FONTSIZE",      (0, 0), (-1, -2), 9),
-        ("ALIGN",         (0, 0), (-1, -2), "LEFT"),
-        ("BACKGROUND",    (0, -1), (-1, -1), colors.HexColor("#f8fafc")),
-        ("FONTNAME",      (0, -1), (-1, -1), "Helvetica-Bold"),
-        ("FONTSIZE",      (0, -1), (-1, -1), 11),
-        ("ALIGN",         (4, -1), (-1, -1), "RIGHT"),
-    ]))
-    elements.append(table)
-    elements.append(Spacer(1, 20))
-
-    earnings_style = ParagraphStyle(
-        "Earnings", parent=styles["Heading2"],
-        fontSize=15, textColor=colors.HexColor("#40a02b"),
-    )
-    elements.append(Paragraph(f"{_g('Total earnings')}: €{total_earnings:.2f}", earnings_style))
-
-    # Vacation section
-    if vacation_entries:
-        elements.append(Spacer(1, 24))
-        elements.append(Paragraph(_g("Vacation / Absences"), ParagraphStyle(
-            "VacTitle", parent=styles["Heading2"],
-            fontSize=13, textColor=colors.HexColor("#179299"), spaceAfter=8,
-        )))
-        vac_data = [[_g("Period"), _g("Working days"), _g("Weeks"), _g("Description")]]
-        for v in vacation_entries:
-            vac_data.append([
-                f"{v.start_date.strftime('%d.%m.%Y')} – {v.end_date.strftime('%d.%m.%Y')}",
-                str(v.workdays),
-                str(v.weeks),
-                v.notes or "",
-            ])
-        vac_data.append([_g("Total"), str(total_vacation_days), "", ""])
-        vac_table = Table(vac_data, colWidths=[2.4*inch, 1.1*inch, 1*inch, 4.1*inch])
-        vac_table.setStyle(TableStyle([
-            ("BACKGROUND",   (0, 0), (-1, 0),  colors.HexColor("#179299")),
-            ("TEXTCOLOR",    (0, 0), (-1, 0),  colors.white),
-            ("FONTNAME",     (0, 0), (-1, 0),  "Helvetica-Bold"),
-            ("FONTSIZE",     (0, 0), (-1, 0),  10),
-            ("BACKGROUND",   (0, 1), (-1, -2), colors.white),
-            ("GRID",         (0, 0), (-1, -2), 0.5, colors.HexColor("#dce0e8")),
-            ("FONTSIZE",     (0, 1), (-1, -1), 9),
-            ("BACKGROUND",   (0, -1), (-1, -1), colors.HexColor("#f8fafc")),
-            ("FONTNAME",     (0, -1), (-1, -1), "Helvetica-Bold"),
-        ]))
-        elements.append(vac_table)
-
-    doc.build(elements)
-    buffer.seek(0)
-    response.write(buffer.getvalue())
+        data.append(
+            [
+                entry.date.strftime("%d.%m.%Y"),
+                entry.start_time.strftime("%H:%M"),
+                entry.end_time.strftime("%H:%M"),
+                f"{entry.pause_duration}h",
+                f"{entry.hours_worked:.2f}h",
+                entry.notes or "",
+            ]
+        )
     return response
 
 
+# ── Timer API Endpoints ───────────────────────────────────────────────────────
+
+
+@login_required
+@require_http_methods(["POST"])
+def start_timer(request, profile_id):
+    """Start a timer for a profile."""
+    profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+
+    existing_timer = ActiveTimer.objects.filter(
+        profile=profile, user=request.user
+    ).first()
+    if existing_timer:
+        return JsonResponse(
+            {"error": "Timer already running for this profile"}, status=400
+        )
+
+    timer = ActiveTimer.objects.create(
+        profile=profile, user=request.user, start_time=timezone.now(), is_paused=False
+    )
+
+    return JsonResponse(
+        {
+            "status": "started",
+            "start_time": timer.start_time.isoformat(),
+            "profile_id": profile.id,
+            "profile_title": profile.title,
+        }
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
+def pause_timer(request, profile_id):
+    """Pause a running timer."""
+    profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+
+    timer = ActiveTimer.objects.filter(profile=profile, user=request.user).first()
+    if not timer:
+        return JsonResponse({"error": "No active timer found"}, status=404)
+
+    if timer.is_paused:
+        return JsonResponse({"error": "Timer is already paused"}, status=400)
+
+    timer.pause_time = timezone.now()
+    timer.is_paused = True
+    timer.save()
+
+    return JsonResponse(
+        {
+            "status": "paused",
+            "pause_time": timer.pause_time.isoformat(),
+            "total_paused_seconds": timer.total_paused_seconds,
+        }
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
+def resume_timer(request, profile_id):
+    """Resume a paused timer."""
+    profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+
+    timer = ActiveTimer.objects.filter(profile=profile, user=request.user).first()
+    if not timer:
+        return JsonResponse({"error": "No active timer found"}, status=404)
+
+    if not timer.is_paused:
+        return JsonResponse({"error": "Timer is not paused"}, status=400)
+
+    now = timezone.now()
+    paused_duration = int((now - timer.pause_time).total_seconds())
+    timer.total_paused_seconds += paused_duration
+    timer.pause_time = None
+    timer.is_paused = False
+    timer.save()
+
+    return JsonResponse(
+        {"status": "resumed", "total_paused_seconds": timer.total_paused_seconds}
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
+def stop_timer(request, profile_id):
+    """Stop timer and create TimeEntry."""
+    profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+
+    timer = ActiveTimer.objects.filter(profile=profile, user=request.user).first()
+    if not timer:
+        return JsonResponse({"error": "No active timer found"}, status=404)
+
+    now = timezone.now()
+    total_seconds = (
+        now - timer.start_time
+    ).total_seconds() - timer.total_paused_seconds
+
+    if total_seconds < 0:
+        total_seconds = 0
+
+    hours_worked = total_seconds / 3600
+
+    entry_date = timer.start_time.date()
+    start_time_obj = timer.start_time.time()
+    end_time_obj = now.time()
+
+    time_entry = TimeEntry.objects.create(
+        profile=profile,
+        date=entry_date,
+        start_time=start_time_obj,
+        end_time=end_time_obj,
+        pause_duration=round(timer.total_paused_seconds / 3600, 2),
+        hours_worked=round(hours_worked, 2),
+    )
+
+    timer.delete()
+
+    return JsonResponse(
+        {
+            "status": "stopped",
+            "hours_worked": round(hours_worked, 2),
+            "entry_id": time_entry.id,
+            "date": str(entry_date),
+            "message": f"Time entry created: {round(hours_worked, 2)} hours",
+        }
+    )
+
+
+@login_required
+def timer_status(request, profile_id):
+    """Get current timer status for a profile."""
+    profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+
+    timer = ActiveTimer.objects.filter(profile=profile, user=request.user).first()
+    if not timer:
+        return JsonResponse({"has_timer": False})
+
+    now = timezone.now()
+    if timer.is_paused:
+        elapsed_seconds = (
+            timer.pause_time - timer.start_time
+        ).total_seconds() - timer.total_paused_seconds
+    else:
+        elapsed_seconds = (
+            now - timer.start_time
+        ).total_seconds() - timer.total_paused_seconds
+
+    return JsonResponse(
+        {
+            "has_timer": True,
+            "is_paused": timer.is_paused,
+            "start_time": timer.start_time.isoformat(),
+            "elapsed_seconds": int(elapsed_seconds),
+            "total_paused_seconds": timer.total_paused_seconds,
+        }
+    )
+
+
 # ── CSV Export ────────────────────────────────────────────────────────────────
+
 
 @login_required
 def export_csv(request, profile_id, year, month):
@@ -279,17 +427,25 @@ def export_csv(request, profile_id, year, month):
     response.write("\ufeff")  # BOM for Excel compatibility
 
     writer = csv.writer(response, delimiter=";")
-    writer.writerow([
-        _g("Date"), _g("Start"), _g("End"), _g("Break") + " (h)",
-        _g("Hours"), _g("Activity"),
-    ])
+    writer.writerow(
+        [
+            _g("Date"),
+            _g("Start"),
+            _g("End"),
+            _g("Break") + " (h)",
+            _g("Hours"),
+            _g("Activity"),
+        ]
+    )
     for entry in time_entries:
-        writer.writerow([
-            entry.date.strftime("%d.%m.%Y"),
-            entry.start_time.strftime("%H:%M"),
-            entry.end_time.strftime("%H:%M"),
-            str(entry.pause_duration).replace(".", ","),
-            str(round(entry.hours_worked, 2)).replace(".", ","),
-            entry.notes or "",
-        ])
+        writer.writerow(
+            [
+                entry.date.strftime("%d.%m.%Y"),
+                entry.start_time.strftime("%H:%M"),
+                entry.end_time.strftime("%H:%M"),
+                str(entry.pause_duration).replace(".", ","),
+                str(round(entry.hours_worked, 2)).replace(".", ","),
+                entry.notes or "",
+            ]
+        )
     return response

@@ -31,6 +31,15 @@
             <span>🕐 {{ profile.weekly_hours }}h / {% trans "week" %}</span>
             {% if profile.address %}<span>📍 {{ profile.address }}</span>{% endif %}
         </div>
+        <div class="timer-controls" data-profile-id="{{ profile.id }}" style="margin-bottom:12px;">
+            <div class="timer-display" data-profile-id="{{ profile.id }}"></div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" data-action="start" style="flex:1;">▶ {% trans "Start" %}</button>
+                <button class="btn btn-warning btn-sm" data-action="pause" style="display:none;">⏸ {% trans "Pause" %}</button>
+                <button class="btn btn-success btn-sm" data-action="resume" style="display:none;">▶ {% trans "Resume" %}</button>
+                <button class="btn btn-danger btn-sm" data-action="stop" style="display:none;">⏹ {% trans "Stop" %}</button>
+            </div>
+        </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary btn-sm" style="flex:1; justify-content:center;">+ {% trans "Add time" %}</a>
             <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary btn-sm">{% trans "Monthly overview" %}</a>
