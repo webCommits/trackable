@@ -75,6 +75,11 @@
 - A reverse proxy (Nginx, Caddy, Traefik) &mdash; **required in production**
 - A domain name (for HTTPS)
 
+### Which compose file to use?
+
+- **`docker-compose.prod.yaml`**: For Coolify deployments OR standalone with manual reverse proxy (Nginx, Caddy)
+- **`docker-compose.standalone.yaml`**: For standalone deployments with Traefik (automatic SSL via Let's Encrypt)
+
 ### 1. Clone the repository
 
 ```bash
@@ -113,9 +118,16 @@ DEFAULT_FROM_EMAIL=noreply@trackable.yourdomain.com
 ### 3. Start the container
 
 **For Coolify:**
-Deploy through the Coolify UI — environment variables are passed automatically.
+Deploy through the Coolify UI — environment variables are passed automatically. Configure your domain in the Coolify domain settings.
 
 **For Standalone Docker Compose:**
+
+With Traefik (automatic SSL):
+```bash
+docker-compose --env-file .env -f docker-compose.standalone.yaml up -d --build
+```
+
+Without Traefik (manual reverse proxy):
 ```bash
 docker-compose --env-file .env -f docker-compose.prod.yaml up -d --build
 ```
@@ -124,26 +136,16 @@ On startup the container automatically runs `migrate`, `collectstatic`, and `com
 
 ### 4. Reverse proxy
 
-A production-ready Nginx config is included at `nginx/trackable.conf` (TLS, HSTS, rate limiting, gzip).
+**For Coolify:**
+Coolify's Traefik proxy handles SSL and routing automatically based on the domain you configure in the UI.
 
-For **Coolify**: Coolify's Traefik proxy handles SSL and routing automatically based on the domain you configure in the UI.
+**For Standalone Docker Compose:**
+
+- **With Traefik**: Use `docker-compose.standalone.yaml` which includes pre-configured Traefik labels for automatic routing and SSL. Set `SUBDOMAIN` and `DOMAIN_NAME` in your `.env` file.
+
+- **Without Traefik**: Use `docker-compose.prod.yaml` and configure your own reverse proxy. A production-ready Nginx config is included at `nginx/trackable.conf` (TLS, HSTS, rate limiting, gzip).
 
 > Static files are served directly by Gunicorn via WhiteNoise — no separate static file location in the reverse proxy needed.
-
-### Standalone Docker Compose (without Coolify)
-
-If you're running Docker Compose directly (without Coolify), the included Traefik labels handle routing and SSL:
-
-1. Ensure Traefik is running on your server with Let's Encrypt configured
-
-2. The compose file uses `SUBDOMAIN` and `DOMAIN_NAME` environment variables to configure Traefik routing automatically. Set these in your `.env` file:
-   ```env
-   SUBDOMAIN=trackable
-   DOMAIN_NAME=example.com
-   ```
-   This makes the app accessible at `trackable.example.com`.
-
-**Note:** If you're not using Traefik at all, remove or adjust the `labels` section in `docker-compose.prod.yaml` and configure your own reverse proxy (Nginx, Caddy, etc.).
 
 ### 5. Create the first user
 

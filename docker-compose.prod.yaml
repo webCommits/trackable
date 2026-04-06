@@ -11,16 +11,6 @@ services:
       - PYTHONUNBUFFERED=1
     expose:
       - "8000"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.trackable-http.entrypoints=http"
-      - "traefik.http.routers.trackable-http.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.trackable-http.middlewares=redirect-to-https"
-      - "traefik.http.routers.trackable-https.entrypoints=https"
-      - "traefik.http.routers.trackable-https.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.trackable-https.tls=true"
-      - "traefik.http.routers.trackable-https.tls.certresolver=letsencrypt"
-      - "traefik.http.services.trackable.loadbalancer.server.port=8000"
     networks:
       - coolify
     command: >

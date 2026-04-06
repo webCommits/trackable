@@ -105,21 +105,24 @@ MONTHLY_EMAIL_TIME=23:59
 ### 3. Docker Compose starten
 
 **Für Coolify:**
-Einfach über das Coolify UI deployen — Umgebungsvariablen werden automatisch übergeben.
+Einfach über das Coolify UI deployen — Umgebungsvariablen werden automatisch übergeben. Domain im Coolify UI konfigurieren.
 
 **Für Standalone Docker Compose:**
 ```bash
 # Volume erstellen (wichtig für persistente Daten)
 docker volume create trackable_db_data
 
-# Prod-Compose mit .env Datei starten
+# Mit Traefik (automatisches SSL):
+docker-compose --env-file .env -f docker-compose.standalone.yaml up -d --build
+
+# Ohne Traefik (eigener Reverse Proxy wie Nginx/Caddy):
 docker-compose --env-file .env -f docker-compose.prod.yaml up -d --build
 
 # Status prüfen
-docker-compose -f docker-compose.prod.yaml ps
+docker-compose ps
 
 # Logs prüfen
-docker-compose -f docker-compose.prod.yaml logs -f
+docker-compose logs -f
 ```
 
 ## SSL-Zertifikat mit Let's Encrypt (empfohlen)
@@ -198,22 +201,23 @@ curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 2. Neues Projekt → Neue Ressource → **Docker Compose**
 3. Repository-URL eintragen (GitHub, GitLab, etc.)
 4. Build-Konfiguration:
-   - Compose-Datei: `docker-compose.prod.yaml`
+   - Compose-Datei: `docker-compose.prod.yaml` (ohne Traefik Labels)
    - **Port: `8000`** (Container-interner Port — nicht den Host-Port ändern)
 5. Environment-Variablen im Coolify UI setzen:
    - `SECRET_KEY` (generieren mit: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`)
    - `DEBUG=False`
    - `ALLOWED_HOSTS=trackable.deine-domain.com`
    - E-Mail-Konfiguration (`EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`)
-   - `SUBDOMAIN` und `DOMAIN_NAME` werden von Coolify ignoriert (Routing wird im UI konfiguriert)
 6. Domain im Coolify UI konfigurieren → Deployen
+
+> **Hinweis:** Bei Coolify wird das Routing automatisch über das Coolify UI verwaltet. Die `SUBDOMAIN` und `DOMAIN_NAME` Variablen werden von Coolify ignoriert.
 
 > **Hinweis:** Die `ports`-Zeile in `docker-compose.prod.yaml` ist für Coolify irrelevant. Traefik routet direkt über das interne Docker-Netzwerk (`coolify`) auf Port 8000.
 
 ### 3. Was Coolify automatisch übernimmt
 
 - SSL-Zertifikate (via Traefik + Let's Encrypt)
-- Domain-Routing (überschreibt die Traefik-Labels im Compose-File)
+- Domain-Routing (konfiguriert im Coolify UI)
 - Deployment bei Git-Push
 - Rollbacks
 - Log-Monitoring

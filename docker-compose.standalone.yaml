@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: trackable-app
+    volumes:
+      - db_data:/app/data
+    environment:
+      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
+      - PYTHONUNBUFFERED=1
+      - SUBDOMAIN=${SUBDOMAIN:-trackable}
+      - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
+    ports:
+      - "8000:8000"
+    networks:
+      - standalone
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py compilemessages &&
+             gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.trackable-http.entrypoints=http"
+      - "traefik.http.routers.trackable-http.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.trackable-http.middlewares=redirect-to-https"
+      - "traefik.http.routers.trackable-https.entrypoints=https"
+      - "traefik.http.routers.trackable-https.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.trackable-https.tls=true"
+      - "traefik.http.routers.trackable-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.trackable.loadbalancer.server.port=8000"
+  
+  cron:
+    build: .
+    container_name: trackable-cron
+    volumes:
+      - db_data:/app/data
+    environment:
+      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
+      - PYTHONUNBUFFERED=1
+      - SUBDOMAIN=${SUBDOMAIN:-trackable}
+      - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
+    user: root
+    networks:
+      - standalone
+    command: >
+      sh -c "crond -b -L /var/log/cron.log"
+    restart: unless-stopped
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  standalone:
+    driver: bridge
