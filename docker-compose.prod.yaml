@@ -35,9 +35,13 @@ services:
       - coolify.type=application
       - traefik.enable=true
       - traefik.http.routers.trackable-http.entrypoints=http
+      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
+      # - traefik.http.routers.trackable-http.rule=Host(`your-domain.com`)
       - traefik.http.routers.trackable-http.rule=Host(`trackable.lukasschaffrath.online`)
       - traefik.http.routers.trackable-http.middlewares=redirect-to-https
       - traefik.http.routers.trackable-https.entrypoints=https
+      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
+      # - traefik.http.routers.trackable-https.rule=Host(`your-domain.com`)
       - traefik.http.routers.trackable-https.rule=Host(`trackable.lukasschaffrath.online`)
       - traefik.http.routers.trackable-https.tls=true
       - traefik.http.routers.trackable-https.tls.certresolver=letsencrypt
