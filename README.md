@@ -90,7 +90,7 @@ cd trackable
 ### 2. Configure environment
 
 **For Coolify:**
-Set environment variables directly in the Coolify UI when configuring your service. No `.env` file needed.
+Set environment variables directly in the Coolify UI when configuring your service. You must set all required variables listed in the [Environment Variables](#environment-variables) table below. No `.env` file needed.
 
 **For Standalone Docker Compose:**
 ```bash
@@ -287,22 +287,24 @@ python manage.py runserver
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `SECRET_KEY` | &mdash; | Django secret key (required) |
-| `DEBUG` | `False` | Set `True` for development only |
-| `SUBDOMAIN` | `trackable` | Subdomain for Traefik routing (Standalone Docker Compose only) |
-| `DOMAIN_NAME` | &mdash; | Base domain for Traefik routing (e.g., `example.com`). Ignored by Coolify |
-| `ALLOWED_HOSTS` | &mdash; | Comma-separated list of allowed domains |
-| `EMAIL_HOST` | `localhost` | SMTP host |
-| `EMAIL_PORT` | `587` | SMTP port |
-| `EMAIL_USE_TLS` | `True` | Use STARTTLS |
-| `EMAIL_HOST_USER` | &mdash; | SMTP username |
-| `EMAIL_HOST_PASSWORD` | &mdash; | SMTP password |
-| `DEFAULT_FROM_EMAIL` | &mdash; | From address for outgoing mail |
-| `BACKUP_SCHEDULE` | `weekly` | Backup frequency (`daily` / `weekly`) |
-| `BACKUP_FILENAME` | `db_backup.sqlite3` | Backup file name |
-| `MONTHLY_EMAIL_TIME` | `23:59` | Time to send monthly reports (HH:MM) |
+**Coolify users:** All variables below must be set in the Coolify UI. Copy them from this table and configure them in your service's Environment Variables section.
+
+| Variable | Default | Description | Required for Coolify? |
+|---|---|---|---|
+| `SECRET_KEY` | &mdash; | Django secret key (required) | **Yes** |
+| `DEBUG` | `False` | Set `True` for development only | Yes (set to `False`) |
+| `ALLOWED_HOSTS` | &mdash; | Comma-separated list of allowed domains | **Yes** |
+| `EMAIL_HOST` | `localhost` | SMTP host | Yes (for email features) |
+| `EMAIL_PORT` | `587` | SMTP port | Yes (if using email) |
+| `EMAIL_USE_TLS` | `True` | Use STARTTLS | Yes (if using email) |
+| `EMAIL_HOST_USER` | &mdash; | SMTP username | Yes (if using email) |
+| `EMAIL_HOST_PASSWORD` | &mdash; | SMTP password | Yes (if using email) |
+| `DEFAULT_FROM_EMAIL` | &mdash; | From address for outgoing mail | Yes (if using email) |
+| `BACKUP_SCHEDULE` | `weekly` | Backup frequency (`daily` / `weekly`) | No (optional) |
+| `BACKUP_FILENAME` | `db_backup.sqlite3` | Backup file name | No (optional) |
+| `MONTHLY_EMAIL_TIME` | `23:59` | Time to send monthly reports (HH:MM) | No (optional) |
+| `SUBDOMAIN` | `trackable` | Subdomain for Traefik routing | No (Standalone only) |
+| `DOMAIN_NAME` | &mdash; | Base domain for Traefik routing (e.g., `example.com`) | No (Standalone only) |
 
 ---
 
