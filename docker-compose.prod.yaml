@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -29,12 +27,6 @@ services:
              python manage.py collectstatic --noinput &&
              python manage.py compilemessages &&
              gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     restart: unless-stopped
     labels:
       - coolify.managed=true
@@ -62,9 +54,6 @@ services:
       - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
     user: root
     command: cron -f -L /var/log/cron.log
-    depends_on:
-      app:
-        condition: service_healthy
     restart: unless-stopped
     labels:
       - coolify.managed=true
