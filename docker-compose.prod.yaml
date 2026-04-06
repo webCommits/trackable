@@ -5,56 +5,70 @@ services:
     build: .
     container_name: trackable-app
     volumes:
-      - db_data:/app/data
+      - 'db_data:/app/data'
     environment:
+      - SERVICE_FQDN_APP_8000
       - DJANGO_SETTINGS_MODULE=trackable.settings.prod
       - PYTHONUNBUFFERED=1
-      - SECRET_KEY=${SECRET_KEY:-}
-      - DEBUG=${DEBUG:-False}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-}
-      - EMAIL_HOST=${EMAIL_HOST:-}
-      - EMAIL_PORT=${EMAIL_PORT:-587}
-      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}
-      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}
-      - BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}
-      - MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}
+      - 'SECRET_KEY=${SECRET_KEY:-}'
+      - 'DEBUG=${DEBUG:-False}'
+      - 'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}'
+      - 'EMAIL_HOST=${EMAIL_HOST:-}'
+      - 'EMAIL_PORT=${EMAIL_PORT:-587}'
+      - 'EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}'
+      - 'EMAIL_HOST_USER=${EMAIL_HOST_USER:-}'
+      - 'EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}'
+      - 'DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}'
+      - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
+      - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
+      - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
     expose:
-      - "8000"
+      - '8000'
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
              python manage.py compilemessages &&
              gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
-  
+    labels:
+      - coolify.managed=true
+      - coolify.type=application
+
   cron:
     build: .
     container_name: trackable-cron
     volumes:
-      - db_data:/app/data
+      - 'db_data:/app/data'
     environment:
       - DJANGO_SETTINGS_MODULE=trackable.settings.prod
       - PYTHONUNBUFFERED=1
-      - SECRET_KEY=${SECRET_KEY:-}
-      - DEBUG=${DEBUG:-False}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-}
-      - EMAIL_HOST=${EMAIL_HOST:-}
-      - EMAIL_PORT=${EMAIL_PORT:-587}
-      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}
-      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}
-      - BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}
-      - MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}
+      - 'SECRET_KEY=${SECRET_KEY:-}'
+      - 'DEBUG=${DEBUG:-False}'
+      - 'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}'
+      - 'EMAIL_HOST=${EMAIL_HOST:-}'
+      - 'EMAIL_PORT=${EMAIL_PORT:-587}'
+      - 'EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}'
+      - 'EMAIL_HOST_USER=${EMAIL_HOST_USER:-}'
+      - 'EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}'
+      - 'DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}'
+      - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
+      - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
+      - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
     user: root
     command: cron -f -L /var/log/cron.log
-    restart: unless-stopped
     depends_on:
-      - app
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    labels:
+      - coolify.managed=true
+      - coolify.type=application
 
 volumes:
   db_data:
