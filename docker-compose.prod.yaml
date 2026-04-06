@@ -9,8 +9,6 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=trackable.settings.prod
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
     expose:
       - "8000"
     labels:
@@ -40,8 +38,6 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=trackable.settings.prod
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
     user: root
     networks:
       - coolify

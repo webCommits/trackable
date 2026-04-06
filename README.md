@@ -84,6 +84,10 @@ cd trackable
 
 ### 2. Configure environment
 
+**For Coolify:**
+Set environment variables directly in the Coolify UI when configuring your service. No `.env` file needed.
+
+**For Standalone Docker Compose:**
 ```bash
 cp .env.example .env
 ```
@@ -96,18 +100,24 @@ Edit `.env` and set at minimum:
 SECRET_KEY=your-secret-key-here
 
 DEBUG=False
-ALLOWED_HOSTS=yourdomain.com
+SUBDOMAIN=trackable
+DOMAIN_NAME=yourdomain.com
+ALLOWED_HOSTS=trackable.yourdomain.com
 
 EMAIL_HOST=smtp.yourprovider.com
 EMAIL_HOST_USER=you@yourdomain.com
 EMAIL_HOST_PASSWORD=your-smtp-password
-DEFAULT_FROM_EMAIL=noreply@yourdomain.com
+DEFAULT_FROM_EMAIL=noreply@trackable.yourdomain.com
 ```
 
 ### 3. Start the container
 
+**For Coolify:**
+Deploy through the Coolify UI — environment variables are passed automatically.
+
+**For Standalone Docker Compose:**
 ```bash
-docker-compose -f docker-compose.prod.yaml up -d --build
+docker-compose --env-file .env -f docker-compose.prod.yaml up -d --build
 ```
 
 On startup the container automatically runs `migrate`, `collectstatic`, and `compilemessages`.
@@ -116,7 +126,7 @@ On startup the container automatically runs `migrate`, `collectstatic`, and `com
 
 A production-ready Nginx config is included at `nginx/trackable.conf` (TLS, HSTS, rate limiting, gzip).
 
-For **Coolify**: set the compose file to `docker-compose.prod.yaml`, set the port to `8000`, and configure environment variables in the Coolify UI. Coolify's Traefik proxy handles SSL automatically.
+For **Coolify**: Coolify's Traefik proxy handles SSL and routing automatically based on the domain you configure in the UI.
 
 > Static files are served directly by Gunicorn via WhiteNoise — no separate static file location in the reverse proxy needed.
 
@@ -124,16 +134,14 @@ For **Coolify**: set the compose file to `docker-compose.prod.yaml`, set the por
 
 If you're running Docker Compose directly (without Coolify), the included Traefik labels handle routing and SSL:
 
-1. Set `SUBDOMAIN` and `DOMAIN_NAME` in your `.env` file:
+1. Ensure Traefik is running on your server with Let's Encrypt configured
+
+2. The compose file uses `SUBDOMAIN` and `DOMAIN_NAME` environment variables to configure Traefik routing automatically. Set these in your `.env` file:
    ```env
    SUBDOMAIN=trackable
    DOMAIN_NAME=example.com
    ```
    This makes the app accessible at `trackable.example.com`.
-
-2. Ensure Traefik is running on your server with Let's Encrypt configured
-
-3. The compose file uses these environment variables to configure Traefik routing automatically
 
 **Note:** If you're not using Traefik at all, remove or adjust the `labels` section in `docker-compose.prod.yaml` and configure your own reverse proxy (Nginx, Caddy, etc.).
 

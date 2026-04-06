@@ -59,6 +59,10 @@ scp -r trackable/ user@server:/opt/trackable
 
 ### 2. Umgebungsvariablen konfigurieren
 
+**Für Coolify:**
+Umgebungsvariablen direkt im Coolify UI beim Einrichten der Ressource setzen. Keine `.env` Datei benötigt.
+
+**Für Standalone Docker Compose:**
 ```bash
 # .env Datei erstellen
 cp .env.example .env
@@ -90,7 +94,7 @@ EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=deine-email@domain.com
 EMAIL_HOST_PASSWORD=dein-email-passwort
-DEFAULT_FROM_EMAIL=noreply@deine-domain.com
+DEFAULT_FROM_EMAIL=noreply@trackable.deine-domain.com
 
 # Backup und Cron
 BACKUP_SCHEDULE=weekly
@@ -100,12 +104,16 @@ MONTHLY_EMAIL_TIME=23:59
 
 ### 3. Docker Compose starten
 
+**Für Coolify:**
+Einfach über das Coolify UI deployen — Umgebungsvariablen werden automatisch übergeben.
+
+**Für Standalone Docker Compose:**
 ```bash
 # Volume erstellen (wichtig für persistente Daten)
 docker volume create trackable_db_data
 
-# Prod-Compose starten
-docker-compose -f docker-compose.prod.yaml up -d --build
+# Prod-Compose mit .env Datei starten
+docker-compose --env-file .env -f docker-compose.prod.yaml up -d --build
 
 # Status prüfen
 docker-compose -f docker-compose.prod.yaml ps
@@ -192,9 +200,12 @@ curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 4. Build-Konfiguration:
    - Compose-Datei: `docker-compose.prod.yaml`
    - **Port: `8000`** (Container-interner Port — nicht den Host-Port ändern)
-5. Environment-Variablen setzen:
-   - `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS`, E-Mail-Konfiguration
-   - `SUBDOMAIN` und `DOMAIN_NAME` können ignoriert werden (Coolify verwaltet das Routing automatisch)
+5. Environment-Variablen im Coolify UI setzen:
+   - `SECRET_KEY` (generieren mit: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`)
+   - `DEBUG=False`
+   - `ALLOWED_HOSTS=trackable.deine-domain.com`
+   - E-Mail-Konfiguration (`EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`)
+   - `SUBDOMAIN` und `DOMAIN_NAME` werden von Coolify ignoriert (Routing wird im UI konfiguriert)
 6. Domain im Coolify UI konfigurieren → Deployen
 
 > **Hinweis:** Die `ports`-Zeile in `docker-compose.prod.yaml` ist für Coolify irrelevant. Traefik routet direkt über das interne Docker-Netzwerk (`coolify`) auf Port 8000.
