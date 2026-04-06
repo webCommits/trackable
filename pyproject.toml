@@ -1,0 +1,15 @@
+[project]
+name = "trackable"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "django==5.0",
+    "gunicorn==21.2.0",
+    "html2text==2020.1.16",
+    "pillow==10.1.0",
+    "python-decouple==3.8",
+    "reportlab==4.0.7",
+    "whitenoise==6.8.2",
+]
