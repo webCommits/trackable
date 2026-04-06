@@ -33,6 +33,15 @@ services:
     labels:
       - coolify.managed=true
       - coolify.type=application
+      - traefik.enable=true
+      - traefik.http.routers.trackable-http.entrypoints=http
+      - traefik.http.routers.trackable-http.rule=Host(`trackable.lukasschaffrath.online`)
+      - traefik.http.routers.trackable-http.middlewares=redirect-to-https
+      - traefik.http.routers.trackable-https.entrypoints=https
+      - traefik.http.routers.trackable-https.rule=Host(`trackable.lukasschaffrath.online`)
+      - traefik.http.routers.trackable-https.tls=true
+      - traefik.http.routers.trackable-https.tls.certresolver=letsencrypt
+      - traefik.http.services.trackable.loadbalancer.server.port=8000
 
   cron:
     build: .
