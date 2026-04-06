@@ -55,9 +55,6 @@ services:
     user: root
     command: cron -f -L /var/log/cron.log
     restart: unless-stopped
-    labels:
-      - coolify.managed=true
-      - coolify.type=application
 
 volumes:
   db_data:

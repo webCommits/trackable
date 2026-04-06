@@ -46,11 +46,31 @@ if SECRET_KEY.startswith("django-insecure-"):
         "Bitte einen sicheren Schlüssel in .env setzen."
     )
 
-# ── ALLOWED_HOSTS: kein "*"-Fallback in Produktion ───────────────────────────
+# ── ALLOWED_HOSTS: dynamische Konfiguration für Coolify und Compose ──────────
+from urllib.parse import urlparse
+
 _hosts = config("ALLOWED_HOSTS", default="").strip()
-if not _hosts:
-    raise RuntimeError(
-        "ALLOWED_HOSTS muss in der .env gesetzt sein (z.B. meine-domain.com)."
-    )
 ALLOWED_HOSTS = [h.strip() for h in _hosts.split(",") if h.strip()]
+
+# Auto-add standalone Domain_NAME
+_subdomain = config("SUBDOMAIN", default="").strip()
+_domain = config("DOMAIN_NAME", default="").strip()
+if _subdomain and _domain:
+    _full_domain = f"{_subdomain}.{_domain}"
+    if _full_domain not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_full_domain)
+
+# Auto-add Coolify domains if present
+coolify_domains = config("SERVICE_FQDN_APP_8000", default="").strip()
+if coolify_domains:
+    for url in coolify_domains.split(","):
+        parsed = urlparse(url.strip())
+        if parsed.hostname and parsed.hostname not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(parsed.hostname)
+
+if not ALLOWED_HOSTS:
+    raise RuntimeError(
+        "ALLOWED_HOSTS muss in der .env gesetzt sein (z.B. meine-domain.com), oder via Coolify / Standalone ENV konfiguriert sein."
+    )
+
 CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
