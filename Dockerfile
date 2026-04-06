@@ -1,9 +1,13 @@
 FROM python:3.11-slim
 
+# uv für extrem schnelle Builds
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_COMPILE_BYTECODE=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
@@ -11,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cron \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml uv.lock ./
+RUN uv pip install --system -r pyproject.toml
 
 COPY . .
 

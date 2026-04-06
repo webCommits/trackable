@@ -273,7 +273,7 @@ App runs at `http://localhost:8000`. Useful Makefile commands:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+uv pip install -r pyproject.toml
 
 cp .env.example .env
 # set DEBUG=True in .env

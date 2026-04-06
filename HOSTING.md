@@ -348,7 +348,7 @@ sudo docker-compose -f docker-compose.prod.yaml pull
 - `DEBUG=False` in der `.env`
 - Starker `SECRET_KEY`
 - `ALLOWED_HOSTS` korrekt konfiguriert
-- Regelmäßige Updates: `pip install --upgrade -r requirements.txt`
+- Regelmäßige Updates: `uv lock --upgrade` and `uv sync`
 
 ## Performance-Optimierung
 
