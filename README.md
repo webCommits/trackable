@@ -120,6 +120,23 @@ For **Coolify**: set the compose file to `docker-compose.prod.yaml`, set the por
 
 > Static files are served directly by Gunicorn via WhiteNoise — no separate static file location in the reverse proxy needed.
 
+### Standalone Docker Compose (without Coolify)
+
+If you're running Docker Compose directly (without Coolify), the included Traefik labels handle routing and SSL:
+
+1. Set `SUBDOMAIN` and `DOMAIN_NAME` in your `.env` file:
+   ```env
+   SUBDOMAIN=trackable
+   DOMAIN_NAME=example.com
+   ```
+   This makes the app accessible at `trackable.example.com`.
+
+2. Ensure Traefik is running on your server with Let's Encrypt configured
+
+3. The compose file uses these environment variables to configure Traefik routing automatically
+
+**Note:** If you're not using Traefik at all, remove or adjust the `labels` section in `docker-compose.prod.yaml` and configure your own reverse proxy (Nginx, Caddy, etc.).
+
 ### 5. Create the first user
 
 There is no public registration. Create a superuser and manage all accounts via `/admin`:
@@ -264,6 +281,8 @@ python manage.py runserver
 |---|---|---|
 | `SECRET_KEY` | &mdash; | Django secret key (required) |
 | `DEBUG` | `False` | Set `True` for development only |
+| `SUBDOMAIN` | `trackable` | Subdomain for Traefik routing (Standalone Docker Compose only) |
+| `DOMAIN_NAME` | &mdash; | Base domain for Traefik routing (e.g., `example.com`). Ignored by Coolify |
 | `ALLOWED_HOSTS` | &mdash; | Comma-separated list of allowed domains |
 | `EMAIL_HOST` | `localhost` | SMTP host |
 | `EMAIL_PORT` | `587` | SMTP port |

@@ -73,7 +73,13 @@ nano .env
 # Sicherheit
 SECRET_KEY=<starker-zufälliger-key-generieren-mit: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())">
 DEBUG=False
-ALLOWED_HOSTS=deine-domain.com,www.deine-domain.com
+
+# Domain-Konfiguration für Traefik Routing (nur bei Standalone Docker Compose)
+# Bei Coolify kann dies ignoriert werden, da Coolify das Routing automatisch verwaltet
+SUBDOMAIN=trackable
+DOMAIN_NAME=deine-domain.com
+
+ALLOWED_HOSTS=trackable.deine-domain.com,www.deine-domain.com
 
 # Datenbank
 DATABASE_URL=sqlite:///data/db.sqlite3
@@ -186,14 +192,17 @@ curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 4. Build-Konfiguration:
    - Compose-Datei: `docker-compose.prod.yaml`
    - **Port: `8000`** (Container-interner Port — nicht den Host-Port ändern)
-5. Environment-Variablen aus der Tabelle unten in der Coolify-UI eintragen
-6. Domain konfigurieren → Deployen
+5. Environment-Variablen setzen:
+   - `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS`, E-Mail-Konfiguration
+   - `SUBDOMAIN` und `DOMAIN_NAME` können ignoriert werden (Coolify verwaltet das Routing automatisch)
+6. Domain im Coolify UI konfigurieren → Deployen
 
 > **Hinweis:** Die `ports`-Zeile in `docker-compose.prod.yaml` ist für Coolify irrelevant. Traefik routet direkt über das interne Docker-Netzwerk (`coolify`) auf Port 8000.
 
 ### 3. Was Coolify automatisch übernimmt
 
 - SSL-Zertifikate (via Traefik + Let's Encrypt)
+- Domain-Routing (überschreibt die Traefik-Labels im Compose-File)
 - Deployment bei Git-Push
 - Rollbacks
 - Log-Monitoring
