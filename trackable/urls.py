@@ -1,8 +1,8 @@
 from django.urls import path, include
-from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
+from trackable.core.admin_site import custom_admin_site
 
 
 def health_check(request):
@@ -11,10 +11,11 @@ def health_check(request):
 
 urlpatterns = [
     path("health/", health_check, name="health_check"),
-    path("admin/", admin.site.urls),
+    path("admin/", custom_admin_site.urls),
     path("accounts/", include("trackable.accounts.urls")),
     path("", include("trackable.timetracking.urls")),
     path("profiles/", include("trackable.profiles.urls")),
+    path("org/", include("trackable.organizations.urls")),
     path("", include("trackable.core.urls")),
 ]
 

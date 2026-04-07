@@ -13,4 +13,10 @@ urlpatterns = [
         name="password_reset_confirm",
     ),
     path("settings/", views.profile_settings, name="profile_settings"),
+    path("register/", views.register, name="register"),
+    path(
+        "confirm/<uidb64>/<token>/",
+        views.email_confirm,
+        name="email_confirm",
+    ),
 ]

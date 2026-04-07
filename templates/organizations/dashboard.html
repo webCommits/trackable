@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Organization" %}{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
+    <div>
+        <h1>{{ organization.name }}</h1>
+        <p style="color:var(--ctp-subtext0); margin-top:4px;">{% trans "Manage your team and view employee time data." %}</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap;">
+        <a href="/org/holidays/" class="btn btn-secondary" style="color:var(--ctp-teal); border-color:rgba(23,146,153,.3);">🎌 {% trans "Holidays" %}</a>
+        <a href="/org/employees/create/" class="btn btn-primary">+ {% trans "Add employee" %}</a>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:20px; margin-bottom:30px;">
+    <div class="card" style="text-align:center;">
+        <p style="color:var(--ctp-subtext0); margin-bottom:10px;">{% trans "Employees" %}</p>
+        <p style="font-size:2rem; font-weight:bold; color:var(--ctp-mauve);">{{ total_employees }}</p>
+    </div>
+    <div class="card" style="text-align:center;">
+        <p style="color:var(--ctp-subtext0); margin-bottom:10px;">{% trans "Managers" %}</p>
+        <p style="font-size:2rem; font-weight:bold; color:var(--ctp-green);">{{ manager_memberships|length }}</p>
+    </div>
+</div>
+
+{% if manager_memberships %}
+<h2 style="color:var(--ctp-green); margin-bottom:16px;">{% trans "Managers" %}</h2>
+<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:30px;">
+    {% for m in manager_memberships %}
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:16px 20px; margin-bottom:0;">
+        <div style="flex:1; min-width:180px;">
+            <div style="font-weight:600; font-size:.95rem; color:var(--ctp-text);">{{ m.user.get_full_name|default:m.user.username }}</div>
+            <div style="font-size:.82rem; color:var(--ctp-subtext0);">{{ m.user.email }}</div>
+        </div>
+        <span class="badge badge-mauve">{% trans "Manager" %}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h2 style="color:var(--ctp-mauve); margin-bottom:16px;">{% trans "Employees" %}</h2>
+{% if employee_memberships %}
+<div style="display:flex; flex-direction:column; gap:10px;">
+    {% for m in employee_memberships %}
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:16px 20px; margin-bottom:0;">
+        <div style="flex:1; min-width:180px;">
+            <div style="font-weight:600; font-size:.95rem; color:var(--ctp-text);">{{ m.user.get_full_name|default:m.user.username }}</div>
+            <div style="font-size:.82rem; color:var(--ctp-subtext0);">{{ m.user.email }}</div>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+            <a href="/org/employees/{{ m.user.id }}/" class="btn btn-secondary btn-sm">{% trans "View" %}</a>
+            <a href="/org/employees/{{ m.user.id }}/remove/" class="btn btn-sm" style="background: rgba(210,15,57,.15); color: var(--ctp-red); border-color: rgba(210,15,57,.25);">{% trans "Remove" %}</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="content" style="text-align:center; padding:60px 20px; max-width:480px; margin:0 auto;">
+    <div style="font-size:2.5rem; margin-bottom:18px;">👤</div>
+    <h2 style="margin-bottom:10px;">{% trans "No employees yet" %}</h2>
+    <p style="color:var(--ctp-subtext0); margin-bottom:28px;">{% trans "Add your first employee to start tracking their time." %}</p>
+    <a href="/org/employees/create/" class="btn btn-primary btn-lg">+ {% trans "Add employee" %}</a>
+</div>
+{% endif %}
+{% endblock %}

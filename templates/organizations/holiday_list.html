@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Holidays" %} – {{ organization.name }}{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
+    <div>
+        <a href="/org/" class="btn btn-secondary btn-sm" style="margin-bottom:12px;">← {% trans "Back to organization" %}</a>
+        <h1 style="color:var(--ctp-teal);">🎌 {% trans "Holidays" %}</h1>
+        <p style="color:var(--ctp-subtext0); margin-top:4px;">{% trans "These holidays are excluded from vacation workday calculations for all organization members." %}</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap;">
+        <a href="/org/holidays/add/" class="btn btn-primary">+ {% trans "Add holiday" %}</a>
+    </div>
+</div>
+
+{% if year_range %}
+<div style="margin-bottom:20px; display:flex; gap:8px; flex-wrap:wrap;">
+    {% for y in year_range %}
+    {% if y == year %}
+    <span style="font-weight:bold; color:var(--ctp-teal); padding:4px 10px;">{{ y }}</span>
+    {% else %}
+    <a href="?year={{ y }}" style="padding:4px 10px; color:var(--ctp-subtext0);">{{ y }}</a>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if holidays %}
+<div style="overflow-x:auto;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Holiday" %}</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for holiday in holidays %}
+            <tr>
+                <td>{{ holiday.date|date:"d.m.Y" }}</td>
+                <td>{{ holiday.name }}</td>
+                <td style="white-space:nowrap;">
+                    <form method="post" action="/org/holidays/{{ holiday.pk }}/delete/" style="display:inline" onsubmit="return confirm('{% trans "Delete this holiday?" %}')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm" style="background:rgba(210,15,57,.15); color:var(--ctp-red); border-color:rgba(210,15,57,.25);">{% trans "Delete" %}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="content" style="text-align:center; padding:60px 20px; max-width:480px; margin:0 auto;">
+    <div style="font-size:2.5rem; margin-bottom:18px;">🎌</div>
+    <h2 style="margin-bottom:10px;">{% trans "No holidays yet" %}</h2>
+    <p style="color:var(--ctp-subtext0); margin-bottom:28px;">{% trans "Add public holidays for your organization. They will be automatically excluded from vacation workday calculations." %}</p>
+    <a href="/org/holidays/add/" class="btn btn-primary btn-lg">+ {% trans "Add holiday" %}</a>
+</div>
+{% endif %}
+{% endblock %}

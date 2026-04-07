@@ -11,6 +11,9 @@
     </div>
     {% if profiles %}
     <div style="display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; align-self:center;">
+        {% if not has_org %}
+        <a href="/org/create/" class="btn btn-secondary btn-sm">🏢 {% trans "New organization" %}</a>
+        {% endif %}
         <a href="/profiles/" class="btn btn-secondary btn-sm">{% trans "Manage profiles" %}</a>
         <a href="/profiles/create/" class="btn btn-primary btn-sm">+ {% trans "New profile" %}</a>
     </div>

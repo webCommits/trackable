@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ employee.get_full_name|default:employee.username }} – {% trans "Employee" %}{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
+    <div>
+        <a href="/org/" class="btn btn-secondary btn-sm" style="margin-bottom:12px;">← {% trans "Back to organization" %}</a>
+        <h1 style="color:var(--ctp-mauve); margin-bottom:5px;">{{ employee.get_full_name|default:employee.username }}</h1>
+        <p style="color:var(--ctp-subtext0);">{{ employee.email }}</p>
+    </div>
+    <a href="/org/employees/{{ employee.id }}/remove/" class="btn btn-sm" style="background:rgba(210,15,57,.15); color:var(--ctp-red); border-color:rgba(210,15,57,.25);">{% trans "Remove from organization" %}</a>
+</div>
+
+{% if profile_data %}
+{% for pd in profile_data %}
+<div class="card" style="margin-bottom:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+        <div>
+            <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:3px;">{{ pd.profile.position }}</div>
+            <h3 style="margin:0;">{{ pd.profile.title }}</h3>
+            <div style="font-size:.82rem; color:var(--ctp-subtext0); margin-top:4px;">
+                {{ pd.profile.weekly_hours }}h / {% trans "week" %} · €{{ pd.profile.hourly_rate }}/h
+            </div>
+        </div>
+    </div>
+
+    {% if pd.months %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px;">
+        {% for m in pd.months %}
+        <a href="/org/employees/{{ employee.id }}/profiles/{{ pd.profile.id }}/?year={{ m.year }}&month={{ m.month }}" style="text-decoration:none; color:inherit;">
+            <div class="card" style="padding:14px; border:1px solid var(--ctp-surface1);">
+                <div style="font-weight:600; margin-bottom:6px;">{{ m.month_name }}</div>
+                <div style="font-size:.85rem; color:var(--ctp-subtext0);">
+                    <strong>{{ m.hours|floatformat:2 }}h</strong> · €{{ m.earnings|floatformat:2 }}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--ctp-subtext0); text-align:center; padding:20px;">{% trans "No time entries yet." %}</p>
+    {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<div class="content" style="text-align:center; padding:60px 20px;">
+    <div style="font-size:2.5rem; margin-bottom:18px;">📋</div>
+    <h2 style="margin-bottom:10px;">{% trans "No profiles yet" %}</h2>
+    <p style="color:var(--ctp-subtext0);">{% trans "This employee has not created any work profiles yet." %}</p>
+</div>
+{% endif %}
+{% endblock %}

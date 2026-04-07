@@ -21,13 +21,14 @@ INSTALLED_APPS = [
     "trackable.profiles",
     "trackable.timetracking",
     "trackable.core",
+    "trackable.organizations",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",   # browser-language detection
+    "django.middleware.locale.LocaleMiddleware",  # browser-language detection
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -84,7 +85,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en"            # default: English
+LANGUAGE_CODE = "en"  # default: English
 LANGUAGES = [
     ("en", "English"),
     ("de", "Deutsch"),

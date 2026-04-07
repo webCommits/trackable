@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "My Organization" %}{% endblock %}
+
+{% block content %}
+<div style="max-width:600px; margin:0 auto; text-align:center; padding:60px 20px;">
+    <div style="font-size:2.5rem; margin-bottom:18px;">🏢</div>
+    <h1 style="color:var(--ctp-mauve); margin-bottom:10px;">{{ organization.name }}</h1>
+    <p style="color:var(--ctp-subtext0); margin-bottom:30px;">{% trans "You are a member of this organization." %}</p>
+    <div class="card" style="text-align:center;">
+        <p style="color:var(--ctp-subtext0); margin-bottom:5px;">{% trans "Role" %}</p>
+        <p style="font-size:1.5rem; font-weight:bold; color:var(--ctp-mauve);">{{ membership.get_role_display }}</p>
+    </div>
+</div>
+{% endblock %}

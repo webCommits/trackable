@@ -10,13 +10,28 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 import html2text
 from trackable.accounts.models import User
+from trackable.accounts.forms import UserRegistrationForm
 
 
 class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
     redirect_authenticated_user = True
+
+    def form_invalid(self, form):
+        username = form.cleaned_data.get("username", "")
+        try:
+            user = User.objects.get(username=username)
+            if not user.email_confirmed:
+                messages.error(
+                    self.request,
+                    _("Please confirm your email address before logging in."),
+                )
+        except User.DoesNotExist:
+            pass
+        return super().form_invalid(form)
 
 
 class CustomLogoutView(LogoutView):
@@ -117,3 +132,72 @@ def profile_settings(request):
             "user": request.user,
         },
     )
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    if request.method == "POST":
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False
+            user.email_confirmed = False
+            user.save()
+
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            confirm_url = request.build_absolute_uri(
+                f"/accounts/confirm/{uid}/{token}/"
+            )
+
+            html_message = render_to_string(
+                "emails/email_confirm_email.html",
+                {
+                    "user": user,
+                    "confirm_url": confirm_url,
+                },
+            )
+
+            text_message = html2text.html2text(html_message)
+
+            send_mail(
+                _("Confirm your email - Trackable"),
+                text_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+
+            messages.success(
+                request,
+                _("Account created! Please check your email to confirm your address."),
+            )
+            return redirect("login")
+    else:
+        form = UserRegistrationForm()
+
+    return render(request, "accounts/register.html", {"form": form})
+
+
+def email_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.email_confirmed = True
+        user.save()
+        messages.success(
+            request,
+            _("Your email has been confirmed! You can now log in."),
+        )
+        return redirect("login")
+
+    messages.error(request, _("The confirmation link is invalid or has expired."))
+    return redirect("login")

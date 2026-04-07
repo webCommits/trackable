@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Remove employee" %}{% endblock %}
+
+{% block content %}
+<div style="max-width:500px; margin:0 auto; text-align:center;">
+    <h1 style="color:var(--ctp-red); margin-bottom:20px;">{% trans "Remove employee" %}</h1>
+    <p style="color:var(--ctp-subtext0); margin-bottom:30px;">
+        {% blocktrans with name=employee.get_full_name|default:employee.username %}Are you sure you want to remove <strong>{{ name }}</strong> from the organization?{% endblocktrans %}
+    </p>
+    <p style="color:var(--ctp-subtext0); margin-bottom:30px; font-size:.9rem;">{% trans "Their account and time data will remain, but you will no longer be able to view their data." %}</p>
+    <form method="post">
+        {% csrf_token %}
+        <div style="display:flex; gap:12px; justify-content:center;">
+            <a href="/org/" class="btn btn-secondary">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-primary" style="background:var(--ctp-red);">{% trans "Remove" %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

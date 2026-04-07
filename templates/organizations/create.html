@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Create organization" %}{% endblock %}
+
+{% block content %}
+<div style="max-width:500px; margin:0 auto;">
+    <h1 style="color:var(--ctp-mauve); margin-bottom:30px; text-align:center;">{% trans "Create your organization" %}</h1>
+    <p style="color:var(--ctp-subtext0); text-align:center; margin-bottom:30px;">{% trans "Set up a workspace for your business. You will be the manager and can add employees." %}</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">{% trans "Organization name" %}</label>
+            {{ form.name }}
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">{% trans "Create organization" %}</button>
+    </form>
+</div>
+{% endblock %}

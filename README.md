@@ -42,9 +42,18 @@
 - **🔒 Internal profile notes** — Attach private notes to each profile (e.g. contract details, department, payroll hints) — visible only to the account owner
 - **📝 Time entry notes** — Add a short activity description to each time entry
 
+### Organizations & teams
+- **🏢 Organizations** — Create an organization and add employees as a manager
+- **👤 Employee accounts** — Managers set a temporary password; employees log in immediately — no email confirmation needed
+- **📊 Manager dashboard** — View all employees' profiles, monthly hours, and earnings at a glance
+- **👁 Read-only oversight** — Managers see employee time entries, vacation, and earnings without edit/delete controls
+- **🔑 Role-based access** — Two roles: manager (oversight + employee management) and employee (personal tracking)
+
 ### System
+- **🔐 Registration with email confirmation** — New users register and confirm via email link; accounts stay inactive until confirmed
+- **📧 Email test tool** — Send test emails from the admin panel (`/admin/email-test/`) to verify SMTP configuration; shows current settings and error details
 - **📧 Monthly email reports** — Automated summary email on the last day of each month
-- **🔐 Authentication** — Login and password reset; accounts are created by a superuser via `/admin`
+- **🔐 Authentication** — Login, password reset, and email confirmation
 - **💾 Automatic backups** — Weekly SQLite database backups
 - **🌍 English & German** — Auto-detects browser language; English by default, German when device locale is `de`
 - **🎨 Catppuccin design** — Clean, mobile-first dark theme
@@ -149,16 +158,38 @@ Coolify's Traefik proxy handles SSL and routing automatically based on the domai
 
 ### 5. Create the first user
 
-There is no public registration. Create a superuser and manage all accounts via `/admin`:
+Users can **self-register** at `/accounts/register/` — they will receive a confirmation email and must click the link to activate their account. Email must be configured (see step 2) for this to work.
+
+Alternatively, create a superuser for admin access:
 
 ```bash
 docker exec -it trackable-app python manage.py createsuperuser
 ```
 
 Then open `https://yourdomain.com/admin/` to:
-- Create additional user accounts
 - Add and manage **public holidays** (used to calculate accurate vacation workday counts)
 - Review or edit any data directly
+- Test your email configuration via the **Email Test** page at `/admin/email-test/`
+
+### 6. Test your email setup
+
+Before relying on email features (registration confirmation, password resets, monthly reports), verify your SMTP configuration works:
+
+1. Open `/admin/email-test/` in your browser (requires staff access)
+2. Enter a recipient email address and click **Send test email**
+3. Check the inbox — if the email arrives, your configuration is correct
+4. If it fails, the page shows the error details and your current email settings (host, port, TLS, from address)
+
+### 7. Set up an organization (for business use)
+
+Any registered user can create an organization at `/org/`:
+
+1. Click **"Create organization"** and enter a name — you become the **manager**
+2. Add employees via **"Add employee"** — fill in their name, email, and a temporary password
+3. Employees log in with the temporary password and start tracking time
+4. As manager, you see all employees' profiles, monthly hours, and earnings from the organization dashboard
+
+> Individual users can continue using Trackable without an organization — nothing changes for them.
 
 ### Updating
 
@@ -318,7 +349,27 @@ Language is detected automatically from the `Accept-Language` header sent by the
 
 ## Business & Team Use
 
-trackable. works well as a lightweight time-tracking solution for small businesses or freelancers with multiple clients.
+trackable. supports both individual freelancers and small businesses through its organization system.
+
+### Organizations
+
+Any user can create an organization at `/org/create/` and become its **manager**. Managers can then:
+
+1. **Add employees** — Create accounts with a username, email, name, and temporary password. Employees are active immediately and can log in right away.
+2. **View the dashboard** — See all employees at a glance with quick stats.
+3. **Inspect employee data** — Click into any employee to view their profiles, monthly hours, and earnings. Drill down into a specific month to see a read-only table of time entries, vacation, and totals.
+4. **Remove employees** — Remove an employee from the organization. Their account and data remain intact.
+
+Employees see a minimal org page showing their membership. Their personal time-tracking experience (profiles, entries, exports) is unchanged.
+
+> A user can belong to at most one organization. Individual users without an organization see no org UI at all — the app works exactly as before.
+
+### Registration flow
+
+| Method | Email confirmation | Account active? | Who creates it? |
+|---|---|---|---|
+| Public registration (`/accounts/register/`) | Required | After clicking confirmation link | The user themselves |
+| Manager creates employee | Not required | Immediately | An org manager |
 
 ### Public holidays
 

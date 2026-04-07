@@ -1,0 +1,49 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Email Test" %}{% endblock %}
+
+{% block content_title %}<h1>{% trans "Email Test" %}</h1>{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+    <p style="margin-bottom:20px; color:#666;">
+        {% trans "Send a test email to verify your email configuration (SMTP settings) is working correctly." %}
+    </p>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div style="padding:12px 16px; margin-bottom:16px; border-radius:6px;
+            {% if message.tags == 'success' %}background:#d1fae5; color:#065f46;{% elif message.tags == 'error' %}background:#fee2e2; color:#991b1b;{% else %}background:#e5e7eb; color:#374151;{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom:16px;">
+            <label for="id_recipient" style="display:block; font-weight:bold; margin-bottom:6px;">
+                {% trans "Recipient email address" %}
+            </label>
+            <input type="email" name="recipient" id="id_recipient" required
+                   placeholder="test@example.com"
+                   style="width:100%; padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:14px;">
+        </div>
+        <button type="submit" style="padding:10px 20px; background:#cba6f7; color:#1e1e2e; border:none; border-radius:6px; font-weight:600; cursor:pointer;">
+            {% trans "Send test email" %}
+        </button>
+    </form>
+
+    <div style="margin-top:30px; padding:16px; background:#f9fafb; border-radius:6px; border:1px solid #e5e7eb;">
+        <h3 style="margin-top:0; font-size:14px;">{% trans "Current email configuration" %}</h3>
+        <table style="width:100%; font-size:13px;">
+            <tr><td style="padding:4px 8px; color:#666; width:180px;">{% trans "Email backend" %}</td><td>{{ email_backend }}</td></tr>
+            <tr><td style="padding:4px 8px; color:#666;">{% trans "Email host" %}</td><td>{{ email_host }}</td></tr>
+            <tr><td style="padding:4px 8px; color:#666;">{% trans "Email port" %}</td><td>{{ email_port }}</td></tr>
+            <tr><td style="padding:4px 8px; color:#666;">{% trans "Use TLS" %}</td><td>{{ email_use_tls }}</td></tr>
+            <tr><td style="padding:4px 8px; color:#666;">{% trans "From address" %}</td><td>{{ default_from_email }}</td></tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

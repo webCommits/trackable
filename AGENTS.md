@@ -16,10 +16,11 @@ Dev container uses `trackable/settings/dev.py` with console email backend and SQ
 Django 5.0 app with custom user model (`accounts.User`):
 
 - `trackable/` — project root (settings, urls, wsgi)
-- `trackable/accounts/` — custom User model, auth views
+- `trackable/accounts/` — custom User model, auth views, email confirmation
 - `trackable/profiles/` — user profiles (client/job tracking)
 - `trackable/timetracking/` — core time entry, vacation logic
 - `trackable/core/` — shared models (Holiday), management commands
+- `trackable/organizations/` — Organization & OrganizationMembership models, manager/employee roles, org dashboard
 - `templates/` — Django templates
 - `locale/de/` — German translations (`.po`/`.mo`)
 

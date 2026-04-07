@@ -31,12 +31,17 @@ def home(request):
             "profile"
         )
     }
+    has_org = hasattr(request.user, "organization_membership")
     if profiles.count() == 0:
         return redirect("profile_create")
     return render(
         request,
         "timetracking/home.html",
-        {"profiles": profiles, "active_timers": active_timers},
+        {
+            "profiles": profiles,
+            "active_timers": active_timers,
+            "has_org": has_org,
+        },
     )
 
 
