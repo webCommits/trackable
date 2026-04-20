@@ -257,11 +257,13 @@ def export_pdf(request, profile_id, year, month):
             ]
         )
 
-    table = Table(data, colWidths=[1 * inch, 1 * inch, 1 * inch, 1 * inch, 1 * inch, 4 * inch])
+    table = Table(
+        data, colWidths=[1 * inch, 1 * inch, 1 * inch, 1 * inch, 1 * inch, 4 * inch]
+    )
     table.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#313244")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#8938eb")),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
                 ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -274,11 +276,27 @@ def export_pdf(request, profile_id, year, month):
     elements.append(table)
     elements.append(Spacer(1, 20))
 
-    elements.append(Paragraph(f"{_g('Total Hours')}: {total_hours:.2f}h", styles["Normal"]))
+    totals_data = []
+    totals_data.append([_g("Total Hours") + ":", f"{total_hours:.2f}h"])
     if total_earnings > 0:
-        elements.append(Paragraph(f"{_g('Total Earnings')}: {total_earnings:.2f}", styles["Normal"]))
+        totals_data.append([_g("Total Earnings") + ":", f"{total_earnings:.2f}"])
     if total_vacation_days > 0:
-        elements.append(Paragraph(f"{_g('Vacation Days')}: {total_vacation_days}", styles["Normal"]))
+        totals_data.append([_g("Vacation Days") + ":", str(total_vacation_days)])
+
+    totals_table = Table(totals_data, colWidths=[2 * inch, 1.5 * inch], hAlign="RIGHT")
+    totals_table.setStyle(
+        TableStyle(
+            [
+                ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 12),
+                ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#3b782c")),
+                ("ALIGN", (0, 0), (0, -1), "RIGHT"),
+                ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    elements.append(totals_table)
 
     doc.build(elements)
     response.write(buffer.getvalue())
