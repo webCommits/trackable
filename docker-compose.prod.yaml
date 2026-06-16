@@ -24,25 +24,10 @@ services:
       - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
     expose:
       - '8000'
-    networks:
-      - coolify
     restart: unless-stopped
     labels:
       - coolify.managed=true
       - coolify.type=application
-      - traefik.enable=true
-      - traefik.http.routers.trackable-http.entrypoints=http
-      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
-      # - traefik.http.routers.trackable-http.rule=Host(`your-domain.com`)
-      - traefik.http.routers.trackable-http.rule=Host(`trackable.lukasschaffrath.online`)
-      - traefik.http.routers.trackable-http.middlewares=redirect-to-https
-      - traefik.http.routers.trackable-https.entrypoints=https
-      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
-      # - traefik.http.routers.trackable-https.rule=Host(`your-domain.com`)
-      - traefik.http.routers.trackable-https.rule=Host(`trackable.lukasschaffrath.online`)
-      - traefik.http.routers.trackable-https.tls=true
-      - traefik.http.routers.trackable-https.tls.certresolver=letsencrypt
-      - traefik.http.services.trackable.loadbalancer.server.port=8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 30s
@@ -56,6 +41,4 @@ volumes:
   media_data:
     driver: local
 
-networks:
-  coolify:
-    external: true
+
