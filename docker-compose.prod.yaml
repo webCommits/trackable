@@ -30,6 +30,8 @@ services:
     labels:
       - coolify.managed=true
       - coolify.type=application
+      - traefik.enable=true
+      - traefik.port=8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 30s
