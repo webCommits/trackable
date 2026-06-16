@@ -1,3 +1,21 @@
+# German translations for trackable.
+# Copyright (C) 2026 webCommits web Designs
+# This file is distributed under the same license as the trackable project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: trackable\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-16 14:00+0200\n"
+"PO-Revision-Date: 2026-06-16 14:00+0200\n"
+"Last-Translator: Lukas Schaffrath <info@webcommits.info>\n"
+"Language-Team: German <de@li.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: templates/accounts/login.html:3 templates/accounts/login.html:7
 #: templates/base.html:112
 msgid "Login"
