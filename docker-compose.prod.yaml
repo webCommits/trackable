@@ -41,19 +41,6 @@ services:
     labels:
       - coolify.managed=true
       - coolify.type=application
-      - traefik.enable=true
-      - traefik.http.routers.trackable-http.entrypoints=http
-      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
-      # - traefik.http.routers.trackable-http.rule=Host(`your-domain.com`)
-      - traefik.http.routers.trackable-http.rule=Host(`trackable.lukasschaffrath.online`)
-      - traefik.http.routers.trackable-http.middlewares=redirect-to-https
-      - traefik.http.routers.trackable-https.entrypoints=https
-      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
-      # - traefik.http.routers.trackable-https.rule=Host(`your-domain.com`)
-      - traefik.http.routers.trackable-https.rule=Host(`trackable.lukasschaffrath.online`)
-      - traefik.http.routers.trackable-https.tls=true
-      - traefik.http.routers.trackable-https.tls.certresolver=letsencrypt
-      - traefik.http.services.trackable.loadbalancer.server.port=8000
 
   cron:
     build: .
@@ -80,14 +67,6 @@ services:
     user: root
     networks:
       - coolify
-    labels:
-      - traefik.enable=false
-    healthcheck:
-      test: ["CMD-SHELL", "grep -q cron /proc/1/cmdline"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     command: cron -f -L /var/log/cron.log
     restart: unless-stopped
 
