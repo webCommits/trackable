@@ -10,6 +10,7 @@
     </div>
     <div style="display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap;">
         <a href="/org/holidays/" class="btn btn-secondary" style="color:var(--ctp-teal); border-color:rgba(23,146,153,.3);">🎌 {% trans "Holidays" %}</a>
+        <a href="{% url 'time_entry_import' %}" class="btn btn-secondary btn-sm">📥 {% trans "Import time entries" %}</a>
         <a href="/org/employees/create/" class="btn btn-primary">+ {% trans "Add employee" %}</a>
     </div>
 </div>

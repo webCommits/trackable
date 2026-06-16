@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Import time entries" %}{% endblock %}
+
+{% block content %}
+<div style="max-width:900px; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
+        <div>
+            <h1>{% trans "Import time entries" %}</h1>
+            <p style="color:var(--ctp-subtext0); margin-top:4px;">
+                {% trans "Upload a spreadsheet with time entries to import them for an employee." %}
+            </p>
+        </div>
+        <a href="{% url 'org_dashboard' %}" class="btn btn-secondary">&larr; {% trans "Back to dashboard" %}</a>
+    </div>
+
+    {% if preview %}
+        {# --- Preview stage --- #}
+        <div class="card" style="margin-bottom:24px; padding:20px;">
+            <h3>{% trans "Import summary" %}</h3>
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin:16px 0;">
+                <div style="background:var(--ctp-surface0); padding:12px 20px; border-radius:8px; text-align:center;">
+                    <div style="font-size:1.5rem; font-weight:bold; color:var(--ctp-green);">{{ preview.total_entries }}</div>
+                    <div style="font-size:.85rem; color:var(--ctp-subtext0);">{% trans "Entries" %}</div>
+                </div>
+                <div style="background:var(--ctp-surface0); padding:12px 20px; border-radius:8px; text-align:center;">
+                    <div style="font-size:1.5rem; font-weight:bold; color:var(--ctp-yellow);">{{ preview.warnings|length }}</div>
+                    <div style="font-size:.85rem; color:var(--ctp-subtext0);">{% trans "Warnings" %}</div>
+                </div>
+                <div style="background:var(--ctp-surface0); padding:12px 20px; border-radius:8px; text-align:center;">
+                    <div style="font-size:1.5rem; font-weight:bold; color:var(--ctp-red);">{{ preview.errors|length }}</div>
+                    <div style="font-size:.85rem; color:var(--ctp-subtext0);">{% trans "Errors" %}</div>
+                </div>
+            </div>
+            <p>
+                <strong>{% trans "Employee:" %}</strong> {{ preview.employee.get_full_name|default:preview.employee.username }}<br>
+                <strong>{% trans "Profile:" %}</strong> {{ preview.profile.title }}
+            </p>
+        </div>
+
+        {% if preview.errors %}
+        <div class="card" style="margin-bottom:20px; padding:20px; border-left:4px solid var(--ctp-red);">
+            <h4 style="color:var(--ctp-red); margin-bottom:12px;">{% trans "Errors" %}</h4>
+            <ul style="margin:0; padding-left:20px;">
+                {% for error in preview.errors %}
+                <li style="color:var(--ctp-red); margin-bottom:4px;">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if preview.warnings %}
+        <div class="card" style="margin-bottom:20px; padding:20px; border-left:4px solid var(--ctp-yellow);">
+            <h4 style="color:var(--ctp-yellow); margin-bottom:12px;">{% trans "Warnings" %}</h4>
+            <ul style="margin:0; padding-left:20px;">
+                {% for warning in preview.warnings %}
+                <li style="margin-bottom:4px;">{{ warning }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if preview.entries %}
+        <div class="card" style="margin-bottom:24px; padding:20px;">
+            <h4 style="margin-bottom:12px;">
+                {% trans "Preview of entries" %}
+                <span style="font-weight:normal; font-size:.85rem; color:var(--ctp-subtext0);">
+                    ({% trans "showing first 25" %})
+                </span>
+            </h4>
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:.88rem;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; padding:8px 12px; border-bottom:2px solid var(--ctp-overlay0);">{% trans "Date" %}</th>
+                            <th style="text-align:left; padding:8px 12px; border-bottom:2px solid var(--ctp-overlay0);">{% trans "Start" %}</th>
+                            <th style="text-align:left; padding:8px 12px; border-bottom:2px solid var(--ctp-overlay0);">{% trans "End" %}</th>
+                            <th style="text-align:left; padding:8px 12px; border-bottom:2px solid var(--ctp-overlay0);">{% trans "Notes" %}</th>
+                            <th style="text-align:left; padding:8px 12px; border-bottom:2px solid var(--ctp-overlay0);">{% trans "Sheet" %}</th>
+                            <th style="text-align:right; padding:8px 12px; border-bottom:2px solid var(--ctp-overlay0);">{% trans "Row" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in preview.entries|slice:":25" %}
+                        <tr>
+                            <td style="padding:6px 12px; border-bottom:1px solid var(--ctp-surface0);">{{ entry.date|date:"d.m.Y" }}</td>
+                            <td style="padding:6px 12px; border-bottom:1px solid var(--ctp-surface0);">{{ entry.start_time|time:"H:i"|default:"-" }}</td>
+                            <td style="padding:6px 12px; border-bottom:1px solid var(--ctp-surface0);">{{ entry.end_time|time:"H:i"|default:"-" }}</td>
+                            <td style="padding:6px 12px; border-bottom:1px solid var(--ctp-surface0); max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ entry.notes|default:"" }}</td>
+                            <td style="padding:6px 12px; border-bottom:1px solid var(--ctp-surface0);">{{ entry.source_sheet }}</td>
+                            <td style="padding:6px 12px; border-bottom:1px solid var(--ctp-surface0); text-align:right;">{{ entry.source_row|add:"1" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if preview.errors %}
+        <div class="alert alert-error">
+            <p>{% trans "Please fix the errors above and re-upload the file. The import cannot proceed until all errors are resolved." %}</p>
+        </div>
+        {% else %}
+        <div class="card" style="padding:20px;">
+            <form method="post" action="{% url 'time_entry_import_confirm' %}">
+                {% csrf_token %}
+                {{ confirm_form.as_p }}
+                <div style="display:flex; gap:12px; margin-top:16px;">
+                    <button type="submit" class="btn btn-primary">{% trans "Confirm import" %}</button>
+                    <a href="{% url 'time_entry_import' %}" class="btn btn-secondary">{% trans "Cancel and start over" %}</a>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="card" style="padding:20px;">
+            <p style="color:var(--ctp-subtext0);">{% trans "No valid entries found in the file." %}</p>
+            <a href="{% url 'time_entry_import' %}" class="btn btn-secondary">{% trans "Try again" %}</a>
+        </div>
+        {% endif %}
+
+    {% else %}
+        {# --- Upload stage --- #}
+        <div class="card" style="padding:24px;">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                    <div class="form-group">
+                        <label for="{{ form.employee.id_for_label }}">{{ form.employee.label }}</label>
+                        {{ form.employee }}
+                        {% if form.employee.errors %}
+                        <div class="field-error">{{ form.employee.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.profile.id_for_label }}">{{ form.profile.label }}</label>
+                        {{ form.profile }}
+                        {% if form.profile.errors %}
+                        <div class="field-error">{{ form.profile.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:16px;">
+                    <label for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
+                    {{ form.file }}
+                    <span class="text-muted">{{ form.file.help_text }}</span>
+                    {% if form.file.errors %}
+                    <div class="field-error">{{ form.file.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:16px;">
+                    <div class="form-group">
+                        <label for="{{ form.decimal_separator.id_for_label }}">{{ form.decimal_separator.label }}</label>
+                        {{ form.decimal_separator }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.separator.id_for_label }}">{{ form.separator.label }}</label>
+                        {{ form.separator }}
+                        <span class="text-muted">{% trans "Only used for CSV files." %}</span>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:16px;">
+                    <div class="form-group">
+                        <label for="{{ form.date_format.id_for_label }}">{{ form.date_format.label }}</label>
+                        {{ form.date_format }}
+                        <span class="text-muted">{{ form.date_format.help_text }}</span>
+                        {% if form.date_format.errors %}
+                        <div class="field-error">{{ form.date_format.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.time_format.id_for_label }}">{{ form.time_format.label }}</label>
+                        {{ form.time_format }}
+                        <span class="text-muted">{{ form.time_format.help_text }}</span>
+                        {% if form.time_format.errors %}
+                        <div class="field-error">{{ form.time_format.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:16px;">
+                    <label>
+                        {{ form.import_all_sheets }} {{ form.import_all_sheets.label }}
+                    </label>
+                    <span class="text-muted" style="display:block; margin-left:24px;">{{ form.import_all_sheets.help_text }}</span>
+                    {% if form.import_all_sheets.errors %}
+                    <div class="field-error">{{ form.import_all_sheets.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-top:8px;">
+                    <label for="{{ form.sheet_name.id_for_label }}">{{ form.sheet_name.label }}</label>
+                    {{ form.sheet_name }}
+                    <span class="text-muted">{{ form.sheet_name.help_text }}</span>
+                    {% if form.sheet_name.errors %}
+                    <div class="field-error">{{ form.sheet_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-top:16px;">
+                    <label for="{{ form.header_row.id_for_label }}">{{ form.header_row.label }}</label>
+                    {{ form.header_row }}
+                    <span class="text-muted">{{ form.header_row.help_text }}</span>
+                    {% if form.header_row.errors %}
+                    <div class="field-error">{{ form.header_row.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-top:24px;">
+                    <button type="submit" class="btn btn-primary btn-lg">{% trans "Preview import" %}</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group {
+        margin-bottom: 12px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: .9rem;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="file"],
+    .form-group select,
+    .form-group input[type="number"] {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--ctp-overlay0);
+        background: var(--ctp-base);
+        color: var(--ctp-text);
+        font-size: .9rem;
+    }
+    .form-group input[type="checkbox"] {
+        margin-right: 6px;
+    }
+    .text-muted {
+        font-size: .82rem;
+        color: var(--ctp-subtext0);
+    }
+    .field-error {
+        color: var(--ctp-red);
+        font-size: .85rem;
+        margin-top: 2px;
+    }
+    .alert-error {
+        background: rgba(231,130,132,.1);
+        border: 1px solid rgba(231,130,132,.3);
+        border-radius: 8px;
+        padding: 16px;
+        color: var(--ctp-red);
+        margin: 16px 0;
+    }
+</style>
+{% endblock %}

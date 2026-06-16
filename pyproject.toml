@@ -12,6 +12,10 @@ dependencies = [
     "python-decouple==3.8",
     "reportlab==4.0.7",
     "whitenoise==6.8.2",
+    "openpyxl>=3.1.0",
+    "odfpy>=1.4.1",
+    "chardet>=5.0.0",
+    "xlrd>=2.0.1",
 ]
 
 [tool.setuptools.packages.find]

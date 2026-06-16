@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import import_views
 
 urlpatterns = [
     path("", views.org_dashboard, name="org_dashboard"),
@@ -34,6 +35,13 @@ urlpatterns = [
     path("holidays/add/", views.holiday_create, name="org_holiday_add"),
     path("holidays/<int:pk>/delete/", views.holiday_delete, name="org_holiday_delete"),
 
+    # Time entry import
+    path("import-time-entries/", import_views.time_entry_import, name="time_entry_import"),
+    path(
+        "import-time-entries/confirm/",
+        import_views.time_entry_import_confirm,
+        name="time_entry_import_confirm",
+    ),
     # Branding
     path("branding/", views.org_branding, name="org_branding"),
 ]
