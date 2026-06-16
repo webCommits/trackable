@@ -26,6 +26,12 @@ services:
       - '8000'
     networks:
       - coolify
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
@@ -74,6 +80,12 @@ services:
     user: root
     networks:
       - coolify
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q cron /proc/1/cmdline"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     command: cron -f -L /var/log/cron.log
     restart: unless-stopped
 
