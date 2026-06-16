@@ -80,6 +80,8 @@ services:
     user: root
     networks:
       - coolify
+    labels:
+      - traefik.enable=false
     healthcheck:
       test: ["CMD-SHELL", "grep -q cron /proc/1/cmdline"]
       interval: 30s

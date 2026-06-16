@@ -79,6 +79,8 @@ services:
     user: root
     networks:
       - standalone
+    labels:
+      - traefik.enable=false
     healthcheck:
       test: ["CMD-SHELL", "grep -q cron /proc/1/cmdline"]
       interval: 30s
