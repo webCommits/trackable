@@ -83,16 +83,23 @@ class VacationEntry(models.Model):
     def workdays(self):
         """Mon–Fri days in the vacation period, minus public holidays."""
         from datetime import timedelta
+        from django.db.models import Q
         from trackable.core.models import Holiday
 
-        holiday_dates = set()
+        holiday_filter = Q(date__range=[self.start_date, self.end_date])
         org = getattr(self.profile.user, "organization_membership", None)
         if org and org.organization.holidays_enabled:
-            qs = Holiday.objects.filter(date__range=[self.start_date, self.end_date])
-            qs = qs.filter(organization=org.organization) | qs.filter(
+            # Org-specific holidays + global holidays
+            holiday_filter &= Q(organization=org.organization) | Q(
                 organization__isnull=True
             )
-            holiday_dates = set(qs.values_list("date", flat=True))
+        else:
+            # Global holidays only (even without org membership)
+            holiday_filter &= Q(organization__isnull=True)
+
+        holiday_dates = set(
+            Holiday.objects.filter(holiday_filter).values_list("date", flat=True)
+        )
 
         count = 0
         current = self.start_date

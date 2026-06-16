@@ -4,12 +4,14 @@
 
 ```bash
 make dev          # Start dev server (Docker) at localhost:8000
-make test         # Run Django test suite
+make test         # Run Django test suite (in existing dev container, test settings)
+make test-all     # Run tests in a fresh container with rebuilt image
 make shell        # Django shell inside container
 make migrate      # Run migrations
 ```
 
 Dev container uses `trackable/settings/dev.py` with console email backend and SQLite at project root.
+Tests use `trackable/settings/test.py` (locmem email backend, permissive ALLOWED_HOSTS, no setup redirect).
 
 ## Project Structure
 

@@ -28,4 +28,8 @@ migrate:
 	docker exec -it trackable-dev python manage.py migrate
 
 test:
-	docker exec -it trackable-dev python manage.py test
+	docker exec -it trackable-dev python manage.py test --settings=trackable.settings.test
+
+test-all:
+	# Run tests in a fresh container (rebuilds image if needed)
+	docker-compose -f docker-compose.dev.yaml run --rm app python manage.py test --settings=trackable.settings.test
