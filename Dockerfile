@@ -1,7 +1,5 @@
 FROM python:3.11-slim
 
-# Build cache bust: 2026-06-16T17:39:00Z
-
 # uv für extrem schnelle Builds
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
@@ -18,7 +16,6 @@ RUN apt-get update -o Acquire::http::Timeout=30 -o Acquire::Retries=3 -o Acquire
         gcc \
         gettext \
         cron \
-        curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./
