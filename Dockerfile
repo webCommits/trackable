@@ -16,6 +16,7 @@ RUN apt-get update -o Acquire::http::Timeout=30 -o Acquire::Retries=3 -o Acquire
         gcc \
         gettext \
         cron \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./
@@ -38,5 +39,8 @@ RUN adduser --disabled-password --gecos '' appuser \
 USER appuser
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
+    CMD curl -f http://localhost:8000/health/ || exit 1
 
 CMD ["gunicorn", "trackable.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
