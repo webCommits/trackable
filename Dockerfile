@@ -16,7 +16,6 @@ RUN apt-get update -o Acquire::http::Timeout=30 -o Acquire::Retries=3 -o Acquire
         gcc \
         gettext \
         cron \
-        curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./
@@ -32,12 +31,12 @@ RUN echo '0 2 * * 0 root cd /app && python manage.py backup_db >> /var/log/cron.
     && chmod 0644 /etc/cron.d/trackable \
     && touch /var/log/cron.log
 
-EXPOSE 8000
+# Non-root user für sicheren Container-Betrieb (nur app, nicht cron)
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app \
+    && chmod 775 /app/data
+USER appuser
 
-# Der Image-Healthcheck wird vom App-Service im docker-compose überschrieben.
-# Er ist trotzdem im Image nötig, damit Coolify den Container-Status ermitteln
-# kann. Der cron-Service deaktiviert ihn explizit (healthcheck: disable: true).
-HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
-    CMD curl -f http://localhost:8000/health/ || exit 1
+EXPOSE 8000
 
 CMD ["gunicorn", "trackable.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

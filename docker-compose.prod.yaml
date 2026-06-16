@@ -32,38 +32,57 @@ services:
              python manage.py compilemessages &&
              gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
+    labels:
+      - coolify.managed=true
+      - coolify.type=application
+      - traefik.enable=true
+      - traefik.http.routers.trackable-http.entrypoints=http
+      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
+      # - traefik.http.routers.trackable-http.rule=Host(`your-domain.com`)
+      - traefik.http.routers.trackable-http.rule=Host(`trackable.lukasschaffrath.online`)
+      - traefik.http.routers.trackable-http.middlewares=redirect-to-https
+      - traefik.http.routers.trackable-https.entrypoints=https
+      # --- FOR OTHER USERS: Replace trackable.lukasschaffrath.online with your domain ---
+      # - traefik.http.routers.trackable-https.rule=Host(`your-domain.com`)
+      - traefik.http.routers.trackable-https.rule=Host(`trackable.lukasschaffrath.online`)
+      - traefik.http.routers.trackable-https.tls=true
+      - traefik.http.routers.trackable-https.tls.certresolver=letsencrypt
+      - traefik.http.services.trackable.loadbalancer.server.port=8000
 
   cron:
     build: .
     container_name: trackable-cron
     volumes:
       - 'db_data:/app/data'
+      - 'media_data:/app/media'
     environment:
       - DJANGO_SETTINGS_MODULE=trackable.settings.prod
       - PYTHONUNBUFFERED=1
       - 'SECRET_KEY=${SECRET_KEY:-}'
+      - 'DEBUG=${DEBUG:-False}'
+      - 'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}'
+      - 'DISABLE_REGISTRATION=${DISABLE_REGISTRATION:-False}'
+      - 'EMAIL_HOST=${EMAIL_HOST:-}'
+      - 'EMAIL_PORT=${EMAIL_PORT:-587}'
+      - 'EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}'
+      - 'EMAIL_HOST_USER=${EMAIL_HOST_USER:-}'
+      - 'EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}'
+      - 'DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}'
+      - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
+      - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
+      - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
     user: root
     networks:
       - coolify
     command: cron -f -L /var/log/cron.log
     restart: unless-stopped
-    # Der cron-Container erbt keinen Healthcheck vom Dockerfile, sollte aber
-    # auf keinen Fall versuchen, einen App-Port zu prüfen.
-    healthcheck:
-      disable: true
-
-networks:
-  coolify:
-    external: true
 
 volumes:
   db_data:
     driver: local
   media_data:
     driver: local
+
+networks:
+  coolify:
+    external: true
