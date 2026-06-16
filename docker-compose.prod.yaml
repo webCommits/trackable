@@ -26,11 +26,6 @@ services:
       - '8000'
     networks:
       - coolify
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             python manage.py compilemessages &&
-             gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     restart: unless-stopped
     labels:
       - coolify.managed=true
@@ -54,34 +49,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 45s
-
-  cron:
-    build: .
-    container_name: trackable-cron
-    volumes:
-      - 'db_data:/app/data'
-      - 'media_data:/app/media'
-    environment:
-      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
-      - PYTHONUNBUFFERED=1
-      - 'SECRET_KEY=${SECRET_KEY:-}'
-      - 'DEBUG=${DEBUG:-False}'
-      - 'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}'
-      - 'DISABLE_REGISTRATION=${DISABLE_REGISTRATION:-False}'
-      - 'EMAIL_HOST=${EMAIL_HOST:-}'
-      - 'EMAIL_PORT=${EMAIL_PORT:-587}'
-      - 'EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}'
-      - 'EMAIL_HOST_USER=${EMAIL_HOST_USER:-}'
-      - 'EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}'
-      - 'DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}'
-      - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
-      - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
-      - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
-    user: root
-    networks:
-      - coolify
-    command: cron -f -L /var/log/cron.log
-    restart: unless-stopped
 
 volumes:
   db_data:
