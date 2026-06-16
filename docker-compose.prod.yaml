@@ -24,6 +24,8 @@ services:
       - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
     expose:
       - '8000'
+    networks:
+      - coolify
     restart: unless-stopped
     labels:
       - coolify.managed=true
@@ -35,10 +37,13 @@ services:
       retries: 3
       start_period: 45s
 
+networks:
+  coolify:
+    external: true
+
 volumes:
   db_data:
     driver: local
   media_data:
     driver: local
-
 
