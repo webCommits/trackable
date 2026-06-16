@@ -47,6 +47,17 @@ class OrganizationForm(forms.ModelForm):
 
 
 class EmployeeCreateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        # Accept German decimal comma (e.g. 4,33 → 4.33)
+        data = kwargs.get("data")
+        if data:
+            data = data.copy()
+            for key in data:
+                if isinstance(data[key], str):
+                    data[key] = data[key].replace(",", ".")
+            kwargs["data"] = data
+        super().__init__(*args, **kwargs)
+
     temp_password = forms.CharField(
         widget=forms.PasswordInput,
         label=_("Temporary password"),
@@ -60,6 +71,7 @@ class EmployeeCreateForm(forms.ModelForm):
         label=_("Weekly hours"),
         initial=40.0,
         help_text=_("Standard working hours per week (e.g. 40)."),
+        widget=forms.TextInput(attrs={"placeholder": _("e.g. 40,00")}),
     )
     contract_start_date = forms.DateField(
         label=_("Contract start date"),
