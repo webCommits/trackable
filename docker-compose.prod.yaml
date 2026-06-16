@@ -26,12 +26,6 @@ services:
       - '8000'
     networks:
       - coolify
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
@@ -54,6 +48,12 @@ services:
       - traefik.http.routers.trackable-https.tls=true
       - traefik.http.routers.trackable-https.tls.certresolver=letsencrypt
       - traefik.http.services.trackable.loadbalancer.server.port=8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
 
   cron:
     build: .
