@@ -31,6 +31,7 @@ services:
       - coolify.managed=true
       - coolify.type=application
       - traefik.enable=true
+      - traefik.docker.network=coolify
       - traefik.port=8000
       - traefik.http.routers.trackable-http.entrypoints=http
       - traefik.http.routers.trackable-http.rule=Host(`trackable.lukasschaffrath.online`)
