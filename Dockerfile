@@ -34,7 +34,7 @@ RUN echo '0 2 * * 0 root cd /app && python manage.py backup_db >> /var/log/cron.
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
-    CMD curl -f http://localhost:8000/health/ || exit 1
-
+# Hinweis: Ein HEALTHCHECK wird absichtlich *nicht* im Image definiert, damit
+# Neben-Container (z.B. cron) ihn nicht erben. Der Healthcheck für den App-
+# Container wird im docker-compose definiert.
 CMD ["gunicorn", "trackable.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

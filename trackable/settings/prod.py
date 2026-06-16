@@ -73,4 +73,11 @@ if not ALLOWED_HOSTS:
         "ALLOWED_HOSTS muss in der .env gesetzt sein (z.B. meine-domain.com), oder via Coolify / Standalone ENV konfiguriert sein."
     )
 
-CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
+# Lokale Adressen müssen erlaubt sein, damit Docker-Healthchecks innerhalb des
+# Containers auf localhost:8000/health/ zugreifen können. Das gilt unabhängig vom
+# Hosting-Anbieter (Coolify, standalone, etc.).
+for _local in ("localhost", "127.0.0.1", "::1"):
+    if _local not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_local)
+
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if not h.startswith("127.") and h != "localhost" and h != "::1"]
