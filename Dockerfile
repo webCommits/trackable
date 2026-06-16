@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+# Build cache bust: 2026-06-16T17:39:00Z
+
 # uv für extrem schnelle Builds
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
