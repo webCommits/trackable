@@ -26,6 +26,11 @@ services:
       - '8000'
     networks:
       - coolify
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py compilemessages &&
+             gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     restart: unless-stopped
     labels:
       - coolify.managed=true
@@ -47,6 +52,23 @@ services:
       timeout: 10s
       retries: 3
       start_period: 45s
+
+  cron:
+    build: .
+    container_name: trackable-cron
+    volumes:
+      - 'db_data:/app/data'
+    environment:
+      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
+      - PYTHONUNBUFFERED=1
+      - 'SECRET_KEY=${SECRET_KEY:-}'
+    user: root
+    networks:
+      - coolify
+    command: cron -f -L /var/log/cron.log
+    labels:
+      - traefik.enable=false
+    restart: unless-stopped
 
 networks:
   coolify:
