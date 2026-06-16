@@ -32,13 +32,9 @@ RUN echo '0 2 * * 0 root cd /app && python manage.py backup_db >> /var/log/cron.
     && chmod 0644 /etc/cron.d/trackable \
     && touch /var/log/cron.log
 
-# Copy entrypoint script (starts cron + gunicorn)
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
     CMD curl -f http://localhost:8000/health/ || exit 1
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["gunicorn", "trackable.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
