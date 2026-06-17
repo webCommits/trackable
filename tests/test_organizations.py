@@ -607,7 +607,7 @@ class SetTargetHoursTest(TestCase):
         )
         self.profile.refresh_from_db()
         target = self.profile.get_target_hours(2026, 5)
-        self.assertEqual(target, 126.0)  # 30/5*21 = 126
+        self.assertEqual(target, 130.44)  # 30 × 4,348 = 130,44
 
 
 class OrganizationBrandingTest(TestCase):

@@ -1,6 +1,9 @@
 from django.db import models
 
 
+AVERAGE_WEEKS_PER_MONTH = 4.348
+
+
 class Profile(models.Model):
     user = models.ForeignKey(
         "accounts.User", on_delete=models.CASCADE, related_name="profiles"
@@ -87,16 +90,66 @@ class Profile(models.Model):
                 count += 1
         return count
 
+    def _count_weekdays_in_month(self, year, month):
+        """Count Mon–Fri days in a month (no holiday exclusion, no contract filter)."""
+        import calendar
+        from datetime import date
+
+        _, last_day = calendar.monthrange(year, month)
+        count = 0
+        for day in range(1, last_day + 1):
+            d = date(year, month, day)
+            if d.weekday() < 5:
+                count += 1
+        return count
+
     def get_target_hours(self, year, month):
         """Target hours (Soll) for this profile in a given month.
 
-        Formula: weekly_target_hours / 5 × working_days_in_month.
+        Formula: weekly_hours × 4.348 (average weeks per month).
+        Pro-rata bei Vertragsbeginn/-ende im Monat.
+        Feiertage kürzen die Soll-Stunden nicht.
         Falls back to weekly_hours if weekly_target_hours is not set.
         """
-        working_days = self._get_working_days_in_month(year, month)
+        import calendar
+        from datetime import date
+
         base = float(self.weekly_target_hours) if self.weekly_target_hours is not None else float(self.weekly_hours)
-        daily_hours = base / 5
-        return round(daily_hours * working_days, 2)
+        full_target = base * AVERAGE_WEEKS_PER_MONTH
+
+        _, last_day = calendar.monthrange(year, month)
+        month_start = date(year, month, 1)
+        month_end = date(year, month, last_day)
+
+        # Vertrag noch nicht begonnen oder bereits beendet
+        if self.contract_start_date and self.contract_start_date > month_end:
+            return 0.0
+        if self.contract_end_date and self.contract_end_date < month_start:
+            return 0.0
+
+        # Vertrag umspannt den vollen Monat → kein Pro-rata nötig
+        if (not self.contract_start_date or self.contract_start_date <= month_start) and (
+            not self.contract_end_date or self.contract_end_date >= month_end
+        ):
+            return round(full_target, 2)
+
+        # Teilmonat → Pro-rata anhand Werktage (Mo–Fr) im Vertragszeitraum
+        total_weekdays = 0
+        contract_weekdays = 0
+        for day in range(1, last_day + 1):
+            d = date(year, month, day)
+            if d.weekday() >= 5:
+                continue
+            total_weekdays += 1
+            if self.contract_start_date and d < self.contract_start_date:
+                continue
+            if self.contract_end_date and d > self.contract_end_date:
+                continue
+            contract_weekdays += 1
+
+        if total_weekdays == 0:
+            return 0.0
+        return round(full_target * contract_weekdays / total_weekdays, 2)
 
     def get_balance(self, year, month):
         """Balance = actual hours − target hours.

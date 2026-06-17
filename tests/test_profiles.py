@@ -113,31 +113,27 @@ class TimeAccountTests(TestCase):
         )
 
     def test_get_target_hours_full_month(self):
-        """May 2026: 21 workdays → 40/5*21 = 168h"""
+        """40h/Woche × 4,348 = 173,92h (kein Pro-rata)"""
         target = self.profile.get_target_hours(2026, 5)
-        self.assertEqual(target, 168.0)
+        self.assertEqual(target, 173.92)
 
     def test_get_target_hours_february_2026(self):
-        """Feb 2026: 20 workdays → 160h"""
+        """Februar hat weniger Tage, aber Faktor bleibt 4,348 → 173,92h"""
         target = self.profile.get_target_hours(2026, 2)
-        self.assertEqual(target, 160.0)
+        self.assertEqual(target, 173.92)
 
-    def test_target_hours_excludes_org_holiday(self):
+    def test_target_hours_ignores_holidays(self):
+        """Feiertage kürzen die Soll-Stunden nicht mehr."""
         Holiday.objects.create(
             date=date(2026, 5, 1), name="Tag der Arbeit", organization=self.org
         )
         target = self.profile.get_target_hours(2026, 5)
-        self.assertEqual(target, 160.0)
-
-    def test_target_hours_excludes_global_holiday(self):
-        Holiday.objects.create(date=date(2026, 5, 1), name="Tag der Arbeit")
-        target = self.profile.get_target_hours(2026, 5)
-        self.assertEqual(target, 160.0)
+        self.assertEqual(target, 173.92)
 
     def test_get_balance_negative(self):
-        """No entries → balance = -168.0"""
+        """No entries → balance = -173.92"""
         balance = self.profile.get_balance(2026, 5)
-        self.assertEqual(balance, -168.0)
+        self.assertEqual(balance, -173.92)
 
     def test_working_days_excludes_weekends(self):
         days = self.profile._get_working_days_in_month(2026, 2)
@@ -161,18 +157,18 @@ class TimeAccountTests(TestCase):
         self.assertContains(response, "Balance")
 
     def test_target_hours_uses_weekly_target_hours_when_set(self):
-        """Overridden target → 30/5*21 = 126h"""
+        """Overridden target → 30 × 4,348 = 130,44h"""
         self.profile.weekly_target_hours = 30
         self.profile.save()
         target = self.profile.get_target_hours(2026, 5)
-        self.assertEqual(target, 126.0)
+        self.assertEqual(target, 30 * 4.348)
 
     def test_target_hours_falls_back_to_weekly_hours(self):
-        """weekly_target_hours=None → 40/5*21 = 168h"""
+        """weekly_target_hours=None → 40 × 4,348 = 173,92h"""
         self.profile.weekly_target_hours = None
         self.profile.save()
         target = self.profile.get_target_hours(2026, 5)
-        self.assertEqual(target, 168.0)
+        self.assertEqual(target, 173.92)
 
     def test_target_hours_cleared_to_none(self):
         """Setting None falls back to weekly_hours"""
@@ -181,42 +177,54 @@ class TimeAccountTests(TestCase):
         self.profile.weekly_target_hours = None
         self.profile.save()
         target = self.profile.get_target_hours(2026, 5)
-        self.assertEqual(target, 168.0)
+        self.assertEqual(target, 173.92)
 
     def test_target_hours_with_contract_start_later(self):
-        """Contract starts June 10 → only working days from 10th count."""
+        """Contract starts June 10 → Pro-rata 15/22 der vollen Soll-Stunden."""
         self.profile.contract_start_date = date(2026, 6, 10)
         self.profile.save()
         target = self.profile.get_target_hours(2026, 6)
-        # Full month June 2026 has 22 working days
-        # Starting June 10: Wed 10, Thu 11, Fri 12, Mon 15, Tue 16, Wed 17, Thu 18, Fri 19,
-        # Mon 22, Tue 23, Wed 24, Thu 25, Fri 26, Mon 29, Tue 30 = 15 working days
-        # 40/5*15 = 120.0
-        self.assertAlmostEqual(target, 40 / 5 * 15, places=1)
+        # June 2026: 22 weekdays total, 15 weekdays from June 10
+        expected = round(40 * 4.348 * 15 / 22, 2)
+        self.assertEqual(target, expected)
 
     def test_target_hours_with_contract_end_before_month(self):
-        """Contract ends June 15 → only working days until 15th count."""
+        """Contract ends June 15 → Pro-rata 11/22 der vollen Soll-Stunden."""
         self.profile.contract_end_date = date(2026, 6, 15)
         self.profile.save()
         target = self.profile.get_target_hours(2026, 6)
-        # June 1-15 has 11 working days (Mon 1, Tue 2, Wed 3, Thu 4, Fri 5, Mon 8, Tue 9, Wed 10, Thu 11, Fri 12, Mon 15)
-        # 40/5*11 = 88.0
-        self.assertAlmostEqual(target, 40 / 5 * 11, places=1)
+        # June 2026: 22 weekdays total, 11 weekdays until June 15
+        expected = round(40 * 4.348 * 11 / 22, 2)
+        self.assertEqual(target, expected)
 
     def test_target_hours_with_contract_in_middle(self):
-        """Contract June 10 to June 20."""
+        """Contract June 10 to June 20 → Pro-rata 8/22 der vollen Soll-Stunden."""
         self.profile.contract_start_date = date(2026, 6, 10)
         self.profile.contract_end_date = date(2026, 6, 20)
         self.profile.save()
         target = self.profile.get_target_hours(2026, 6)
-        # June 10-20 has 8 working days (Wed 10, Thu 11, Fri 12, Mon 15, Tue 16, Wed 17, Thu 18, Fri 19)
-        self.assertAlmostEqual(target, 40 / 5 * 8, places=1)
+        # June 2026: 22 weekdays total, 8 weekdays June 10-20
+        expected = round(40 * 4.348 * 8 / 22, 2)
+        self.assertEqual(target, expected)
+
+    def test_target_hours_before_contract_start(self):
+        """Vertrag beginnt erst im Juli → Juni = 0 Soll-Stunden."""
+        self.profile.contract_start_date = date(2026, 7, 1)
+        self.profile.save()
+        target = self.profile.get_target_hours(2026, 6)
+        self.assertEqual(target, 0.0)
+
+    def test_target_hours_after_contract_end(self):
+        """Vertrag endete im Mai → Juni = 0 Soll-Stunden."""
+        self.profile.contract_end_date = date(2026, 5, 31)
+        self.profile.save()
+        target = self.profile.get_target_hours(2026, 6)
+        self.assertEqual(target, 0.0)
 
     def test_target_hours_ignores_contract_dates_when_null(self):
-        """Null contract dates should behave like before (use full month)."""
+        """Null contract dates → voller Monat = 173,92h."""
         self.profile.contract_start_date = None
         self.profile.contract_end_date = None
         self.profile.save()
         target = self.profile.get_target_hours(2026, 5)
-        # May 2026 has 21 working days
-        self.assertAlmostEqual(target, 40 / 5 * 21, places=1)
+        self.assertEqual(target, 173.92)
