@@ -45,11 +45,17 @@
             {{ form.temp_password_confirm }}
             {% for error in form.temp_password_confirm.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
-        <div class="form-group{% if form.weekly_hours.errors %} has-error{% endif %}">
-            <label for="{{ form.weekly_hours.id_for_label }}">{% trans "Weekly hours" %}</label>
-            {{ form.weekly_hours }}
-            {% if form.weekly_hours.help_text %}<small class="text-muted" style="display:block; margin-top:4px;">{{ form.weekly_hours.help_text }}</small>{% endif %}
-            {% for error in form.weekly_hours.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        <div class="form-group{% if form.weekly_hours_hours.errors or form.weekly_hours_minutes.errors %} has-error{% endif %}">
+            <label>{% trans "Weekly hours" %}</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                {{ form.weekly_hours_hours }}
+                <span style="white-space: nowrap;">{% trans "h" %}</span>
+                {{ form.weekly_hours_minutes }}
+                <span style="white-space: nowrap;">{% trans "min" %}</span>
+            </div>
+            {% for error in form.weekly_hours_hours.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            {% for error in form.weekly_hours_minutes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Enter weekly hours as hours and optional minutes (e.g. 4 h 20 min)." %}</small>
         </div>
         <div class="form-group{% if form.contract_start_date.errors %} has-error{% endif %}">
             <label for="{{ form.contract_start_date.id_for_label }}">{% trans "Contract start date" %}</label>
@@ -62,7 +68,6 @@
             {{ form.contract_end_date }}
             {% if form.contract_end_date.help_text %}<small class="text-muted" style="display:block; margin-top:4px;">{{ form.contract_end_date.help_text }}</small>{% endif %}
             {% for error in form.contract_end_date.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
-        </div>
         </div>
         <button type="submit" class="btn btn-primary btn-full btn-form-submit">{% trans "Create employee" %}</button>
     </form>

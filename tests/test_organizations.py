@@ -98,7 +98,8 @@ class OrganizationViewTest(TestCase):
                 "last_name": "Employee",
                 "temp_password": "temppass123",
                 "temp_password_confirm": "temppass123",
-                "weekly_hours": "40",
+                "weekly_hours_hours": "40",
+                "weekly_hours_minutes": "0",
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -118,7 +119,8 @@ class OrganizationViewTest(TestCase):
                 "last_name": "Emp",
                 "temp_password": "temppass123",
                 "temp_password_confirm": "temppass123",
-                "weekly_hours": "35",
+                "weekly_hours_hours": "35",
+                "weekly_hours_minutes": "0",
                 "contract_start_date": "2026-06-01",
                 "contract_end_date": "2026-12-31",
             },
@@ -141,7 +143,8 @@ class OrganizationViewTest(TestCase):
                 "last_name": "Emp",
                 "temp_password": "temppass123",
                 "temp_password_confirm": "temppass123",
-                "weekly_hours": "40",
+                "weekly_hours_hours": "40",
+                "weekly_hours_minutes": "0",
                 "contract_start_date": "2026-12-01",
                 "contract_end_date": "2026-06-01",
             },
@@ -160,7 +163,8 @@ class OrganizationViewTest(TestCase):
                 "last_name": "Contract",
                 "temp_password": "temppass123",
                 "temp_password_confirm": "temppass123",
-                "weekly_hours": "40",
+                "weekly_hours_hours": "40",
+                "weekly_hours_minutes": "0",
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -530,7 +534,7 @@ class SetTargetHoursTest(TestCase):
                 "user_id": self.employee.id,
                 "profile_id": self.profile.id,
             }),
-            {"weekly_target_hours": "30"},
+            {"weekly_target_hours_hours": "30", "weekly_target_hours_minutes": "0"},
         )
         self.assertEqual(response.status_code, 302)
         self.profile.refresh_from_db()
@@ -543,7 +547,7 @@ class SetTargetHoursTest(TestCase):
                 "user_id": self.employee.id,
                 "profile_id": self.profile.id,
             }),
-            {"weekly_target_hours": "30"},
+            {"weekly_target_hours_hours": "30", "weekly_target_hours_minutes": "0"},
         )
         self.assertRedirects(
             response,
@@ -564,7 +568,7 @@ class SetTargetHoursTest(TestCase):
                 "user_id": self.employee.id,
                 "profile_id": self.profile.id,
             }),
-            {"weekly_target_hours": ""},
+            {"weekly_target_hours_hours": "", "weekly_target_hours_minutes": ""},
         )
         self.assertRedirects(
             response,
@@ -591,7 +595,7 @@ class SetTargetHoursTest(TestCase):
                 "user_id": self.employee.id,
                 "profile_id": self.profile.id,
             }),
-            {"weekly_target_hours": "30"},
+            {"weekly_target_hours_hours": "30", "weekly_target_hours_minutes": "0"},
         )
         self.assertEqual(response.status_code, 404)
 
@@ -603,7 +607,7 @@ class SetTargetHoursTest(TestCase):
                 "user_id": self.employee.id,
                 "profile_id": self.profile.id,
             }),
-            {"weekly_target_hours": "30"},
+            {"weekly_target_hours_hours": "30", "weekly_target_hours_minutes": "0"},
         )
         self.profile.refresh_from_db()
         target = self.profile.get_target_hours(2026, 5)

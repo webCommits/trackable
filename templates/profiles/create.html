@@ -10,29 +10,49 @@
     </h2>
     <form method="post">
         {% csrf_token %}
-        <div class="form-group">
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom: 20px;">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-group{% if form.title.errors %} has-error{% endif %}">
             <label for="{{ form.title.id_for_label }}">{% trans "Job title" %}</label>
             {{ form.title }}
+            {% for error in form.title.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
-        <div class="form-group">
+        <div class="form-group{% if form.position.errors %} has-error{% endif %}">
             <label for="{{ form.position.id_for_label }}">{% trans "Position" %}</label>
             {{ form.position }}
+            {% for error in form.position.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
-        <div class="form-group">
+        <div class="form-group{% if form.address.errors %} has-error{% endif %}">
             <label for="{{ form.address.id_for_label }}">{% trans "Address (optional)" %}</label>
             {{ form.address }}
+            {% for error in form.address.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
-        <div class="form-group">
-            <label for="{{ form.weekly_hours.id_for_label }}">{% trans "Weekly hours" %}</label>
-            {{ form.weekly_hours }}
+        <div class="form-group{% if form.weekly_hours_hours.errors or form.weekly_hours_minutes.errors %} has-error{% endif %}">
+            <label>{% trans "Weekly hours" %}</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                {{ form.weekly_hours_hours }}
+                <span style="white-space: nowrap;">{% trans "h" %}</span>
+                {{ form.weekly_hours_minutes }}
+                <span style="white-space: nowrap;">{% trans "min" %}</span>
+            </div>
+            {% for error in form.weekly_hours_hours.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            {% for error in form.weekly_hours_minutes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Enter weekly hours as hours and optional minutes (e.g. 4 h 20 min)." %}</small>
         </div>
-        <div class="form-group">
+        <div class="form-group{% if form.hourly_rate.errors %} has-error{% endif %}">
             <label for="{{ form.hourly_rate.id_for_label }}">{% trans "Hourly rate (€)" %}</label>
             {{ form.hourly_rate }}
+            {% for error in form.hourly_rate.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
-        <div class="form-group">
+        <div class="form-group{% if form.internal_notes.errors %} has-error{% endif %}">
             <label for="{{ form.internal_notes.id_for_label }}">{% trans "Internal notes (optional)" %}</label>
             {{ form.internal_notes }}
+            {% for error in form.internal_notes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">
             {% if edit %}{% trans "Save changes" %}{% else %}{% trans "Create profile" %}{% endif %}

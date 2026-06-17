@@ -58,7 +58,8 @@ class ProfileViewTest(TestCase):
                 "title": "Software Developer",
                 "position": "Senior Developer",
                 "address": "Berlin, Germany",
-                "weekly_hours": 40,
+                "weekly_hours_hours": 40,
+                "weekly_hours_minutes": 0,
                 "hourly_rate": 75.50,
             },
         )

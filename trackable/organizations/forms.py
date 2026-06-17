@@ -1,5 +1,7 @@
+from decimal import Decimal
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from trackable.core.utils import hours_and_minutes_to_decimal
 from trackable.organizations.models import Organization
 from trackable.accounts.models import User
 from trackable.core.models import Holiday
@@ -35,7 +37,7 @@ class OrganizationBrandingForm(forms.ModelForm):
             "apple_touch_icon": _("Empfohlen: 180×180 px, PNG. iOS-Homescreen-Symbol."),
             "primary_color": _("Hex-Farbe (#RRGGBB). Überschreibt primäre UI-Akzente (Buttons, Badges)."),
             "accent_color": _("Hex-Farbe (#RRGGBB). Überschreibt sekundäre Akzente (Links, Hover)."),
-            "custom_css": _("Beliebige CSS-Regeln (z. B. .btn-primary { background: #xyz; }). Wird nach allen Standard-Styles geladen."),
+            "custom_css": _("Beliebige CSS-Regeln (z. B. .btn-primary { background: #xyz; }). Wird nach allen Standard-Styles geladen."),
         }
 
 
@@ -47,17 +49,6 @@ class OrganizationForm(forms.ModelForm):
 
 
 class EmployeeCreateForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        # Accept German decimal comma (e.g. 4,33 → 4.33)
-        data = kwargs.get("data")
-        if data:
-            data = data.copy()
-            for key in data:
-                if isinstance(data[key], str):
-                    data[key] = data[key].replace(",", ".")
-            kwargs["data"] = data
-        super().__init__(*args, **kwargs)
-
     temp_password = forms.CharField(
         widget=forms.PasswordInput,
         label=_("Temporary password"),
@@ -66,12 +57,21 @@ class EmployeeCreateForm(forms.ModelForm):
         widget=forms.PasswordInput,
         label=_("Confirm temporary password"),
     )
-    weekly_hours = forms.DecimalField(
-        max_digits=4, decimal_places=2,
+    weekly_hours_hours = forms.IntegerField(
+        min_value=0,
+        max_value=168,
+        required=True,
         label=_("Weekly hours"),
-        initial=40.0,
-        help_text=_("Standard working hours per week (e.g. 40)."),
-        widget=forms.TextInput(attrs={"placeholder": _("e.g. 40,00")}),
+        initial=40,
+        widget=forms.NumberInput(attrs={"placeholder": _("e.g. 4"), "min": 0, "max": 168}),
+    )
+    weekly_hours_minutes = forms.IntegerField(
+        min_value=0,
+        max_value=59,
+        required=False,
+        initial=0,
+        label=_("Minutes"),
+        widget=forms.NumberInput(attrs={"placeholder": _("e.g. 20"), "min": 0, "max": 59}),
     )
     contract_start_date = forms.DateField(
         label=_("Contract start date"),
@@ -107,6 +107,17 @@ class EmployeeCreateForm(forms.ModelForm):
         end = cleaned_data.get("contract_end_date")
         if start and end and end < start:
             raise forms.ValidationError(_("Contract end date must be after start date."))
+
+        hours = cleaned_data.get("weekly_hours_hours")
+        minutes = cleaned_data.get("weekly_hours_minutes") or 0
+        if hours is not None:
+            weekly_hours = hours_and_minutes_to_decimal(hours, minutes)
+            if weekly_hours > Decimal("99.9999"):
+                self.add_error(
+                    "weekly_hours_hours",
+                    _("Weekly hours must be at most 99.9999 hours."),
+                )
+            cleaned_data["weekly_hours"] = weekly_hours
 
         return cleaned_data
 
@@ -164,7 +175,7 @@ class TimeEntryImportForm(forms.Form):
     time_format = forms.CharField(
         initial="%H:%M",
         label=_("Time format"),
-        help_text=_("e.g. %%H:%%M"),
+        help_text=_("e.g. %%H%%M"),
     )
     header_row = forms.IntegerField(
         required=False,

@@ -11,9 +11,9 @@ class Profile(models.Model):
     title = models.CharField(max_length=200)
     position = models.CharField(max_length=200)
     address = models.CharField(max_length=500, blank=True, null=True)
-    weekly_hours = models.DecimalField(max_digits=4, decimal_places=2)
+    weekly_hours = models.DecimalField(max_digits=6, decimal_places=4)
     weekly_target_hours = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True,
+        max_digits=6, decimal_places=4, null=True, blank=True,
         verbose_name="Weekly target hours",
         help_text="Override target hours per week. If empty, uses weekly hours.",
     )

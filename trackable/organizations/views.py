@@ -19,8 +19,11 @@ from trackable.accounts.models import User
 from trackable.timetracking.models import TimeEntry
 import json
 from datetime import datetime, timedelta
+from decimal import Decimal
 from django.utils import timezone as tz
 import calendar
+
+from trackable.core.utils import hours_and_minutes_to_decimal
 
 
 @login_required
@@ -231,12 +234,19 @@ def set_target_hours(request, user_id, profile_id):
     employee = employee_membership.user
     profile = get_object_or_404(Profile, pk=profile_id, user=employee)
 
-    value = request.POST.get("weekly_target_hours", "").strip()
-    if value == "":
+    hours_str = request.POST.get("weekly_target_hours_hours", "").strip()
+    minutes_str = request.POST.get("weekly_target_hours_minutes", "").strip()
+
+    if hours_str == "" and minutes_str == "":
         profile.weekly_target_hours = None
     else:
         try:
-            profile.weekly_target_hours = float(value)
+            hours = int(hours_str) if hours_str != "" else 0
+            minutes = int(minutes_str) if minutes_str != "" else 0
+            target_hours = hours_and_minutes_to_decimal(hours, minutes)
+            if target_hours > Decimal("99.9999"):
+                raise ValueError("Target hours too large")
+            profile.weekly_target_hours = target_hours
         except (ValueError, TypeError):
             messages.error(request, _("Invalid value for target hours."))
             return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
