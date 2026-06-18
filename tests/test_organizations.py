@@ -491,8 +491,8 @@ class TimeTrackingModeTest(TestCase):
         entry.refresh_from_db()
         self.assertEqual(entry.date.isoformat(), new_date)
 
-    def test_move_entry_as_employee_other_entry_denied(self):
-        """Employee cannot move another employee's entries."""
+    def test_move_entry_as_employee_other_entry_allowed(self):
+        """Employees can move any entry in their organization."""
         from datetime import datetime as dt, timedelta
 
         today = dt.now().date()
@@ -523,7 +523,161 @@ class TimeTrackingModeTest(TestCase):
             reverse("move_entry", kwargs={"entry_id": entry.pk}),
             {"new_date": new_date},
         )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+        entry.refresh_from_db()
+        self.assertEqual(entry.date.isoformat(), new_date)
+
+    def test_delete_entry_as_manager(self):
+        """Manager can delete any entry in the organization."""
+        from datetime import datetime as dt, timedelta
+
+        today = dt.now().date()
+        profile = Profile.objects.create(
+            user=self.employee,
+            title="Dev",
+            position="Developer",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        entry = TimeEntry.objects.create(
+            profile=profile,
+            date=today,
+            start_time=dt.now().time(),
+            end_time=(dt.now() + timedelta(hours=8)).time(),
+            pause_duration=1,
+        )
+
+        response = self.client.post(
+            reverse("delete_calendar_entry", kwargs={"entry_id": entry.pk}),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+        self.assertFalse(TimeEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_delete_entry_as_employee_own(self):
+        """Employee can delete their own entries."""
+        from datetime import datetime as dt, timedelta
+
+        today = dt.now().date()
+        profile = Profile.objects.create(
+            user=self.employee,
+            title="Dev",
+            position="Developer",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        entry = TimeEntry.objects.create(
+            profile=profile,
+            date=today,
+            start_time=dt.now().time(),
+            end_time=(dt.now() + timedelta(hours=8)).time(),
+            pause_duration=1,
+        )
+
+        self.client.login(username="employee", password="pass123")
+        response = self.client.post(
+            reverse("delete_calendar_entry", kwargs={"entry_id": entry.pk}),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+        self.assertFalse(TimeEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_delete_entry_as_employee_other_denied(self):
+        """Employee cannot delete another employee's entries."""
+        from datetime import datetime as dt, timedelta
+
+        today = dt.now().date()
+        other_employee = User.objects.create_user(
+            username="other_employee", email="other@example.com", password="pass123"
+        )
+        OrganizationMembership.objects.create(
+            organization=self.org, user=other_employee, role="employee"
+        )
+        profile = Profile.objects.create(
+            user=other_employee,
+            title="Dev",
+            position="Developer",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        entry = TimeEntry.objects.create(
+            profile=profile,
+            date=today,
+            start_time=dt.now().time(),
+            end_time=(dt.now() + timedelta(hours=8)).time(),
+            pause_duration=1,
+        )
+
+        self.client.login(username="employee", password="pass123")
+        response = self.client.post(
+            reverse("delete_calendar_entry", kwargs={"entry_id": entry.pk}),
+        )
         self.assertEqual(response.status_code, 403)
+        self.assertTrue(TimeEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_delete_entry_not_org_member(self):
+        """A user outside the organization cannot delete entries."""
+        from datetime import datetime as dt, timedelta
+
+        today = dt.now().date()
+        profile = Profile.objects.create(
+            user=self.employee,
+            title="Dev",
+            position="Developer",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        entry = TimeEntry.objects.create(
+            profile=profile,
+            date=today,
+            start_time=dt.now().time(),
+            end_time=(dt.now() + timedelta(hours=8)).time(),
+            pause_duration=1,
+        )
+
+        outsider = User.objects.create_user(
+            username="outsider", email="outsider@example.com", password="pass123"
+        )
+        self.client.login(username="outsider", password="pass123")
+        response = self.client.post(
+            reverse("delete_calendar_entry", kwargs={"entry_id": entry.pk}),
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(TimeEntry.objects.filter(pk=entry.pk).exists())
+
+    def test_move_entry_not_org_member(self):
+        """A user outside the organization cannot move entries."""
+        from datetime import datetime as dt, timedelta
+
+        today = dt.now().date()
+        profile = Profile.objects.create(
+            user=self.employee,
+            title="Dev",
+            position="Developer",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        entry = TimeEntry.objects.create(
+            profile=profile,
+            date=today,
+            start_time=dt.now().time(),
+            end_time=(dt.now() + timedelta(hours=8)).time(),
+            pause_duration=1,
+        )
+
+        outsider = User.objects.create_user(
+            username="outsider", email="outsider@example.com", password="pass123"
+        )
+        self.client.login(username="outsider", password="pass123")
+        new_date = (today + timedelta(days=1)).isoformat()
+        response = self.client.post(
+            reverse("move_entry", kwargs={"entry_id": entry.pk}),
+            {"new_date": new_date},
+        )
+        self.assertEqual(response.status_code, 403)
+        entry.refresh_from_db()
+        self.assertEqual(entry.date, today)
 
 
 # Make TimeEntry available for tests above

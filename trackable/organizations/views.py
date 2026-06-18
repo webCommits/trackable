@@ -17,6 +17,7 @@ from trackable.organizations.helpers import (
     can_modify_entry,
     can_create_calendar_entry,
     can_manage_profile_time_entries,
+    can_move_entry,
 )
 from trackable.profiles.models import Profile
 from trackable.core.models import Holiday
@@ -545,7 +546,7 @@ def move_entry(request, entry_id):
 
     entry = get_object_or_404(TimeEntry, pk=entry_id)
 
-    if not can_modify_entry(request.user, entry):
+    if not can_move_entry(request.user, entry):
         return JsonResponse(
             {"error": _("You do not have permission to modify this entry.")}, status=403
         )
@@ -815,4 +816,23 @@ def update_entry(request, entry_id):
         entry.end_time = datetime.strptime(end_time_str, "%H:%M").time()
 
     entry.save()
+    return JsonResponse({"status": "ok"})
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_calendar_entry(request, entry_id):
+    """Delete a time entry from the weekly calendar.
+
+    - Managers can delete any entry in their org.
+    - Employees can only delete their own entries.
+    """
+    entry = get_object_or_404(TimeEntry, pk=entry_id)
+
+    if not can_modify_entry(request.user, entry):
+        return JsonResponse(
+            {"error": _("You do not have permission to modify this entry.")}, status=403
+        )
+
+    entry.delete()
     return JsonResponse({"status": "ok"})

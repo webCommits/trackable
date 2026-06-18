@@ -29,6 +29,7 @@ urlpatterns = [
     path("weekly/create-entry/", views.create_entry, name="create_entry"),
     path("weekly/update-entry/<int:entry_id>/", views.update_entry, name="update_entry"),
     path("weekly/move-entry/<int:entry_id>/", views.move_entry, name="move_entry"),
+    path("weekly/delete-entry/<int:entry_id>/", views.delete_calendar_entry, name="delete_calendar_entry"),
     path("toggle-time-tracking-mode/", views.toggle_time_tracking_mode, name="toggle_time_tracking_mode"),
     path("toggle-holidays/", views.toggle_holidays, name="toggle_holidays"),
     path("holidays/", views.holiday_list, name="org_holidays"),

@@ -78,6 +78,23 @@ def can_modify_entry(user, entry):
     return False
 
 
+def can_move_entry(user, entry):
+    """Check if a user can move a time entry in the weekly calendar.
+
+    - Any member of the entry's organization can move any entry.
+    - This is intentionally permissive to allow shared scheduling.
+    """
+    membership = getattr(user, "organization_membership", None)
+    if not membership:
+        return False
+
+    entry_membership = getattr(entry.profile.user, "organization_membership", None)
+    if not entry_membership or entry_membership.organization != membership.organization:
+        return False
+
+    return True
+
+
 def can_create_calendar_entry(user, profile):
     """Check if a user can create a time entry in the weekly calendar.
 

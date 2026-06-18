@@ -998,6 +998,9 @@ msgstr "Diesen Eintrag löschen?"
 msgid "Delete"
 msgstr "Löschen"
 
+msgid "Are you sure you want to delete this time entry?"
+msgstr "Sind Sie sicher, dass Sie diesen Zeiteintrag löschen möchten?"
+
 msgid "No entries for this month."
 msgstr "Keine Einträge für diesen Monat vorhanden."
 
