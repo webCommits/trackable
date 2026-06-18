@@ -111,6 +111,76 @@ class ProfileFormTest(TestCase):
         profile.save()
         self.assertEqual(profile.weekly_hours, Decimal("4.3333"))
 
+    def test_save_sets_contract_dates(self):
+        user = User.objects.create_user(username="testuser_dates", password="testpass")
+        form = ProfileForm({
+            "title": "Dev",
+            "position": "Senior",
+            "address": "",
+            "weekly_hours_hours": "40",
+            "weekly_hours_minutes": "0",
+            "hourly_rate": "50,00",
+            "contract_start_date": "2024-01-15",
+            "contract_end_date": "2024-12-31",
+            "internal_notes": "",
+        }, user=user)
+        self.assertTrue(form.is_valid())
+        profile = form.save(commit=False)
+        profile.user = user
+        profile.save()
+        self.assertEqual(profile.contract_start_date.isoformat(), "2024-01-15")
+        self.assertEqual(profile.contract_end_date.isoformat(), "2024-12-31")
+
+    def test_org_employee_cannot_edit_contract_dates(self):
+        user = User.objects.create_user(username="employee", password="testpass")
+        org = Organization.objects.create(name="Test Org", created_by=user)
+        OrganizationMembership.objects.create(organization=org, user=user, role="employee")
+        form = ProfileForm({
+            "title": "Dev",
+            "position": "Senior",
+            "address": "",
+            "weekly_hours_hours": "40",
+            "weekly_hours_minutes": "0",
+            "hourly_rate": "50,00",
+            "contract_start_date": "2024-01-15",
+            "contract_end_date": "2024-12-31",
+            "internal_notes": "",
+        }, user=user)
+        self.assertTrue(form.is_valid())
+        self.assertNotIn("contract_start_date", form.fields)
+        self.assertNotIn("contract_end_date", form.fields)
+        self.assertNotIn("contract_start_date", form.cleaned_data)
+        self.assertNotIn("contract_end_date", form.cleaned_data)
+        profile = form.save(commit=False)
+        profile.user = user
+        profile.save()
+        self.assertIsNone(profile.contract_start_date)
+        self.assertIsNone(profile.contract_end_date)
+
+    def test_org_manager_can_edit_contract_dates(self):
+        user = User.objects.create_user(username="manager", password="testpass")
+        org = Organization.objects.create(name="Test Org", created_by=user)
+        OrganizationMembership.objects.create(organization=org, user=user, role="manager")
+        form = ProfileForm({
+            "title": "Dev",
+            "position": "Senior",
+            "address": "",
+            "weekly_hours_hours": "40",
+            "weekly_hours_minutes": "0",
+            "hourly_rate": "50,00",
+            "contract_start_date": "2024-01-15",
+            "contract_end_date": "2024-12-31",
+            "internal_notes": "",
+        }, user=user)
+        self.assertTrue(form.is_valid())
+        self.assertIn("contract_start_date", form.fields)
+        self.assertIn("contract_end_date", form.fields)
+        profile = form.save(commit=False)
+        profile.user = user
+        profile.save()
+        self.assertEqual(profile.contract_start_date.isoformat(), "2024-01-15")
+        self.assertEqual(profile.contract_end_date.isoformat(), "2024-12-31")
+
     def test_initial_values_from_instance(self):
         user = User.objects.create_user(username="testuser2", password="testpass")
         profile = Profile.objects.create(

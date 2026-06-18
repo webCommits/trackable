@@ -17,7 +17,7 @@ def profile_list(request):
 @login_required
 def profile_create(request):
     if request.method == "POST":
-        form = ProfileForm(request.POST)
+        form = ProfileForm(request.POST, user=request.user)
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
@@ -25,7 +25,7 @@ def profile_create(request):
             messages.success(request, _('Profile "%(title)s" was created successfully!') % {"title": profile.title})
             return redirect("profile_detail", pk=profile.pk)
     else:
-        form = ProfileForm()
+        form = ProfileForm(user=request.user)
     return render(request, "profiles/create.html", {"form": form})
 
 
@@ -108,13 +108,13 @@ def profile_detail(request, pk):
 def profile_edit(request, pk):
     profile = get_object_or_404(Profile, pk=pk, user=request.user)
     if request.method == "POST":
-        form = ProfileForm(request.POST, instance=profile)
+        form = ProfileForm(request.POST, instance=profile, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, _("Profile was updated successfully!"))
             return redirect("profile_detail", pk=profile.pk)
     else:
-        form = ProfileForm(instance=profile)
+        form = ProfileForm(instance=profile, user=request.user)
     return render(request, "profiles/create.html", {"form": form, "edit": True, "profile": profile})
 
 

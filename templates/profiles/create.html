@@ -49,6 +49,22 @@
             {{ form.hourly_rate }}
             {% for error in form.hourly_rate.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
+        {% if form.contract_start_date %}
+        <div class="form-group{% if form.contract_start_date.errors %} has-error{% endif %}">
+            <label for="{{ form.contract_start_date.id_for_label }}">{% trans "Contract start date" %}</label>
+            {{ form.contract_start_date }}
+            {% for error in form.contract_start_date.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Target hours are calculated from this date." %}</small>
+        </div>
+        {% endif %}
+        {% if form.contract_end_date %}
+        <div class="form-group{% if form.contract_end_date.errors %} has-error{% endif %}">
+            <label for="{{ form.contract_end_date.id_for_label }}">{% trans "Contract end date" %}</label>
+            {{ form.contract_end_date }}
+            {% for error in form.contract_end_date.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Optional. Leave empty for open-ended contracts." %}</small>
+        </div>
+        {% endif %}
         <div class="form-group{% if form.internal_notes.errors %} has-error{% endif %}">
             <label for="{{ form.internal_notes.id_for_label }}">{% trans "Internal notes (optional)" %}</label>
             {{ form.internal_notes }}

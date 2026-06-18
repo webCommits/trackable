@@ -25,6 +25,7 @@ class ProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # Normalize German decimal commas (e.g. 50,00 -> 50.00) whether data is
         # passed positionally or as a keyword argument.
+        user = kwargs.pop("user", None)
         if args:
             data = args[0]
             if hasattr(data, "copy"):
@@ -50,14 +51,35 @@ class ProfileForm(forms.ModelForm):
             initial.setdefault("weekly_hours_minutes", minutes)
         super().__init__(*args, **kwargs)
 
+        # Organization employees may not edit their own contract dates;
+        # managers and users without an org membership may.
+        if user is not None and self._is_org_employee(user):
+            self.fields.pop("contract_start_date", None)
+            self.fields.pop("contract_end_date", None)
+
+    @staticmethod
+    def _is_org_employee(user):
+        membership = getattr(user, "organization_membership", None)
+        return membership is not None and not membership.is_manager
+
     class Meta:
         model = Profile
-        fields = ["title", "position", "address", "hourly_rate", "internal_notes"]
+        fields = [
+            "title",
+            "position",
+            "address",
+            "hourly_rate",
+            "contract_start_date",
+            "contract_end_date",
+            "internal_notes",
+        ]
         labels = {
             "title": _("Job title"),
             "position": _("Position"),
             "address": _("Address (optional)"),
             "hourly_rate": _("Hourly rate (€)"),
+            "contract_start_date": _("Contract start date"),
+            "contract_end_date": _("Contract end date"),
             "internal_notes": _("Internal notes (optional)"),
         }
         widgets = {
@@ -65,8 +87,10 @@ class ProfileForm(forms.ModelForm):
                 attrs={"rows": 3, "placeholder": _("Street, ZIP, City")}
             ),
             "hourly_rate": forms.TextInput(attrs={"placeholder": _("e.g. 50,00")}),
+            "contract_start_date": forms.DateInput(attrs={"type": "date"}),
+            "contract_end_date": forms.DateInput(attrs={"type": "date"}),
             "internal_notes": forms.Textarea(
-                attrs={"rows": 4, "placeholder": _("Contract start, department, notes for payroll, …")}
+                attrs={"rows": 4, "placeholder": _("Department, notes for payroll, …")}
             ),
         }
 
