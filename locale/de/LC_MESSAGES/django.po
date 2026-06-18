@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trackable\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-17 19:20+0200\n"
+"POT-Creation-Date: 2026-06-18 11:56+0200\n"
 "PO-Revision-Date: 2026-06-16 14:00+0200\n"
 "Last-Translator: Lukas Schaffrath <info@webcommits.info>\n"
 "Language-Team: German <de@li.org>\n"
@@ -16,12 +16,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-
 #: templates/accounts/login.html:3 templates/accounts/login.html:7
-#: templates/base.html:112
+#: templates/base.html:116
 msgid "Login"
 msgstr "Anmelden"
-
 
 # accounts/login.html
 #: templates/accounts/login.html:18 templates/accounts/register.html:18
@@ -33,35 +31,29 @@ msgstr "Anmelden"
 msgid "Username"
 msgstr "Benutzername"
 
-
 #: templates/accounts/login.html:23 templates/accounts/register.html:38
 #: templates/core/manage/user_form.html:24 templates/core/setup/step1.html:23
 msgid "Password"
 msgstr "Passwort"
-
 
 #: templates/accounts/login.html:27 templates/accounts/register.html:50
 #: templates/core/landing.html:27 templates/core/landing.html:168
 msgid "Log in"
 msgstr "Einloggen"
 
-
 #: templates/accounts/login.html:30
 msgid "Forgot your password?"
 msgstr "Passwort vergessen?"
-
 
 #: templates/accounts/login.html:33
 msgid "Don't have an account?"
 msgstr "Noch kein Konto?"
 
-
 #: templates/accounts/login.html:33 templates/accounts/register.html:3
 #: templates/accounts/register.html:7 templates/accounts/register.html:47
-#: templates/base.html:113
+#: templates/base.html:117
 msgid "Register"
 msgstr "Registrieren"
-
 
 # accounts/password_reset.html
 #: templates/accounts/password_reset.html:3
@@ -71,7 +63,6 @@ msgstr "Registrieren"
 msgid "Reset password"
 msgstr "Passwort zurücksetzen"
 
-
 # accounts/register.html
 #: templates/accounts/password_reset.html:11
 #: templates/accounts/register.html:23
@@ -80,16 +71,13 @@ msgstr "Passwort zurücksetzen"
 msgid "E-Mail"
 msgstr "E-Mail"
 
-
 #: templates/accounts/password_reset.html:15
 msgid "Send reset link"
 msgstr "Reset-Link senden"
 
-
 #: templates/accounts/password_reset.html:18
 msgid "Back to login"
 msgstr "Zurück zum Login"
-
 
 # accounts/password_reset_confirm.html
 #: templates/accounts/password_reset_confirm.html:7
@@ -98,17 +86,14 @@ msgstr "Zurück zum Login"
 msgid "New password"
 msgstr "Neues Passwort"
 
-
 #: templates/accounts/password_reset_confirm.html:16
 #: templates/accounts/register.html:43 templates/core/setup/step1.html:28
 msgid "Confirm password"
 msgstr "Passwort bestätigen"
 
-
 #: templates/accounts/password_reset_confirm.html:20
 msgid "Change password"
 msgstr "Passwort ändern"
-
 
 #: templates/accounts/register.html:28
 #: templates/organizations/employee_create.html:29
@@ -116,36 +101,30 @@ msgstr "Passwort ändern"
 msgid "First name"
 msgstr "Vorname"
 
-
 #: templates/accounts/register.html:33
 #: templates/organizations/employee_create.html:34
 #: trackable/organizations/forms.py:96
 msgid "Last name"
 msgstr "Nachname"
 
-
 #: templates/accounts/register.html:50
 msgid "Already have an account?"
 msgstr "Bereits ein Konto?"
 
-
 #: templates/accounts/settings.html:3 templates/accounts/settings.html:8
-#: templates/base.html:105 templates/core/manage/dashboard.html:24
+#: templates/base.html:109 templates/core/manage/dashboard.html:24
 #: templates/core/manage/settings.html:6
 msgid "Settings"
 msgstr "Einstellungen"
-
 
 #: templates/accounts/settings.html:9
 msgid "Manage your personal preferences and notification settings."
 msgstr "Verwalten Sie Ihre persönlichen Einstellungen und Benachrichtigungen."
 
-
 # accounts/settings.html
 #: templates/accounts/settings.html:16
 msgid "Enable monthly email reports"
 msgstr "Monatliche E-Mail-Berichte aktivieren"
-
 
 #: templates/accounts/settings.html:17
 msgid ""
@@ -155,7 +134,6 @@ msgstr ""
 "Sie erhalten am letzten Tag jedes Monats automatisch eine E-Mail mit einer "
 "Zusammenfassung aller Arbeitszeiten."
 
-
 #: templates/accounts/settings.html:21 templates/organizations/branding.html:30
 #: templates/organizations/employee_profile_detail.html:43
 #: templates/organizations/employee_profile_detail.html:80
@@ -164,12 +142,10 @@ msgstr ""
 msgid "Save"
 msgstr "Speichern"
 
-
 #: templates/admin/email_test.html:4 templates/admin/email_test.html:6
 #: trackable/core/admin_site.py:62
 msgid "Email Test"
 msgstr "E-Mail-Test"
-
 
 #: templates/admin/email_test.html:11
 msgid ""
@@ -179,170 +155,138 @@ msgstr ""
 "Senden Sie eine Test-E-Mail, um zu überprüfen, ob Ihre E-Mail-Konfiguration "
 "(SMTP-Einstellungen) korrekt funktioniert."
 
-
 #: templates/admin/email_test.html:27
 msgid "Recipient email address"
 msgstr "Empfänger-E-Mail-Adresse"
-
 
 #: templates/admin/email_test.html:34
 msgid "Send test email"
 msgstr "Test-E-Mail senden"
 
-
 #: templates/admin/email_test.html:39
 msgid "Current email configuration"
 msgstr "Aktuelle E-Mail-Konfiguration"
-
 
 #: templates/admin/email_test.html:41
 msgid "Email backend"
 msgstr "E-Mail-Backend"
 
-
 #: templates/admin/email_test.html:42 trackable/core/models.py:32
 msgid "Email host"
 msgstr "E-Mail-Host"
 
-
 #: templates/admin/email_test.html:43 trackable/core/models.py:33
 msgid "Email port"
 msgstr "E-Mail-Port"
-
 
 #: templates/admin/email_test.html:44 templates/core/manage/settings.html:45
 #: templates/core/setup/step2.html:44
 msgid "Use TLS"
 msgstr "TLS nutzen"
 
-
 #: templates/admin/email_test.html:45
 msgid "From address"
 msgstr "Absender-Adresse"
-
 
 # base.html
 #: templates/base.html:9
 msgid "trackable. – Your personal time tracker."
 msgstr "trackable. – Deine persönliche Arbeitszeiterfassung."
 
-
 #: templates/base.html:10
 msgid "Time Tracking"
 msgstr "Zeiterfassung"
-
 
 #: templates/base.html:67
 msgid "Skip to main content"
 msgstr "Zum Hauptinhalt springen"
 
-
-#: templates/base.html:82
+#: templates/base.html:83
 msgid "Switch to light mode"
 msgstr "Zum hellen Design wechseln"
 
-
-#: templates/base.html:91
+#: templates/base.html:92
 msgid "Open menu"
 msgstr "Menü öffnen"
 
-
-#: templates/base.html:97
+#: templates/base.html:101
 msgid "Dashboard"
 msgstr "Dashboard"
 
-
-#: templates/base.html:98 templates/profiles/list.html:3
+#: templates/base.html:102 templates/profiles/list.html:3
 #: templates/profiles/list.html:9
 msgid "Profiles"
 msgstr "Profile"
 
-
-#: templates/base.html:100 templates/core/manage/dashboard.html:27
+#: templates/base.html:104 templates/core/manage/dashboard.html:27
 #: templates/organizations/dashboard.html:3
 msgid "Organization"
 msgstr "Organisation"
 
-
-#: templates/base.html:103 templates/core/manage/dashboard.html:3
+#: templates/base.html:107 templates/core/manage/dashboard.html:3
 #: templates/core/manage/dashboard.html:6
 #: templates/core/manage/user_detail.html:3
 msgid "Management"
 msgstr "Verwaltung"
 
-
-#: templates/base.html:109
+#: templates/base.html:113
 msgid "Logout"
 msgstr "Abmelden"
 
-
-#: templates/base.html:147 templates/core/impressum.html:33
+#: templates/base.html:151 templates/core/impressum.html:33
 msgid "All rights reserved."
 msgstr "Alle Rechte vorbehalten."
 
-
-#: templates/base.html:151 templates/core/impressum.html:3
+#: templates/base.html:155 templates/core/impressum.html:3
 #: templates/core/impressum.html:7
 msgid "Imprint"
 msgstr "Impressum"
 
-
-#: templates/base.html:153
+#: templates/base.html:157
 msgid "Privacy"
 msgstr "Datenschutz"
-
 
 #: templates/core/datenschutz.html:3 templates/core/datenschutz.html:7
 msgid "Privacy Policy"
 msgstr "Datenschutzerklärung"
 
-
 #: templates/core/datenschutz.html:8
 msgid "Last updated:"
 msgstr "Zuletzt aktualisiert:"
-
 
 #: templates/core/datenschutz.html:11
 msgid "1. Data Controller"
 msgstr "1. Verantwortlicher"
 
-
 #: templates/core/datenschutz.html:14
 msgid "Responsible party within the meaning of the GDPR:"
 msgstr "Verantwortlicher im Sinne der DSGVO:"
-
 
 #: templates/core/datenschutz.html:21
 msgid "2. Collected Data"
 msgstr "2. Erhobene Daten"
 
-
 #: templates/core/datenschutz.html:24
 msgid "This application only collects and stores data that you enter yourself:"
 msgstr ""
-"Diese Anwendung erfasst und speichert ausschließlich Daten, die Sie se"
-"lbst eingeben:"
-
+"Diese Anwendung erfasst und speichert ausschließlich Daten, die Sie selbst "
+"eingeben:"
 
 #: templates/core/datenschutz.html:27
 msgid "Username and email address (registration / login)"
 msgstr "Benutzername und E-Mail-Adresse (Registrierung / Anmeldung)"
 
-
 #: templates/core/datenschutz.html:28
 msgid "Work time entries (date, start/end time, breaks)"
 msgstr "Arbeitszeiteinträge (Datum, Start-/Endzeit, Pausen)"
-
 
 #: templates/core/datenschutz.html:29
 msgid "Profile data (title, position, hourly rate)"
 msgstr "Profildaten (Titel, Position, Stundensatz)"
 
-
 #: templates/core/datenschutz.html:34
 msgid "3. Purpose of Processing"
 msgstr "3. Zweck der Verarbeitung"
-
 
 #: templates/core/datenschutz.html:37
 msgid ""
@@ -353,11 +297,9 @@ msgstr ""
 "Zeiterfassungsfunktionen dieser Anwendung verwendet. Es erfolgt keine "
 "Weitergabe an Dritte."
 
-
 #: templates/core/datenschutz.html:42
 msgid "4. Data Storage"
 msgstr "4. Datenspeicherung"
-
 
 #: templates/core/datenschutz.html:45
 msgid ""
@@ -368,11 +310,9 @@ msgstr ""
 "gespeichert. Es werden keine externen Analysedienste, Tracking-Cookies oder "
 "Werbenetzwerke verwendet."
 
-
 #: templates/core/datenschutz.html:50
 msgid "5. Your Rights"
 msgstr "5. Ihre Rechte"
-
 
 #: templates/core/datenschutz.html:53
 msgid ""
@@ -383,11 +323,9 @@ msgstr ""
 "der Verarbeitung Ihrer gespeicherten Daten. Kontaktieren Sie den "
 "Verantwortlichen über"
 
-
 #: templates/core/datenschutz.html:58
 msgid "6. External Fonts"
 msgstr "6. Externe Schriftarten"
-
 
 #: templates/core/datenschutz.html:61
 msgid ""
@@ -398,39 +336,33 @@ msgstr ""
 "Adresse kann an Google-Server übermittelt werden. Weitere Informationen "
 "finden Sie in der"
 
-
 #: templates/core/datenschutz.html:61
 msgid "Google Privacy Policy"
 msgstr "Google-Datenschutzerklärung"
 
-
 #: templates/core/datenschutz.html:66 templates/core/impressum.html:38
 #: templates/organizations/weekly_calendar.html:325
-#: templates/timetracking/add_entry.html:9
+#: templates/timetracking/add_entry.html:10
+#: templates/timetracking/add_entry.html:12
 #: templates/timetracking/add_vacation.html:9
 msgid "Back"
 msgstr "Zurück"
-
 
 #: templates/core/impressum.html:8
 msgid "Information according to § 5 TMG"
 msgstr "Angaben gemäß § 5 TMG"
 
-
 #: templates/core/impressum.html:11
 msgid "Responsible"
 msgstr "Verantwortlich"
-
 
 #: templates/core/impressum.html:20
 msgid "Disclaimer"
 msgstr "Haftungsausschluss"
 
-
 #: templates/core/impressum.html:22
 msgid "Liability for Content"
 msgstr "Haftung für Inhalte"
-
 
 #: templates/core/impressum.html:24
 msgid ""
@@ -442,11 +374,9 @@ msgstr ""
 "die Richtigkeit, Vollständigkeit und Aktualität der Inhalte wird jedoch "
 "keine Gewähr übernommen."
 
-
 #: templates/core/impressum.html:29
 msgid "Copyright"
 msgstr "Urheberrecht"
-
 
 #: templates/core/impressum.html:32
 msgid ""
@@ -456,12 +386,10 @@ msgstr ""
 "Die durch den Seitenbetreiber erstellten Inhalte und Werke unterliegen dem "
 "deutschen Urheberrecht."
 
-
 # core/landing.html
 #: templates/core/landing.html:3
 msgid "trackable. – Self-Hosted Time Tracking"
 msgstr "trackable. – Self-Hosted Zeiterfassung"
-
 
 #: templates/core/landing.html:4
 msgid ""
@@ -473,7 +401,6 @@ msgstr ""
 "Freelancer und Arbeitnehmer. Monatstabellen, PDF-Export, E-Mail-Berichte – "
 "alles unter deiner Kontrolle."
 
-
 #: templates/core/landing.html:21
 msgid ""
 "The time tracker you truly <strong style=\"color:var(--ctp-text)\">own</"
@@ -484,57 +411,46 @@ msgstr ""
 "\">besitzt</strong>. Kein Abo, keine Cloud, keine Kompromisse – einfach auf "
 "deinem eigenen Server."
 
-
 #: templates/core/landing.html:25 templates/core/landing.html:166
 #: templates/core/setup/done.html:11
 msgid "Go to Dashboard"
 msgstr "Zum Dashboard"
 
-
 #: templates/core/landing.html:38
 msgid "Monthly report – February 2026"
 msgstr "Monatsbericht – Februar 2026"
-
 
 #: templates/core/landing.html:41
 msgid "Mon, 03.02."
 msgstr "Mo, 03.02."
 
-
 #: templates/core/landing.html:45
 msgid "Tue, 04.02."
 msgstr "Di, 04.02."
-
 
 #: templates/core/landing.html:49
 msgid "Wed, 05.02."
 msgstr "Mi, 05.02."
 
-
 #: templates/core/landing.html:53
 msgid "Thu, 06.02."
 msgstr "Do, 06.02."
-
 
 #: templates/core/landing.html:57
 msgid "Fri, 07.02."
 msgstr "Fr, 07.02."
 
-
 #: templates/core/landing.html:61
 msgid "Total February"
 msgstr "Gesamt Februar"
-
 
 #: templates/core/landing.html:75
 msgid "Everything you need."
 msgstr "Alles, was du brauchst."
 
-
 #: templates/core/landing.html:75
 msgid "Nothing you don't."
 msgstr "Nichts, was du nicht brauchst."
-
 
 #: templates/core/landing.html:76
 msgid ""
@@ -544,11 +460,9 @@ msgstr ""
 "trackable. ist schlank, schnell und auf die wesentlichen Dinge fokussiert – "
 "ohne aufgeblähte SaaS-Features, die du sowieso nie nutzt."
 
-
 #: templates/core/landing.html:82
 msgid "Quick time entry"
 msgstr "Schnelle Zeiterfassung"
-
 
 #: templates/core/landing.html:83
 msgid ""
@@ -558,11 +472,9 @@ msgstr ""
 "Trag Start- und Endzeit ein, gib deine Pause an – fertig. Kein Tracking, "
 "kein Timer, kein Stress."
 
-
 #: templates/core/landing.html:87
 msgid "Automatic monthly tables"
 msgstr "Automatische Monatstabellen"
-
 
 #: templates/core/landing.html:88
 msgid ""
@@ -572,11 +484,9 @@ msgstr ""
 "Gesamtstunden und Verdienst werden automatisch berechnet und übersichtlich "
 "als Tabelle dargestellt."
 
-
 #: templates/core/landing.html:92
 msgid "PDF export"
 msgstr "PDF-Export"
-
 
 #: templates/core/landing.html:93
 msgid ""
@@ -586,11 +496,9 @@ msgstr ""
 "Exportiere deine Monatstabellen als professionelles PDF im Querformat – "
 "bereit zum Einreichen beim Arbeitgeber."
 
-
 #: templates/core/landing.html:97
 msgid "Automatic email reports"
 msgstr "Automatische E-Mail-Berichte"
-
 
 #: templates/core/landing.html:98
 msgid ""
@@ -600,11 +508,9 @@ msgstr ""
 "Am letzten Tag jedes Monats erhältst du deinen Monatsbericht automatisch per "
 "E-Mail."
 
-
 #: templates/core/landing.html:102
 msgid "Progressive Web App"
 msgstr "Progressive Web App"
-
 
 #: templates/core/landing.html:103
 msgid ""
@@ -614,11 +520,9 @@ msgstr ""
 "Installierbar auf dem Homescreen deines Smartphones wie eine native App – "
 "ohne App Store."
 
-
 #: templates/core/landing.html:107
 msgid "Multi-profile support"
 msgstr "Multi-Profil-Support"
-
 
 #: templates/core/landing.html:108
 msgid ""
@@ -628,21 +532,17 @@ msgstr ""
 "Mehrere Jobs gleichzeitig? Kein Problem. Verwalte beliebig viele Profile mit "
 "eigenem Stundenlohn pro Profil."
 
-
 #: templates/core/landing.html:120
 msgid "Your data."
 msgstr "Deine Daten."
-
 
 #: templates/core/landing.html:120
 msgid "Your server."
 msgstr "Dein Server."
 
-
 #: templates/core/landing.html:120
 msgid "Your control."
 msgstr "Deine Kontrolle."
-
 
 #: templates/core/landing.html:121
 msgid ""
@@ -654,56 +554,45 @@ msgstr ""
 "kein Abo, kein Vendor-Lock-in. Du entscheidest, wo deine Arbeitszeitdaten "
 "liegen."
 
-
 #: templates/core/landing.html:123
 msgid "Deploy with Docker in under 5 minutes"
 msgstr "Deployment per Docker in unter 5 Minuten"
-
 
 #: templates/core/landing.html:124
 msgid "Compatible with Coolify, Portainer, and more"
 msgstr "Kompatibel mit Coolify, Portainer und Co."
 
-
 #: templates/core/landing.html:125
 msgid "SQLite database with automatic backups"
 msgstr "SQLite-Datenbank mit automatischen Backups"
-
 
 #: templates/core/landing.html:126
 msgid "No external tracking or analytics"
 msgstr "Kein externes Tracking oder Analytics"
 
-
 #: templates/core/landing.html:127
 msgid "Fully open source on GitHub"
 msgstr "Vollständig quelloffen auf GitHub"
-
 
 #: templates/core/landing.html:139
 msgid "Clone repository"
 msgstr "Repository klonen"
 
-
 #: templates/core/landing.html:143
 msgid "Configure environment"
 msgstr "Umgebung konfigurieren"
-
 
 #: templates/core/landing.html:147
 msgid "Launch the app"
 msgstr "Starten"
 
-
 #: templates/core/landing.html:150
 msgid "trackable. is running on port 8000"
 msgstr "trackable. läuft auf Port 8000"
 
-
 #: templates/core/landing.html:162
 msgid "Ready to get started?"
 msgstr "Bereit anzufangen?"
-
 
 #: templates/core/landing.html:163
 msgid ""
@@ -713,6 +602,13 @@ msgstr ""
 "Richte trackable. in wenigen Minuten ein und übernimm die Kontrolle über "
 "deine Arbeitszeit. Kostenlos, für immer."
 
+#: templates/core/language_switcher.html:5
+msgid "Language"
+msgstr "Sprache"
+
+#: templates/core/language_switcher.html:6
+msgid "Select language"
+msgstr "Sprache auswählen"
 
 # accounts/login.html
 #: templates/core/manage/dashboard.html:11
@@ -721,27 +617,22 @@ msgstr ""
 msgid "Users"
 msgstr "Benutzer"
 
-
 #: templates/core/manage/dashboard.html:13
 msgid "staff"
 msgstr "Mitarbeiter"
 
-
 #: templates/core/manage/dashboard.html:13
 msgid "admins"
 msgstr "Administratoren"
-
 
 #: templates/core/manage/dashboard.html:16
 #: templates/core/manage/settings.html:14 templates/core/setup/step2.html:13
 msgid "Registration"
 msgstr "Registrieren"
 
-
 #: templates/core/manage/dashboard.html:18
 msgid "Enabled,Disabled"
 msgstr "Aktiviert,Deaktiviert"
-
 
 #: templates/core/manage/dashboard.html:29
 #: templates/organizations/create.html:3 templates/organizations/create.html:15
@@ -749,35 +640,28 @@ msgstr "Aktiviert,Deaktiviert"
 msgid "Create organization"
 msgstr "Organisation erstellen"
 
-
 #: templates/core/manage/dashboard.html:31
 msgid "Are you sure? New users will be redirected to the setup wizard."
 msgstr ""
-"Sind Sie sicher? Neue Benutzer werden zum Setup-Assistenten weitergele"
-"itet."
-
+"Sind Sie sicher? Neue Benutzer werden zum Setup-Assistenten weitergeleitet."
 
 # accounts/password_reset.html
 #: templates/core/manage/dashboard.html:33
 msgid "Reset setup wizard"
 msgstr "Passwort zurücksetzen"
 
-
 #: templates/core/manage/settings.html:3
 msgid "Settings – Management"
 msgstr "Einstellungen – Verwaltung"
-
 
 # timetracking/monthly_table.html
 #: templates/core/manage/settings.html:7 templates/core/manage/user_list.html:8
 msgid "Back to Management"
 msgstr "Zurück zum Mitarbeiter"
 
-
 #: templates/core/manage/settings.html:19 templates/core/setup/step2.html:18
 msgid "Allow public registration"
 msgstr "Öffentliche Registrierung erlauben"
-
 
 #: templates/core/manage/settings.html:22
 msgid ""
@@ -787,11 +671,9 @@ msgstr ""
 "Wenn deaktiviert, können nur Administratoren Konten erstellen. Die "
 "Umgebungsvariable DISABLE_REGISTRATION überschreibt diese Einstellung."
 
-
 #: templates/core/manage/settings.html:26 templates/core/setup/step2.html:25
 msgid "Email configuration (optional)"
 msgstr "E-Mail-Konfiguration (optional)"
-
 
 #: templates/core/manage/settings.html:28 templates/core/setup/step2.html:27
 msgid ""
@@ -801,49 +683,40 @@ msgstr ""
 "Leer lassen, um die Standardwerte der Umgebungsvariablen zu verwenden "
 "(EMAIL_HOST, EMAIL_PORT, etc.)."
 
-
 #: templates/core/manage/settings.html:32 templates/core/setup/step2.html:31
 msgid "SMTP host"
 msgstr "SMTP-Host"
 
-
 #: templates/core/manage/settings.html:37 templates/core/setup/step2.html:36
 msgid "SMTP port"
 msgstr "SMTP-Port"
-
 
 # accounts/login.html
 #: templates/core/manage/settings.html:49 templates/core/setup/step2.html:48
 msgid "SMTP username"
 msgstr "SMTP-Benutzername"
 
-
 #: templates/core/manage/settings.html:54 templates/core/setup/step2.html:53
 msgid "SMTP password"
 msgstr "SMTP-Passwort"
-
 
 #: templates/core/manage/settings.html:55
 #: templates/core/manage/user_detail.html:25
 msgid "Leave empty to keep current"
 msgstr "Leer lassen, um den aktuellen Wert zu behalten"
 
-
 #: templates/core/manage/settings.html:57
 msgid "Leave empty to keep the current password."
 msgstr "Leer lassen, um das aktuelle Passwort zu behalten."
-
 
 #: templates/core/manage/settings.html:60 templates/core/setup/step2.html:58
 #: trackable/core/models.py:37
 msgid "Default from email"
 msgstr "Standard-Absender-E-Mail"
 
-
 #: templates/core/manage/settings.html:66
 msgid "Save settings"
 msgstr "Einstellungen"
-
 
 # timetracking/monthly_table.html
 #: templates/core/manage/user_detail.html:7
@@ -851,51 +724,42 @@ msgstr "Einstellungen"
 msgid "Back to Users"
 msgstr "Zurück zu den Benutzern"
 
-
 #: templates/core/manage/user_detail.html:19
 #: templates/core/manage/user_form.html:19
 #: templates/core/manage/user_list.html:18 templates/core/setup/step1.html:18
 msgid "Email"
 msgstr "E-Mail"
 
-
 #: templates/core/manage/user_detail.html:27
 msgid "Only set if you want to change the password."
 msgstr "Nur ausfüllen, wenn das Passwort geändert werden soll."
-
 
 #: templates/core/manage/user_detail.html:30
 msgid "Permissions"
 msgstr "Berechtigungen"
 
-
 #: templates/core/manage/user_detail.html:35
 msgid "Active (can log in)"
 msgstr "Aktiv (kann sich anmelden)"
-
 
 #: templates/core/manage/user_detail.html:42
 #: templates/core/manage/user_form.html:32
 msgid "Staff (can access Management panel)"
 msgstr "Mitarbeiter (hat Zugriff auf die Verwaltung)"
 
-
 #: templates/core/manage/user_detail.html:49
 #: templates/core/manage/user_form.html:39
 msgid "Superuser (full access)"
 msgstr "Superuser (voller Zugriff)"
 
-
 #: templates/core/manage/user_detail.html:54 templates/profiles/create.html:58
-#: templates/timetracking/add_entry.html:54
+#: templates/timetracking/add_entry.html:58
 msgid "Save changes"
 msgstr "Änderungen speichern"
-
 
 #: templates/core/manage/user_form.html:3
 msgid "New user – Management"
 msgstr "Neuer Benutzer – Verwaltung"
-
 
 # accounts/password_reset_confirm.html
 #: templates/core/manage/user_form.html:6
@@ -903,59 +767,49 @@ msgstr "Neuer Benutzer – Verwaltung"
 msgid "New user"
 msgstr "Neues Passwort"
 
-
 #: templates/core/manage/user_form.html:43
 msgid "Create user"
 msgstr "Benutzer erstellen"
-
 
 #: templates/core/manage/user_list.html:3
 msgid "Users – Management"
 msgstr "Benutzer – Verwaltung"
 
-
 #: templates/core/manage/user_list.html:19
 msgid "Staff"
 msgstr "Mitarbeiter"
-
 
 #: templates/core/manage/user_list.html:20
 msgid "Admin"
 msgstr "Administrator"
 
-
 #: templates/core/manage/user_list.html:21
 msgid "Active"
 msgstr "Tätigkeit"
-
 
 #: templates/core/manage/user_list.html:22
 msgid "Actions"
 msgstr "Aktionen"
 
-
 #: templates/core/manage/user_list.html:33
 #: templates/organizations/employee_profile_detail.html:25
 #: templates/organizations/employee_profile_detail.html:59
+#: templates/organizations/employee_profile_detail.html:154
 #: templates/timetracking/monthly_table.html:79
 msgid "Edit"
 msgstr "Bearbeiten"
-
 
 #: templates/core/manage/user_list.html:37
 msgid "No users found."
 msgstr "Keine Benutzer gefunden."
 
-
 #: templates/core/setup/admin_exists.html:3
 msgid "Admin exists – Setup"
 msgstr "Admin existiert – Setup"
 
-
 #: templates/core/setup/admin_exists.html:6
 msgid "Admin account already exists"
 msgstr "Admin-Konto existiert bereits"
-
 
 #: templates/core/setup/admin_exists.html:8
 msgid ""
@@ -965,100 +819,80 @@ msgstr ""
 "Ein Admin-Konto wurde in der Datenbank gefunden. Sie müssen kein neues "
 "erstellen. Fahren Sie mit der Konfiguration Ihrer Instanz fort."
 
-
 #: templates/core/setup/admin_exists.html:11
 msgid "Continue setup"
 msgstr "Setup fortsetzen"
-
 
 #: templates/core/setup/done.html:3
 msgid "Setup Complete"
 msgstr "Setup abgeschlossen"
 
-
 #: templates/core/setup/done.html:6
 msgid "Setup complete!"
 msgstr "Setup abgeschlossen!"
-
 
 #: templates/core/setup/done.html:8
 msgid "Your trackable instance is ready. You are logged in as the admin."
 msgstr "Ihre trackable-Instanz ist bereit. Sie sind als Admin angemeldet."
 
-
 #: templates/core/setup/step1.html:3
 msgid "Setup – Create Admin"
 msgstr "Setup – Admin erstellen"
-
 
 #: templates/core/setup/step1.html:6
 msgid "Welcome to trackable."
 msgstr "Willkommen bei trackable!"
 
-
 #: templates/core/setup/step1.html:8
 msgid "Let's set up your instance. First, create the admin account."
 msgstr "Richten Sie Ihre Instanz ein. Erstellen Sie zunächst das Admin-Konto."
-
 
 #: templates/core/setup/step1.html:33
 msgid "Create admin account"
 msgstr "Admin-Konto erstellen"
 
-
 #: templates/core/setup/step2.html:3
 msgid "Setup – Configuration"
 msgstr "Setup – Konfiguration"
-
 
 #: templates/core/setup/step2.html:6
 msgid "Configure your instance"
 msgstr "Instanz konfigurieren"
 
-
 #: templates/core/setup/step2.html:8
 msgid "These settings can be changed later in the Management panel."
 msgstr ""
-"Diese Einstellungen können später im Verwaltungsbereich geändert werde"
-"n."
-
+"Diese Einstellungen können später im Verwaltungsbereich geändert werden."
 
 #: templates/core/setup/step2.html:21
 msgid "If disabled, only admins can create accounts."
 msgstr "Wenn deaktiviert, können nur Administratoren Konten erstellen."
 
-
 #: templates/core/setup/step2.html:63
 msgid "Advanced"
 msgstr "Erweitert"
-
 
 #: templates/core/setup/step2.html:65 trackable/core/models.py:40
 msgid "Allowed hosts"
 msgstr "Erlaubte Hosts"
 
-
 #: templates/core/setup/step2.html:68
 msgid "e.g. example.com, app.example.com"
 msgstr "z. B. example.com, app.example.com"
 
-
 #: templates/core/setup/step2.html:70
 msgid "Comma-separated. Leave empty to use the ALLOWED_HOSTS env var."
 msgstr ""
-"Komma-getrennt. Leer lassen, um die ALLOWED_HOSTS-Umgebungsvariable zu"
-" verwenden."
-
+"Komma-getrennt. Leer lassen, um die ALLOWED_HOSTS-Umgebungsvariable zu "
+"verwenden."
 
 #: templates/core/setup/step2.html:75
 msgid "Complete setup"
 msgstr "Setup abschließen"
 
-
 #: templates/emails/email_confirm_email.html:9
 msgid "Confirm your email address"
 msgstr "Bestätigen Sie Ihre E-Mail-Adresse"
-
 
 #: templates/emails/email_confirm_email.html:10
 msgid ""
@@ -1068,11 +902,9 @@ msgstr ""
 "Willkommen bei Trackable! Bitte klicken Sie auf den Button unten, um Ihre E-"
 "Mail-Adresse zu bestätigen und Ihr Konto zu aktivieren."
 
-
 #: templates/emails/email_confirm_email.html:12
 msgid "Confirm email"
 msgstr "E-Mail bestätigen"
-
 
 #: templates/emails/email_confirm_email.html:14
 msgid ""
@@ -1082,23 +914,19 @@ msgstr ""
 "Falls Sie kein Konto bei Trackable erstellt haben, können Sie diese E-Mail "
 "ignorieren."
 
-
 #: templates/emails/email_confirm_email.html:15
 msgid "If the button doesn't work, copy and paste this link into your browser:"
 msgstr ""
-"Falls der Button nicht funktioniert, kopieren Sie diesen Link in Ihren"
-" Browser:"
-
+"Falls der Button nicht funktioniert, kopieren Sie diesen Link in Ihren "
+"Browser:"
 
 #: templates/emails/monthly_report_email.html:91
 msgid "Monthly Report"
 msgstr "Monatsbericht"
 
-
 #: templates/emails/monthly_report_email.html:95
 msgid "Hello"
 msgstr "Hallo"
-
 
 #: templates/emails/monthly_report_email.html:96
 #, python-format
@@ -1109,12 +937,10 @@ msgstr ""
 "hier ist Ihr monatlicher Bericht für <strong>%(profile.title)s</strong> im "
 "<strong>%(month_name)s</strong>:"
 
-
 #: templates/emails/monthly_report_email.html:100
 #: trackable/organizations/forms.py:142
 msgid "Profile"
 msgstr "Profile"
-
 
 #: templates/emails/monthly_report_email.html:104
 #: templates/organizations/employee_profile_detail.html:13
@@ -1123,29 +949,24 @@ msgstr "Profile"
 msgid "Position"
 msgstr "Stelle"
 
-
 #: templates/emails/monthly_report_email.html:108
 #: templates/organizations/employee_profile_detail.html:90
 msgid "Month"
 msgstr "Monat"
-
 
 #: templates/emails/monthly_report_email.html:112
 #: trackable/core/pdf_export.py:87
 msgid "Total Hours"
 msgstr "Gesamtstunden"
 
-
 #: templates/emails/monthly_report_email.html:116
 #: trackable/core/pdf_export.py:89
 msgid "Total Earnings"
 msgstr "Gesamtverdienst"
 
-
 #: templates/emails/monthly_report_email.html:121
 msgid "Thank you for using Trackable!"
 msgstr "Danke, dass Sie Trackable nutzen!"
-
 
 #: templates/emails/monthly_report_email.html:124
 msgid ""
@@ -1154,17 +975,14 @@ msgstr ""
 "Dies ist eine automatische E-Mail von Trackable. Bitte antworten Sie nicht "
 "auf diese E-Mail."
 
-
 # emails/password_reset_email.html
 #: templates/emails/password_reset_email.html:22
 msgid "Reset your password"
 msgstr "Passwort zurücksetzen"
 
-
 #: templates/emails/password_reset_email.html:26
 msgid "Hi"
 msgstr "Hallo"
-
 
 #: templates/emails/password_reset_email.html:27
 msgid ""
@@ -1172,7 +990,6 @@ msgid ""
 msgstr ""
 "Sie haben angefordert, Ihr Passwort zurückzusetzen. Klicken Sie auf den "
 "untenstehenden Button, um ein neues Passwort zu setzen:"
-
 
 #: templates/emails/password_reset_email.html:31
 msgid ""
@@ -1182,58 +999,49 @@ msgstr ""
 "Dieser Link ist 24 Stunden gültig. Wenn Sie Ihr Passwort nicht zurücksetzen "
 "möchten, können Sie diese E-Mail ignorieren."
 
-
 #: templates/emails/password_reset_email.html:34
 msgid "This is an automated email from trackable. Please do not reply."
 msgstr ""
 "Dies ist eine automatische E-Mail von trackable. Bitte antworten Sie nicht "
 "auf diese E-Mail."
 
-
 #: templates/organizations/branding.html:4
 #: templates/organizations/dashboard.html:87
 msgid "Branding"
 msgstr "Branding"
 
-
 #: templates/organizations/branding.html:8
 msgid "Company Branding"
 msgstr "Firmen-Design"
-
 
 #: templates/organizations/branding.html:10
 msgid "Customize the look and feel of trackable for your organization."
 msgstr "Passen Sie das Erscheinungsbild für Ihre Firma an."
 
-
 #: templates/organizations/branding.html:31
 #: templates/organizations/employee_profile_detail.html:46
 #: templates/organizations/employee_profile_detail.html:83
-#: templates/organizations/employee_remove.html:15
+#: templates/organizations/employee_remove.html:17
 #: templates/organizations/weekly_calendar.html:461
 #: templates/organizations/weekly_calendar.html:488
 #: templates/profiles/create.html:63 templates/profiles/create.html:65
 msgid "Cancel"
 msgstr "Abbrechen"
 
-
 # timetracking/home.html
 #: templates/organizations/branding.html:36
 msgid "Preview"
 msgstr "Vorschau"
 
-
 #: templates/organizations/branding.html:38
 msgid "To see your branding changes, save and reload any page."
 msgstr ""
-"Um Ihre Design-Änderungen zu sehen, speichern Sie und laden Sie eine b"
-"eliebige Seite neu."
-
+"Um Ihre Design-Änderungen zu sehen, speichern Sie und laden Sie eine "
+"beliebige Seite neu."
 
 #: templates/organizations/create.html:7
 msgid "Create your organization"
 msgstr "Organisation erstellen"
-
 
 #: templates/organizations/create.html:8
 msgid ""
@@ -1243,18 +1051,14 @@ msgstr ""
 "Erstellen Sie einen Arbeitsbereich für Ihr Unternehmen. Sie werden Manager "
 "und können Mitarbeiter hinzufügen."
 
-
 #: templates/organizations/create.html:12 trackable/organizations/forms.py:48
 msgid "Organization name"
 msgstr "Organisationsname"
 
-
 #: templates/organizations/dashboard.html:9
 msgid "Manage your team and view employee time data."
 msgstr ""
-"Verwalten Sie Ihr Team und sehen Sie die Arbeitszeiten Ihrer Mitarbeit"
-"er ein."
-
+"Verwalten Sie Ihr Team und sehen Sie die Arbeitszeiten Ihrer Mitarbeiter ein."
 
 #: templates/organizations/dashboard.html:12
 #: templates/organizations/dashboard.html:61
@@ -1263,14 +1067,11 @@ msgstr ""
 msgid "Holidays"
 msgstr "Feiertage"
 
-
 #: templates/organizations/dashboard.html:13
 #: templates/organizations/time_entry_import.html:3
 #: templates/organizations/time_entry_import.html:9
-#| msgid "No time entries yet"
 msgid "Import time entries"
 msgstr "Noch keine Zeiten erfasst"
-
 
 #: templates/organizations/dashboard.html:14
 #: templates/organizations/dashboard.html:128
@@ -1279,28 +1080,23 @@ msgstr "Noch keine Zeiten erfasst"
 msgid "Add employee"
 msgstr "Mitarbeiter hinzufügen"
 
-
 #: templates/organizations/dashboard.html:20
 #: templates/organizations/dashboard.html:107
 msgid "Employees"
 msgstr "Mitarbeiter"
-
 
 #: templates/organizations/dashboard.html:24
 #: templates/organizations/dashboard.html:93
 msgid "Managers"
 msgstr "Manager"
 
-
 #: templates/organizations/dashboard.html:31
 msgid "Team Settings"
 msgstr "Team-Einstellungen"
 
-
 #: templates/organizations/dashboard.html:34
 msgid "Time tracking mode"
 msgstr "Zeiterfassungsmodus"
-
 
 #: templates/organizations/dashboard.html:35
 msgid ""
@@ -1310,48 +1106,37 @@ msgstr ""
 "Im eingeschränkten Modus können Mitarbeiter nur via Start/Stopp-Timer "
 "erfassen. Manager behalten vollen Zugriff."
 
-
 #: templates/organizations/dashboard.html:45
 msgid "Classic – Full access"
 msgstr "Klassisch – Volle Bearbeitung"
-
 
 #: templates/organizations/dashboard.html:48
 msgid "Restricted – Timer only"
 msgstr "Eingeschränkt – Nur Timer"
 
-
 #: templates/organizations/dashboard.html:54
 msgid "Restricted – Timer only (managers can edit)"
 msgstr "Eingeschränkt – Nur Timer (Manager können bearbeiten)"
-
 
 #: templates/organizations/dashboard.html:56
 msgid "Classic – Full CRUD access"
 msgstr "Klassisch – uneingeschränkter Zugriff"
 
-
 #: templates/organizations/dashboard.html:70
-#| msgid "Enabled,Disabled"
 msgid "Enabled"
 msgstr "Aktiviert"
 
-
 #: templates/organizations/dashboard.html:73
-#| msgid "Enabled,Disabled"
 msgid "Disabled"
 msgstr "Deaktiviert"
-
 
 #: templates/organizations/dashboard.html:79
 msgid "Holidays are deducted from vacation days"
 msgstr "Feiertage werden von den Urlaubstagen abgezogen"
 
-
 #: templates/organizations/dashboard.html:81
 msgid "Holidays are ignored in vacation calculation"
 msgstr "Feiertage werden bei der Urlaubsberechnung ignoriert"
-
 
 #: templates/organizations/dashboard.html:86
 #: templates/organizations/employee_dashboard.html:15
@@ -1360,32 +1145,25 @@ msgstr "Feiertage werden bei der Urlaubsberechnung ignoriert"
 msgid "Weekly Calendar"
 msgstr "Wochenkalender"
 
-
 #: templates/organizations/dashboard.html:101
 msgid "Manager"
 msgstr "Manager"
-
 
 #: templates/organizations/dashboard.html:117
 msgid "View"
 msgstr "Ansehen"
 
-
 #: templates/organizations/dashboard.html:118
-#: templates/organizations/employee_remove.html:16
 msgid "Remove"
 msgstr "Entfernen"
-
 
 #: templates/organizations/dashboard.html:126
 msgid "No employees yet"
 msgstr "Noch keine Mitarbeiter"
 
-
 #: templates/organizations/dashboard.html:127
 msgid "Add your first employee to start tracking their time."
 msgstr "Fügen Sie Ihren ersten Mitarbeiter hinzu, um Zeiten zu erfassen."
-
 
 #: templates/organizations/employee_create.html:8
 msgid ""
@@ -1395,26 +1173,22 @@ msgstr ""
 "Erstellen Sie ein Konto für Ihren Mitarbeiter. Er kann sich mit dem "
 "temporären Passwort anmelden, das Sie festlegen."
 
-
 # accounts/password_reset_confirm.html
 #: templates/organizations/employee_create.html:39
 #: trackable/organizations/forms.py:54
 msgid "Temporary password"
 msgstr "Temporäres Passwort"
 
-
 #: templates/organizations/employee_create.html:44
 #: trackable/organizations/forms.py:58
 msgid "Confirm temporary password"
 msgstr "Temporäres Passwort bestätigen"
 
-
 #: templates/organizations/employee_create.html:49
-#: templates/profiles/create.html:36 templates/profiles/detail.html:32
+#: templates/profiles/create.html:36 templates/profiles/detail.html:34
 #: trackable/organizations/forms.py:64 trackable/profiles/forms.py:13
 msgid "Weekly hours"
 msgstr "Wochenstunden"
-
 
 #: templates/organizations/employee_create.html:52
 #: templates/organizations/employee_profile_detail.html:37
@@ -1422,162 +1196,136 @@ msgstr "Wochenstunden"
 msgid "h"
 msgstr "Std"
 
-
 #: templates/organizations/employee_create.html:54
 #: templates/organizations/employee_profile_detail.html:41
 #: templates/profiles/create.html:41
 msgid "min"
 msgstr "Min"
 
-
 #: templates/organizations/employee_create.html:58
 #: templates/profiles/create.html:45
 msgid "Enter weekly hours as hours and optional minutes (e.g. 4 h 20 min)."
-msgstr "Gib die Wochenstunden als Stunden und optionale Minuten ein (z. B. 4 Std 20 Min)."
-
+msgstr ""
+"Gib die Wochenstunden als Stunden und optionale Minuten ein (z. B. 4 Std 20 "
+"Min)."
 
 #: templates/organizations/employee_create.html:61
 #: trackable/organizations/forms.py:77
 msgid "Contract start date"
 msgstr "Vertragsstartdatum"
 
-
 #: templates/organizations/employee_create.html:67
 #: trackable/organizations/forms.py:83
 msgid "Contract end date"
 msgstr "Vertragsende"
 
-
 #: templates/organizations/employee_create.html:72
 msgid "Create employee"
 msgstr "Mitarbeiter erstellen"
-
 
 #: templates/organizations/employee_dashboard.html:3
 msgid "My Organization"
 msgstr "Meine Organisation"
 
-
 #: templates/organizations/employee_dashboard.html:9
 msgid "You are a member of this organization."
 msgstr "Sie sind Mitglied dieser Organisation."
-
 
 #: templates/organizations/employee_dashboard.html:11
 msgid "Role"
 msgstr "Rolle"
 
-
 #: templates/organizations/employee_detail.html:3
 #: templates/organizations/employee_profile_detail.html:12
 #: templates/organizations/weekly_calendar.html:441
-#: templates/organizations/weekly_calendar.html:472
-#: trackable/organizations/forms.py:138 trackable/organizations/views.py:141
+#: templates/organizations/weekly_calendar.html:472 trackable/core/tests.py:58
+#: trackable/organizations/forms.py:138 trackable/organizations/views.py:146
 msgid "Employee"
 msgstr "Mitarbeiter"
-
 
 #: templates/organizations/employee_detail.html:8
 #: templates/organizations/holiday_list.html:8
 msgid "Back to organization"
 msgstr "Zurück zur Organisation"
 
-
 #: templates/organizations/employee_detail.html:12
 msgid "Remove from organization"
 msgstr "Aus Organisation entfernen"
-
 
 #: templates/organizations/employee_detail.html:23
 #: templates/profiles/list.html:24 templates/timetracking/home.html:35
 msgid "week"
 msgstr "Woche"
 
-
 #: templates/organizations/employee_detail.html:35
-#: templates/profiles/detail.html:107
+#: templates/profiles/detail.html:111
 msgid "Target"
 msgstr "Soll"
 
-
 #: templates/organizations/employee_detail.html:36
-#: templates/profiles/detail.html:108
+#: templates/profiles/detail.html:112
 msgid "Actual"
 msgstr "Ist"
 
-
 #: templates/organizations/employee_detail.html:37
 #: templates/organizations/employee_profile_detail.html:115
-#: templates/profiles/detail.html:112
+#: templates/profiles/detail.html:116
 #: templates/timetracking/monthly_table.html:39
 msgid "Balance"
 msgstr "Saldo"
-
 
 #: templates/organizations/employee_detail.html:49
 msgid "No time entries yet."
 msgstr "Noch keine Zeiten erfasst"
 
-
 #: templates/organizations/employee_detail.html:56
 msgid "No profiles yet"
 msgstr "Noch keine Profile"
 
-
 #: templates/organizations/employee_detail.html:57
 msgid "This employee has not created any work profiles yet."
 msgstr "Dieser Mitarbeiter hat noch keine Arbeitsprofile erstellt."
-
 
 # timetracking/monthly_table.html
 #: templates/organizations/employee_profile_detail.html:7
 msgid "Back to employee"
 msgstr "Zurück zum Mitarbeiter"
 
-
 #: templates/organizations/employee_profile_detail.html:15
-#: templates/profiles/detail.html:41
+#: templates/profiles/detail.html:43
 #: templates/timetracking/monthly_table.html:21
 msgid "Address"
 msgstr "Adresse"
-
 
 #: templates/organizations/employee_profile_detail.html:18
 #: templates/organizations/employee_profile_detail.html:30
 msgid "Weekly target hours"
 msgstr "Wöchentliche Soll-Stunden"
 
-
 #: templates/organizations/employee_profile_detail.html:22
 msgid "from profile"
 msgstr "vom Profil"
-
 
 #: templates/organizations/employee_profile_detail.html:51
 #: templates/organizations/employee_profile_detail.html:63
 msgid "Contract"
 msgstr "Vertrag"
 
-
 #: templates/organizations/employee_profile_detail.html:56
 msgid "open-ended"
 msgstr "unbefristet"
-
 
 #: templates/organizations/employee_profile_detail.html:64
 msgid "No contract dates set"
 msgstr "Keine Vertragsdaten hinterlegt"
 
-
 #: templates/organizations/employee_profile_detail.html:66
 msgid "Set"
 msgstr "Festlegen"
 
-
 #: templates/organizations/employee_profile_detail.html:72
 msgid "Contract start"
 msgstr "Vertragsstart"
-
 
 #: templates/organizations/employee_profile_detail.html:76
 #: templates/organizations/employee_profile_detail.html:136
@@ -1588,24 +1336,20 @@ msgstr "Vertragsstart"
 msgid "End"
 msgstr "Ende"
 
-
 #: templates/organizations/employee_profile_detail.html:103
 #: templates/timetracking/monthly_table.html:27
 msgid "Total hours"
 msgstr "Gesamtstunden"
-
 
 #: templates/organizations/employee_profile_detail.html:107
 #: templates/timetracking/monthly_table.html:31
 msgid "Total earnings"
 msgstr "Gesamtverdienst"
 
-
 #: templates/organizations/employee_profile_detail.html:111
 #: templates/timetracking/monthly_table.html:35
 msgid "Target hours"
 msgstr "Soll-Stunden"
-
 
 #: templates/organizations/employee_profile_detail.html:123
 #: templates/timetracking/monthly_table.html:47
@@ -1613,12 +1357,10 @@ msgstr "Soll-Stunden"
 msgid "Vacation days"
 msgstr "Urlaubstage"
 
-
 #: templates/organizations/employee_profile_detail.html:129
 #: templates/timetracking/monthly_table.html:54
 msgid "Working hours"
 msgstr "Arbeitsstunden"
-
 
 #: templates/organizations/employee_profile_detail.html:134
 #: templates/organizations/holiday_form.html:12
@@ -1626,12 +1368,11 @@ msgstr "Arbeitsstunden"
 #: templates/organizations/time_entry_import.html:75
 #: templates/organizations/weekly_calendar.html:448
 #: templates/organizations/weekly_calendar.html:475
-#: templates/timetracking/add_entry.html:26
+#: templates/timetracking/add_entry.html:30
 #: templates/timetracking/monthly_table.html:59 trackable/core/pdf_export.py:53
 #: trackable/organizations/forms.py:234 trackable/timetracking/forms.py:11
 msgid "Date"
 msgstr "Datum"
-
 
 #: templates/organizations/employee_profile_detail.html:135
 #: templates/organizations/time_entry_import.html:76
@@ -1642,77 +1383,94 @@ msgstr "Datum"
 msgid "Start"
 msgstr "Start"
 
-
 #: templates/organizations/employee_profile_detail.html:137
 #: templates/timetracking/monthly_table.html:62 trackable/core/pdf_export.py:53
 msgid "Break"
 msgstr "Pause"
-
 
 #: templates/organizations/employee_profile_detail.html:138
 #: templates/timetracking/monthly_table.html:63 trackable/core/pdf_export.py:53
 msgid "Hours"
 msgstr "Stunden"
 
-
 #: templates/organizations/employee_profile_detail.html:139
 #: templates/timetracking/monthly_table.html:64 trackable/core/pdf_export.py:53
 msgid "Activity"
 msgstr "Tätigkeit"
 
-
 #: templates/organizations/employee_profile_detail.html:155
+#: templates/timetracking/monthly_table.html:80
+msgid "Delete this entry?"
+msgstr "Diesen Eintrag löschen?"
+
+#: templates/organizations/employee_profile_detail.html:157
+#: templates/organizations/holiday_list.html:47
+#: templates/profiles/detail.html:17
+#: templates/timetracking/monthly_table.html:82
+#: templates/timetracking/vacation_overview.html:78
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/organizations/employee_profile_detail.html:165
 #: templates/timetracking/monthly_table.html:90
 msgid "No entries for this month."
 msgstr "Keine Einträge für diesen Monat vorhanden."
 
-
-#: templates/organizations/employee_profile_detail.html:164
+#: templates/organizations/employee_profile_detail.html:174
 #: templates/timetracking/monthly_table.html:100
 msgid "Vacation / Absence"
 msgstr "Urlaub / Abwesenheit"
 
-
-#: templates/organizations/employee_profile_detail.html:169
+#: templates/organizations/employee_profile_detail.html:179
 #: templates/timetracking/monthly_table.html:105
 msgid "Period"
 msgstr "Zeitraum"
 
-
-#: templates/organizations/employee_profile_detail.html:170
+#: templates/organizations/employee_profile_detail.html:180
 #: templates/timetracking/monthly_table.html:106
 #: templates/timetracking/vacation_overview.html:59
 msgid "Workdays"
 msgstr "Arbeitstage"
 
-
-#: templates/organizations/employee_profile_detail.html:171
+#: templates/organizations/employee_profile_detail.html:181
 #: templates/timetracking/monthly_table.html:107
 #: templates/timetracking/vacation_overview.html:60
 msgid "Weeks"
 msgstr "Wochen"
 
-
-#: templates/organizations/employee_profile_detail.html:172
+#: templates/organizations/employee_profile_detail.html:182
 #: templates/timetracking/add_vacation.html:31
 #: templates/timetracking/monthly_table.html:108
 #: templates/timetracking/vacation_overview.html:61
 msgid "Description"
 msgstr "Beschreibung"
 
-
-#: templates/organizations/employee_profile_detail.html:185
+#: templates/organizations/employee_profile_detail.html:195
 #: templates/timetracking/monthly_table.html:121
 #: templates/timetracking/vacation_overview.html:85
 msgid "Total"
 msgstr "Gesamt"
 
+# profiles/detail.html
+#: templates/organizations/employee_profile_detail.html:206
+#: templates/timetracking/add_entry.html:4
+#: templates/timetracking/add_entry.html:17
+#: templates/timetracking/monthly_table.html:132
+msgid "Add time entry"
+msgstr "Zeit eintragen"
+
+#: templates/organizations/employee_profile_detail.html:209
+#: templates/timetracking/add_vacation.html:4
+#: templates/timetracking/monthly_table.html:135
+#: templates/timetracking/vacation_overview.html:13
+#: templates/timetracking/vacation_overview.html:97
+msgid "Add vacation"
+msgstr "Urlaub hinzufügen"
 
 #: templates/organizations/employee_remove.html:3
 #: templates/organizations/employee_remove.html:7
 msgid "Remove employee"
 msgstr "Mitarbeiter entfernen"
-
 
 #: templates/organizations/employee_remove.html:9
 #, python-format
@@ -1723,15 +1481,18 @@ msgstr ""
 "Sind Sie sicher, dass Sie <strong>%(name)s</strong> aus der Organisation "
 "entfernen möchten?"
 
-
-#: templates/organizations/employee_remove.html:11
+#: templates/organizations/employee_remove.html:12
 msgid ""
-"Their account and time data will remain, but you will no longer be able to "
-"view their data."
+"The employee account and all associated time entries, profiles, and vacation "
+"data will be permanently deleted."
 msgstr ""
-"Das Konto und die Zeiterfassungsdaten bleiben erhalten, aber Sie können die "
-"Daten nicht mehr einsehen."
+"Das Mitarbeiterkonto und alle zugehörigen Zeiteinträge, Profile und Urlaubs"
+"daten werden unwiderruflich gelöscht."
 
+#: templates/organizations/employee_remove.html:18
+#| msgid "Create employee"
+msgid "Delete employee account"
+msgstr "Mitarbeiter erstellen"
 
 #: templates/organizations/holiday_form.html:3
 #: templates/organizations/holiday_form.html:8
@@ -1741,17 +1502,14 @@ msgstr ""
 msgid "Add holiday"
 msgstr "Feiertag hinzufügen"
 
-
 #: templates/organizations/holiday_form.html:7
 msgid "Back to holidays"
 msgstr "Zurück zu den Feiertagen"
-
 
 #: templates/organizations/holiday_form.html:16
 #: trackable/organizations/forms.py:235
 msgid "Holiday name"
 msgstr "Feiertagsname"
-
 
 #: templates/organizations/holiday_list.html:10
 msgid ""
@@ -1761,29 +1519,17 @@ msgstr ""
 "Diese Feiertage werden bei der Berechnung der Urlaubsarbeitstage für alle "
 "Organisationsmitglieder ausgeschlossen."
 
-
 #: templates/organizations/holiday_list.html:35
 msgid "Holiday"
 msgstr "Feiertag"
-
 
 #: templates/organizations/holiday_list.html:45
 msgid "Delete this holiday?"
 msgstr "Diesen Feiertag löschen?"
 
-
-#: templates/organizations/holiday_list.html:47
-#: templates/profiles/detail.html:17
-#: templates/timetracking/monthly_table.html:82
-#: templates/timetracking/vacation_overview.html:78
-msgid "Delete"
-msgstr "Löschen"
-
-
 #: templates/organizations/holiday_list.html:58
 msgid "No holidays yet"
 msgstr "Noch keine Feiertage"
-
 
 #: templates/organizations/holiday_list.html:59
 msgid ""
@@ -1793,66 +1539,49 @@ msgstr ""
 "Fügen Sie Feiertage für Ihre Organisation hinzu. Sie werden automatisch bei "
 "der Berechnung der Urlaubsarbeitstage ausgeschlossen."
 
-
 #: templates/organizations/time_entry_import.html:11
 msgid "Upload a spreadsheet with time entries to import them for an employee."
 msgstr ""
-"Laden Sie eine Tabelle mit Zeiteinträgen hoch, um sie für einen Mitarb"
-"eiter zu importieren."
-
+"Laden Sie eine Tabelle mit Zeiteinträgen hoch, um sie für einen Mitarbeiter "
+"zu importieren."
 
 #: templates/organizations/time_entry_import.html:14
-#| msgid "Go to Dashboard"
 msgid "Back to dashboard"
 msgstr "Zum Dashboard"
-
 
 #: templates/organizations/time_entry_import.html:20
 msgid "Import summary"
 msgstr "Import-Zusammenfassung"
 
-
 #: templates/organizations/time_entry_import.html:24
-#| msgid "entries"
 msgid "Entries"
 msgstr "Einträge"
 
-
 #: templates/organizations/time_entry_import.html:28
 #: templates/organizations/time_entry_import.html:54
-#| msgid "Earnings"
 msgid "Warnings"
 msgstr "Warnungen"
 
-
 #: templates/organizations/time_entry_import.html:32
 #: templates/organizations/time_entry_import.html:43
-#| msgid "Error:"
 msgid "Errors"
 msgstr "Fehler"
 
-
 #: templates/organizations/time_entry_import.html:36
-#| msgid "Employee"
 msgid "Employee:"
 msgstr "Mitarbeiter:"
 
-
 #: templates/organizations/time_entry_import.html:37
-#| msgid "Profile"
 msgid "Profile:"
 msgstr "Profil:"
-
 
 #: templates/organizations/time_entry_import.html:66
 msgid "Preview of entries"
 msgstr "Vorschau der Einträge"
 
-
 #: templates/organizations/time_entry_import.html:68
 msgid "showing first 25"
 msgstr "zeigt die ersten 25"
-
 
 #: templates/organizations/time_entry_import.html:78
 #: templates/organizations/weekly_calendar.html:457
@@ -1860,89 +1589,70 @@ msgstr "zeigt die ersten 25"
 msgid "Notes"
 msgstr "Notizen"
 
-
 #: templates/organizations/time_entry_import.html:79
 msgid "Sheet"
 msgstr "Tabelle"
 
-
 #: templates/organizations/time_entry_import.html:80
 msgid "Row"
 msgstr "Zeile"
-
 
 #: templates/organizations/time_entry_import.html:101
 msgid ""
 "Please fix the errors above and re-upload the file. The import cannot "
 "proceed until all errors are resolved."
 msgstr ""
-"Bitte beheben Sie die oben stehenden Fehler und laden Sie die Datei er"
-"neut hoch. Der Import kann erst fortgesetzt werden, wenn alle Fehler b"
-"ehoben sind."
+"Bitte beheben Sie die oben stehenden Fehler und laden Sie die Datei erneut "
+"hoch. Der Import kann erst fortgesetzt werden, wenn alle Fehler behoben sind."
 
 #: templates/organizations/time_entry_import.html:109
-#| msgid "Confirm password"
 msgid "Confirm import"
 msgstr "Passwort bestätigen"
-
 
 #: templates/organizations/time_entry_import.html:110
 msgid "Cancel and start over"
 msgstr "Abbrechen und neu starten"
 
-
 #: templates/organizations/time_entry_import.html:117
-#| msgid "No entries for this month."
 msgid "No valid entries found in the file."
 msgstr "Keine Einträge für diesen Monat vorhanden."
-
 
 #: templates/organizations/time_entry_import.html:118
 msgid "Try again"
 msgstr "Erneut versuchen"
 
-
 #: templates/organizations/time_entry_import.html:163
 msgid "Only used for CSV files."
 msgstr "Wird nur für CSV-Dateien verwendet."
 
-
 # timetracking/home.html
 #: templates/organizations/time_entry_import.html:215
-#| msgid "Preview"
 msgid "Preview import"
 msgstr "Import-Vorschau"
-
 
 #: templates/organizations/weekly_calendar.html:331
 msgid "Week"
 msgstr "Woche"
 
-
 #: templates/organizations/weekly_calendar.html:334
 msgid "Today"
 msgstr "Heute"
-
 
 #: templates/organizations/weekly_calendar.html:340
 msgid "All employees"
 msgstr "Alle Mitarbeiter"
 
-
 #: templates/organizations/weekly_calendar.html:349
 msgid "View only"
 msgstr "Nur Ansicht"
-
 
 #: templates/organizations/weekly_calendar.html:421
 msgid "No entries for this week"
 msgstr "Keine Einträge für diese Woche."
 
-
 #: templates/organizations/weekly_calendar.html:422
 msgid "There are no time entries in this period."
 msgstr "Es gibt keine Zeiteinträge in diesem Zeitraum."
-
 
 #: templates/organizations/weekly_calendar.html:429
 msgid ""
@@ -1951,258 +1661,197 @@ msgstr ""
 "Klicken Sie auf eine leere Zelle, um einen Zeiteintrag hinzuzufügen. Klicken "
 "Sie auf einen vorhandenen Eintrag, um ihn zu bearbeiten."
 
-
 #: templates/organizations/weekly_calendar.html:431
 msgid "View your team's time entries. Managers can add and edit entries."
 msgstr ""
-"Sehen Sie die Zeiteinträge Ihres Teams. Manager können Einträge hinzuf"
-"ügen und bearbeiten."
-
+"Sehen Sie die Zeiteinträge Ihres Teams. Manager können Einträge hinzufügen "
+"und bearbeiten."
 
 #: templates/organizations/weekly_calendar.html:439
 msgid "New time entry"
 msgstr "Neuer Zeiteintrag"
 
-
 #: templates/organizations/weekly_calendar.html:451
 #: templates/organizations/weekly_calendar.html:478
-#: templates/timetracking/add_entry.html:31 trackable/timetracking/forms.py:12
+#: templates/timetracking/add_entry.html:35 trackable/timetracking/forms.py:12
 msgid "Start time"
 msgstr "Startzeit"
 
-
 #: templates/organizations/weekly_calendar.html:454
 #: templates/organizations/weekly_calendar.html:481
-#: templates/timetracking/add_entry.html:36 trackable/timetracking/forms.py:13
+#: templates/timetracking/add_entry.html:40 trackable/timetracking/forms.py:13
 msgid "End time"
 msgstr "Endzeit"
 
-
 #: templates/organizations/weekly_calendar.html:470
 #: templates/timetracking/add_entry.html:4
-#: templates/timetracking/add_entry.html:13
+#: templates/timetracking/add_entry.html:17
 msgid "Edit time entry"
 msgstr "Zeiteintrag bearbeiten"
-
 
 #: templates/organizations/weekly_calendar.html:622
 #: templates/organizations/weekly_calendar.html:677
 msgid "Error:"
 msgstr "Fehler:"
 
-
 #: templates/organizations/weekly_calendar.html:622
 #: templates/organizations/weekly_calendar.html:677
 msgid "Unknown"
 msgstr "Unbekannt"
-
 
 #: templates/organizations/weekly_calendar.html:624
 #: templates/organizations/weekly_calendar.html:679
 msgid "Network error:"
 msgstr "Netzwerkfehler:"
 
-
 #: templates/profiles/create.html:4 templates/profiles/create.html:9
 #: templates/profiles/detail.html:14
 msgid "Edit profile"
 msgstr "Profil bearbeiten"
-
 
 #: templates/profiles/create.html:4 templates/profiles/create.html:58
 #: templates/profiles/list.html:38 templates/timetracking/home.html:63
 msgid "Create profile"
 msgstr "Profil erstellen"
 
-
 # profiles/create.html
 #: templates/profiles/create.html:9
 msgid "Create new profile"
 msgstr "Neues Profil erstellen"
 
-
 #: templates/profiles/create.html:21 trackable/profiles/forms.py:57
 msgid "Job title"
 msgstr "Jobtitel"
-
 
 #: templates/profiles/create.html:31 trackable/profiles/forms.py:59
 msgid "Address (optional)"
 msgstr "Adresse (optional)"
 
-
 #: templates/profiles/create.html:48 trackable/profiles/forms.py:60
 msgid "Hourly rate (€)"
 msgstr "Stundenlohn (€)"
-
 
 #: templates/profiles/create.html:53 trackable/profiles/forms.py:61
 msgid "Internal notes (optional)"
 msgstr "Interne Notizen (optional)"
 
-
 #: templates/profiles/detail.html:15
 msgid "Really delete this profile? All time entries will be lost."
 msgstr "Profil wirklich löschen? Alle Zeiteinträge gehen verloren."
 
-
-#: templates/profiles/detail.html:25 templates/profiles/detail.html:136
+#: templates/profiles/detail.html:26 templates/profiles/detail.html:141
 msgid "Log time"
 msgstr "Zeit eintragen"
 
-
-#: templates/profiles/detail.html:36
+#: templates/profiles/detail.html:38
 msgid "Hourly rate"
 msgstr "Stundenlohn"
 
-
-#: templates/profiles/detail.html:47
+#: templates/profiles/detail.html:49
 msgid "Internal notes"
 msgstr "Interne Notizen"
 
-
-#: templates/profiles/detail.html:56
+#: templates/profiles/detail.html:58
 msgid "This week"
 msgstr "Diese Woche"
 
-
-#: templates/profiles/detail.html:83
+#: templates/profiles/detail.html:85
 msgid "entries"
 msgstr "Einträge"
 
-
-#: templates/profiles/detail.html:90
+#: templates/profiles/detail.html:92
 msgid "Week total"
 msgstr "Tage gesamt"
 
-
-#: templates/profiles/detail.html:93
+#: templates/profiles/detail.html:95
 msgid "target"
 msgstr "Soll"
 
-
-#: templates/profiles/detail.html:98 templates/timetracking/home.html:51
+#: templates/profiles/detail.html:100 templates/timetracking/home.html:51
 msgid "Monthly overview"
 msgstr "Monatsübersicht"
 
-
-#: templates/profiles/detail.html:99
+#: templates/profiles/detail.html:102
 #: templates/timetracking/vacation_overview.html:4
 #: templates/timetracking/vacation_overview.html:18
 msgid "Vacation overview"
 msgstr "Urlaubsübersicht"
 
-
-#: templates/profiles/detail.html:118
+#: templates/profiles/detail.html:122
 msgid "Cumulative"
 msgstr "Kumuliert"
 
-
-#: templates/profiles/detail.html:126
+#: templates/profiles/detail.html:130
 msgid "Earnings"
 msgstr "Verdienst"
 
-
-#: templates/profiles/detail.html:129
+#: templates/profiles/detail.html:133
 msgid "View details"
 msgstr "Details ansehen"
 
-
-#: templates/profiles/detail.html:134
+#: templates/profiles/detail.html:138
 msgid "No time entries yet"
 msgstr "Noch keine Zeiten erfasst"
 
-
-#: templates/profiles/detail.html:135
+#: templates/profiles/detail.html:139
 msgid "Start tracking your working hours now."
 msgstr "Beginnen Sie jetzt, Ihre Arbeitszeiten zu erfassen."
-
 
 # profiles/list.html
 #: templates/profiles/list.html:10
 msgid "Manage your work profiles."
 msgstr "Verwalte deine Arbeitsprofile."
 
-
 #: templates/profiles/list.html:12 templates/timetracking/home.html:18
 msgid "New profile"
 msgstr "Neues Profil"
-
 
 #: templates/profiles/list.html:28
 msgid "Open"
 msgstr "Öffnen"
 
-
 #: templates/profiles/list.html:36
 msgid "No profile yet"
 msgstr "Noch kein Profil"
-
 
 #: templates/profiles/list.html:37
 msgid "Create your first work profile to start tracking time."
 msgstr "Erstelle dein erstes Arbeitsprofil, um Zeiten zu erfassen."
 
-
-# profiles/detail.html
-#: templates/timetracking/add_entry.html:4
-#: templates/timetracking/add_entry.html:13
-#: templates/timetracking/monthly_table.html:134
-msgid "Add time entry"
-msgstr "Zeit eintragen"
-
-
-#: templates/timetracking/add_entry.html:41 trackable/timetracking/forms.py:14
+#: templates/timetracking/add_entry.html:45 trackable/timetracking/forms.py:14
 msgid "Break (hours)"
 msgstr "Pause (Stunden)"
 
-
-#: templates/timetracking/add_entry.html:44
+#: templates/timetracking/add_entry.html:48
 msgid "Default: 0 hours"
 msgstr "Standard: 0 Stunden"
 
-
-#: templates/timetracking/add_entry.html:49 trackable/timetracking/forms.py:15
+#: templates/timetracking/add_entry.html:53 trackable/timetracking/forms.py:15
 msgid "Activity / Notes"
 msgstr "Tätigkeit / Notizen"
 
-
-#: templates/timetracking/add_entry.html:49
+#: templates/timetracking/add_entry.html:53
 #: templates/timetracking/add_vacation.html:32
 msgid "optional"
 msgstr "optional"
 
-
-#: templates/timetracking/add_entry.html:54
+#: templates/timetracking/add_entry.html:58
 msgid "Save time entry"
 msgstr "Zeit speichern"
-
-
-#: templates/timetracking/add_vacation.html:4
-#: templates/timetracking/monthly_table.html:132
-#: templates/timetracking/monthly_table.html:135
-#: templates/timetracking/vacation_overview.html:13
-#: templates/timetracking/vacation_overview.html:97
-msgid "Add vacation"
-msgstr "Urlaub hinzufügen"
-
 
 #: templates/timetracking/add_vacation.html:13
 msgid "Add vacation / absence"
 msgstr "Urlaub / Abwesenheit hinzufügen"
-
 
 #: templates/timetracking/add_vacation.html:19
 #: trackable/timetracking/forms.py:38
 msgid "Start date"
 msgstr "Startdatum"
 
-
 #: templates/timetracking/add_vacation.html:23
 #: trackable/timetracking/forms.py:39
 msgid "End date"
 msgstr "Enddatum"
-
 
 #: templates/timetracking/add_vacation.html:39
 msgid ""
@@ -2211,85 +1860,69 @@ msgstr ""
 "Nur Mo–Fr werden als Arbeitstage gezählt. Wochenenden werden automatisch "
 "ausgeschlossen."
 
-
 #: templates/timetracking/add_vacation.html:44
 msgid "Save vacation"
 msgstr "Urlaub speichern"
-
 
 # timetracking/home.html
 #: templates/timetracking/home.html:3
 msgid "Overview"
 msgstr "Übersicht"
 
-
 #: templates/timetracking/home.html:9
 #, python-format
 msgid "<h1>Hello, %(name)s!</h1>"
 msgstr "Hallo, %(name)s!"
 
-
 #: templates/timetracking/home.html:10
 msgid "Select a profile to add time entries or view monthly stats."
 msgstr ""
-"Wählen Sie ein Profil, um Zeiteinträge hinzuzufügen oder Monatsstatist"
-"iken anzusehen."
-
+"Wählen Sie ein Profil, um Zeiteinträge hinzuzufügen oder Monatsstatistiken "
+"anzusehen."
 
 #: templates/timetracking/home.html:15
 msgid "New organization"
 msgstr "Neue Organisation"
 
-
 #: templates/timetracking/home.html:17
 msgid "Manage profiles"
 msgstr "Profile verwalten"
-
 
 #: templates/timetracking/home.html:41
 msgid "Start timer for"
 msgstr "Timer starten für"
 
-
 #: templates/timetracking/home.html:42
 msgid "Pause timer for"
 msgstr "Timer pausieren für"
-
 
 #: templates/timetracking/home.html:42
 msgid "Pause"
 msgstr "Pause"
 
-
 #: templates/timetracking/home.html:43
 msgid "Resume timer for"
 msgstr "Timer fortsetzen für"
-
 
 #: templates/timetracking/home.html:43
 msgid "Resume"
 msgstr "Fortsetzen"
 
-
 #: templates/timetracking/home.html:44
 msgid "Stop timer for"
 msgstr "Timer stoppen für"
-
 
 #: templates/timetracking/home.html:44
 msgid "Stop"
 msgstr "Stopp"
 
-
 #: templates/timetracking/home.html:49
 msgid "Add time"
 msgstr "Zeit eintragen"
 
-
 #: templates/timetracking/home.html:60
 msgid "Welcome to trackable!"
 msgstr "Willkommen bei trackable!"
-
 
 #: templates/timetracking/home.html:61
 msgid ""
@@ -2300,23 +1933,19 @@ msgstr ""
 "ein Projekt, einen Kunden oder eine Position, für die Sie Zeiten erfassen "
 "möchten."
 
-
 #: templates/timetracking/home.html:71
 msgid "Create a profile for your project or role"
 msgstr "Erstellen Sie ein Profil für Ihr Projekt oder Ihre Position"
-
 
 #: templates/timetracking/home.html:75
 msgid "Start the timer when you begin working"
 msgstr "Starten Sie den Timer, wenn Sie mit der Arbeit beginnen"
 
-
 #: templates/timetracking/home.html:79
 msgid "Stop the timer when you're done — time is saved automatically"
 msgstr ""
-"Stoppen Sie den Timer, wenn Sie fertig sind – die Zeit wird automatisc"
-"h gespeichert"
-
+"Stoppen Sie den Timer, wenn Sie fertig sind – die Zeit wird automatisch "
+"gespeichert"
 
 # timetracking/monthly_table.html
 #: templates/timetracking/monthly_table.html:10
@@ -2324,99 +1953,75 @@ msgstr ""
 msgid "Back to profile"
 msgstr "Zurück zum Profil"
 
-
 #: templates/timetracking/monthly_table.html:12
 msgid "Export PDF"
 msgstr "PDF exportieren"
-
 
 #: templates/timetracking/monthly_table.html:14
 msgid "Export CSV"
 msgstr "CSV exportieren"
 
-
-#: templates/timetracking/monthly_table.html:80
-msgid "Delete this entry?"
-msgstr "Diesen Eintrag löschen?"
-
-
 #: templates/timetracking/vacation_overview.html:38
 msgid "workdays (Mon–Fri)"
 msgstr "Arbeitstage (Mo–Fr)"
-
 
 #: templates/timetracking/vacation_overview.html:41
 msgid "Vacation weeks"
 msgstr "Urlaubswochen"
 
-
 #: templates/timetracking/vacation_overview.html:47
 msgid "days total"
 msgstr "Tage gesamt"
-
 
 #: templates/timetracking/vacation_overview.html:75
 msgid "Delete this vacation entry?"
 msgstr "Diesen Urlaubseintrag löschen?"
 
-
 #: templates/timetracking/vacation_overview.html:95
 msgid "No vacation entries for"
 msgstr "Keine Urlaubseinträge für"
-
 
 #: trackable/accounts/views.py:30
 msgid "Please confirm your email address before logging in."
 msgstr "Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden."
 
-
 #: trackable/accounts/views.py:144
 msgid "Registration is currently disabled."
 msgstr "Die Registrierung ist derzeit deaktiviert."
-
 
 #: trackable/accounts/views.py:172
 msgid "Confirm your email - Trackable"
 msgstr "E-Mail bestätigen - Trackable"
 
-
 #: trackable/accounts/views.py:182
 msgid "Account created! Please check your email to confirm your address."
 msgstr ""
-"Konto erstellt! Bitte prüfen Sie Ihre E-Mails, um Ihre Adresse zu best"
-"ätigen."
-
+"Konto erstellt! Bitte prüfen Sie Ihre E-Mails, um Ihre Adresse zu bestätigen."
 
 #: trackable/accounts/views.py:204
 msgid "Your email has been confirmed! You can now log in."
 msgstr "Ihre E-Mail-Adresse wurde bestätigt! Sie können sich jetzt anmelden."
 
-
 #: trackable/accounts/views.py:208
 msgid "The confirmation link is invalid or has expired."
 msgstr "Der Bestätigungslink ist ungültig oder abgelaufen."
-
 
 #: trackable/core/admin.py:22
 msgid "Email configuration"
 msgstr "E-Mail-Konfiguration"
 
-
 #: trackable/core/admin.py:24
 msgid "Leave empty to use environment variable defaults."
 msgstr "Leer lassen, um die Standardwerte der Umgebungsvariablen zu verwenden."
-
 
 #: trackable/core/admin_site.py:33
 msgid "Please enter a recipient email address."
 msgstr "Bitte geben Sie eine Empfänger-E-Mail-Adresse ein."
 
-
 # core/landing.html
 #: trackable/core/admin_site.py:37
 msgid "Trackable – Test Email"
 msgstr "Trackable – Test-E-Mail"
-
 
 #: trackable/core/admin_site.py:39
 msgid ""
@@ -2429,23 +2034,19 @@ msgstr ""
 "Wenn Sie diese E-Mail erhalten haben, funktioniert Ihre E-Mail-Konfiguration "
 "korrekt."
 
-
 #: trackable/core/admin_site.py:48
 #, python-format
 msgid "Test email sent successfully to %(email)s!"
 msgstr "Test-E-Mail erfolgreich an %(email)s gesendet!"
-
 
 #: trackable/core/admin_site.py:54
 #, python-format
 msgid "Failed to send email: %(error)s"
 msgstr "E-Mail konnte nicht gesendet werden: %(error)s"
 
-
 #: trackable/core/manage_views.py:56
 msgid "Settings saved."
 msgstr "Einstellungen gespeichert."
-
 
 #: trackable/core/manage_views.py:73
 msgid ""
@@ -2454,68 +2055,55 @@ msgstr ""
 "Der Setup-Assistent wurde zurückgesetzt. Neue Benutzer werden erneut durch "
 "das Setup geführt."
 
-
 #: trackable/core/manage_views.py:100 trackable/core/setup_views.py:29
 msgid "Username is required."
 msgstr "Benutzername ist erforderlich."
-
 
 #: trackable/core/manage_views.py:102 trackable/core/setup_views.py:31
 msgid "Email is required."
 msgstr "E-Mail ist erforderlich."
 
-
 #: trackable/core/manage_views.py:104 trackable/core/setup_views.py:33
 msgid "Password is required."
 msgstr "Passwort ist erforderlich."
-
 
 #: trackable/core/manage_views.py:107 trackable/core/setup_views.py:43
 msgid "Username is already taken."
 msgstr "Der Benutzername ist bereits vergeben."
 
-
 #: trackable/core/manage_views.py:109 trackable/core/setup_views.py:45
 msgid "Email is already in use."
 msgstr "Die E-Mail-Adresse wird bereits verwendet."
-
 
 #: trackable/core/manage_views.py:131
 #, python-format
 msgid "User \"%(username)s\" created."
 msgstr "Benutzer \"%(username)s\" wurde erstellt."
 
-
 #: trackable/core/manage_views.py:160
 #, python-format
 msgid "User \"%(username)s\" updated."
 msgstr "Benutzer \"%(username)s\" wurde aktualisiert."
 
-
 #: trackable/core/models.py:28
 msgid "Setup completed"
 msgstr "Setup abgeschlossen"
-
 
 #: trackable/core/models.py:29
 msgid "Registration enabled"
 msgstr "Registrierung aktiviert"
 
-
 #: trackable/core/models.py:34
 msgid "Email use TLS"
 msgstr "E-Mail-Test"
-
 
 #: trackable/core/models.py:35
 msgid "Email host user"
 msgstr "E-Mail-Host-Benutzer"
 
-
 #: trackable/core/models.py:36
 msgid "Email host password"
 msgstr "E-Mail-Host-Passwort"
-
 
 #: trackable/core/models.py:41
 msgid ""
@@ -2525,42 +2113,39 @@ msgstr ""
 "Komma-getrennte Liste erlaubter Hostnamen. Leer lassen, um die "
 "Umgebungsvariable ALLOWED_HOSTS zu verwenden."
 
-
 #: trackable/core/models.py:45 trackable/core/models.py:46
 #: trackable/core/models.py:49
 msgid "Site configuration"
 msgstr "Seitenkonfiguration"
 
-
 #: trackable/core/pdf_export.py:91
 msgid "Vacation Days"
 msgstr "Urlaubstage"
-
 
 #: trackable/core/setup_views.py:35 trackable/organizations/forms.py:104
 msgid "Passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-
 #: trackable/core/setup_views.py:65
 msgid "Admin account created! Now configure your settings."
 msgstr "Admin-Konto erstellt! Konfigurieren Sie jetzt Ihre Einstellungen."
-
 
 #: trackable/core/setup_views.py:104
 msgid "Setup complete! You can now log in to trackable."
 msgstr "Setup abgeschlossen! Sie können sich jetzt bei trackable anmelden."
 
+#: trackable/core/tests.py:52 trackable/organizations/views.py:145
+#, python-format
+msgid "Employee at %(org)s"
+msgstr "Mitarbeiter bei %(org)s"
 
 #: trackable/organizations/decorators.py:13
 msgid "You do not have permission to access this page."
 msgstr "Sie haben keine Berechtigung, auf diese Seite zuzugreifen."
 
-
 #: trackable/organizations/forms.py:30
 msgid "/* Custom CSS rules */"
 msgstr "/* Benutzerdefinierte CSS-Regeln */"
-
 
 #: trackable/organizations/forms.py:35
 msgid ""
@@ -2570,33 +2155,24 @@ msgstr ""
 "Empfohlen: 180×40 px, PNG oder SVG. Ersetzt das Logo in der "
 "Navigationsleiste."
 
-
 #: trackable/organizations/forms.py:36 trackable/organizations/models.py:63
 msgid "Empfohlen: 32×32 px, ICO oder PNG."
 msgstr "Empfohlen: 32×32 px, ICO oder PNG."
-
 
 #: trackable/organizations/forms.py:37
 msgid "Empfohlen: 180×180 px, PNG. iOS-Homescreen-Symbol."
 msgstr "Empfohlen: 180×180 px, PNG. iOS-Homescreen-Symbol."
 
-
 #: trackable/organizations/forms.py:38
 msgid "Hex-Farbe (#RRGGBB). Überschreibt primäre UI-Akzente (Buttons, Badges)."
 msgstr ""
-"Hex-Farbe (#RRGGBB). Überschreibt primäre UI-Akzente (Buttons, Badges)"
-"."
-
+"Hex-Farbe (#RRGGBB). Überschreibt primäre UI-Akzente (Buttons, Badges)."
 
 #: trackable/organizations/forms.py:39
 msgid "Hex-Farbe (#RRGGBB). Überschreibt sekundäre Akzente (Links, Hover)."
 msgstr "Hex-Farbe (#RRGGBB). Überschreibt sekundäre Akzente (Links, Hover)."
 
-
 #: trackable/organizations/forms.py:40
-#| msgid ""
-#| "Beliebige CSS-Regeln (z. B. .btn-primary { background: #xyz; }). Wird "
-#| "nach allen Standard-Styles geladen."
 msgid ""
 "Beliebige CSS-Regeln (z. B. .btn-primary { background: #xyz; }). Wird nach "
 "allen Standard-Styles geladen."
@@ -2604,264 +2180,204 @@ msgstr ""
 "Beliebige CSS-Regeln (z. B. .btn-primary { background: #xyz; }). Wird nach "
 "allen Standard-Styles geladen."
 
-
 #: trackable/organizations/forms.py:66 trackable/profiles/forms.py:14
 msgid "e.g. 4"
 msgstr "z. B. 4"
-
 
 #: trackable/organizations/forms.py:73 trackable/profiles/forms.py:21
 msgid "Minutes"
 msgstr "Minuten"
 
-
 #: trackable/organizations/forms.py:74 trackable/profiles/forms.py:22
 msgid "e.g. 20"
 msgstr "z. B. 20"
-
 
 #: trackable/organizations/forms.py:80
 msgid "Target hours are calculated from this date."
 msgstr "Soll-Stunden werden ab diesem Datum berechnet."
 
-
 #: trackable/organizations/forms.py:86
 msgid "Optional. Leave empty for open-ended contracts."
 msgstr "Optional. Leer lassen bei unbefristeten Verträgen."
 
-
-#: trackable/organizations/forms.py:109 trackable/organizations/views.py:301
+#: trackable/organizations/forms.py:109 trackable/organizations/views.py:306
 msgid "Contract end date must be after start date."
 msgstr "Das Vertragsenddatum muss nach dem Vertragsstart liegen."
-
 
 #: trackable/organizations/forms.py:118 trackable/profiles/forms.py:85
 msgid "Weekly hours must be at most 99.9999 hours."
 msgstr "Wochenstunden dürfen maximal 99,9999 Stunden betragen."
 
-
 #: trackable/organizations/forms.py:146
 msgid "Import file"
 msgstr "Importdatei"
-
 
 #: trackable/organizations/forms.py:147
 msgid "Accepted formats: .csv, .xlsx, .xls, .ods"
 msgstr "Akzeptierte Formate: .csv, .xlsx, .xls, .ods"
 
-
 #: trackable/organizations/forms.py:152
 msgid "Import all sheets"
 msgstr "Alle Tabellen importieren"
-
 
 #: trackable/organizations/forms.py:153
 msgid "For Excel/ODS files, import every sheet that contains data."
 msgstr "Für Excel/ODS-Dateien werden alle Tabellen mit Daten importiert."
 
-
 #: trackable/organizations/forms.py:157
-#| msgid "Internal notes (optional)"
 msgid "Sheet name (optional)"
 msgstr "Interne Notizen (optional)"
-
 
 #: trackable/organizations/forms.py:158
 msgid "Only used if 'Import all sheets' is unchecked."
 msgstr ""
-"Wird nur verwendet, wenn „Alle Tabellen importieren\" nicht ausgewählt"
-" ist."
-
+"Wird nur verwendet, wenn „Alle Tabellen importieren\" nicht ausgewählt ist."
 
 #: trackable/organizations/forms.py:161
 msgid "Semicolon"
 msgstr "Semikolon"
 
-
 #: trackable/organizations/forms.py:161 trackable/organizations/forms.py:166
 msgid "Comma"
 msgstr "Komma"
-
 
 #: trackable/organizations/forms.py:163
 msgid "CSV separator"
 msgstr "CSV-Trennzeichen"
 
-
 #: trackable/organizations/forms.py:166
 msgid "Dot"
 msgstr "Punkt"
-
 
 #: trackable/organizations/forms.py:168
 msgid "Decimal separator"
 msgstr "Dezimaltrennzeichen"
 
-
 #: trackable/organizations/forms.py:172
-#| msgid "Invalid date format."
 msgid "Date format"
 msgstr "Ungültiges Datumsformat."
-
 
 #: trackable/organizations/forms.py:173
 #, python-format
 msgid "e.g. %%d.%%m.%%Y"
 msgstr "z. B. %%d.%%m.%%Y"
 
-
 #: trackable/organizations/forms.py:177
-#| msgid "Invalid time format."
 msgid "Time format"
 msgstr "Ungültiges Zeitformat."
-
 
 #: trackable/organizations/forms.py:178
 #, python-format
 msgid "e.g. %%H%%M"
 msgstr "z. B. %%H%%M"
 
-
 #: trackable/organizations/forms.py:183
 msgid "Header row (0-based)"
 msgstr "Kopfzeile (0-basiert)"
 
-
 #: trackable/organizations/forms.py:184
-#| msgid "Leave empty to keep current"
 msgid "Leave empty for auto-detection."
 msgstr "Leer lassen, um den aktuellen Wert zu behalten"
-
 
 #: trackable/organizations/forms.py:205
 msgid "The selected profile does not belong to the selected employee."
 msgstr "Das ausgewählte Profil gehört nicht zum ausgewählten Mitarbeiter."
 
-
 #: trackable/organizations/forms.py:210
 msgid "Please provide a sheet name when 'Import all sheets' is unchecked."
 msgstr ""
-"Bitte geben Sie einen Tabellennamen an, wenn „Alle Tabellen importiere"
-"n\" nicht ausgewählt ist."
-
+"Bitte geben Sie einen Tabellennamen an, wenn „Alle Tabellen importieren\" "
+"nicht ausgewählt ist."
 
 #: trackable/organizations/forms.py:220
 msgid "Yes, import these entries"
 msgstr "Ja, diese Einträge importieren"
 
-
 #: trackable/organizations/import_views.py:50
-#| msgid "Profile does not belong to this organization."
 msgid "Selected profile does not belong to the selected employee."
 msgstr "Das ausgewählte Profil gehört nicht zum ausgewählten Mitarbeiter."
-
 
 #: trackable/organizations/import_views.py:78
 #, python-format
 msgid "Error reading file: %(error)s"
 msgstr "Fehler beim Lesen der Datei: %(error)s"
 
-
 #: trackable/organizations/import_views.py:99
 #, python-format
 msgid "Sheet '%(sheet)s': %(error)s"
 msgstr "Tabelle '%(sheet)s': %(error)s"
-
 
 #: trackable/organizations/import_views.py:124
 #, python-format
 msgid "Error parsing sheet '%(sheet)s': %(error)s"
 msgstr "Fehler beim Parsen der Tabelle '%(sheet)s': %(error)s"
 
-
 #: trackable/organizations/import_views.py:132
 #, python-format
 msgid "Found %(count)d error(s) during parsing. Please fix and try again."
 msgstr ""
-"%(count)d Fehler beim Parsen gefunden. Bitte beheben Sie diese und ver"
-"suchen Sie es erneut."
-
+"%(count)d Fehler beim Parsen gefunden. Bitte beheben Sie diese und versuchen "
+"Sie es erneut."
 
 #: trackable/organizations/import_views.py:200
-#| msgid "Email configuration"
 msgid "Invalid confirmation."
 msgstr "E-Mail-Konfiguration"
-
 
 #: trackable/organizations/import_views.py:211
 msgid "Import session not found. Please upload the file again."
 msgstr "Import-Sitzung nicht gefunden. Bitte laden Sie die Datei erneut hoch."
 
-
 #: trackable/organizations/import_views.py:218
-#| msgid "Create your organization"
 msgid "Import session does not match your organization."
 msgstr "Organisation erstellen"
-
 
 #: trackable/organizations/import_views.py:270
 #, python-format
 msgid "Successfully imported %(count)d time entr%(plural)s."
 msgstr "Erfolgreich %(count)d Zeiteintr%(plural)s importiert."
 
-
 #: trackable/organizations/import_views.py:273
-#| msgid "entries"
 msgid "ies"
 msgstr "äge"
-
 
 #: trackable/organizations/import_views.py:273
 msgid "y"
 msgstr "ag"
 
-
 #: trackable/organizations/models.py:28
-#| msgid "Holiday name"
 msgid "Holidays enabled"
 msgstr "Feiertage aktiviert"
 
-
 #: trackable/organizations/models.py:29
-#| msgid ""
-#| "These holidays are excluded from vacation workday calculations for all "
-#| "organization members."
 msgid ""
 "When disabled, holidays are not deducted from vacation workday calculations."
 msgstr ""
 "Diese Feiertage werden bei der Berechnung der Urlaubsarbeitstage für alle "
 "Organisationsmitglieder ausgeschlossen."
 
-
 #: trackable/organizations/models.py:56
 msgid "Logo (Navbar)"
 msgstr "Logo (Navigationsleiste)"
-
 
 #: trackable/organizations/models.py:57
 msgid "Empfohlen: 180×40 px, PNG oder SVG mit transparentem Hintergrund."
 msgstr "Empfohlen: 180×40 px, PNG oder SVG mit transparentem Hintergrund."
 
-
 #: trackable/organizations/models.py:62
 msgid "Favicon"
 msgstr "Favicon"
-
 
 #: trackable/organizations/models.py:68
 msgid "Apple Touch Icon"
 msgstr "Apple Touch Icon"
 
-
 #: trackable/organizations/models.py:69
 msgid "Empfohlen: 180×180 px, PNG. Wird auf dem iOS-Homescreen verwendet."
 msgstr "Empfohlen: 180×180 px, PNG. Wird auf dem iOS-Homescreen verwendet."
 
-
 #: trackable/organizations/models.py:74
 msgid "Primärfarbe"
 msgstr "Primärfarbe"
-
 
 #: trackable/organizations/models.py:75
 msgid ""
@@ -2869,11 +2385,9 @@ msgid ""
 msgstr ""
 "Hex-Farbe (z. B. #ca9ee6). Überschreibt primäre UI-Akzente (Buttons, Badges)."
 
-
 #: trackable/organizations/models.py:80
 msgid "Akzentfarbe"
 msgstr "Akzentfarbe"
-
 
 #: trackable/organizations/models.py:81
 msgid ""
@@ -2881,265 +2395,241 @@ msgid ""
 msgstr ""
 "Hex-Farbe (z. B. #8caaee). Überschreibt sekundäre Akzente (Links, Hover)."
 
-
 #: trackable/organizations/models.py:85
 msgid "Eigenes CSS"
 msgstr "Eigenes CSS"
-
 
 #: trackable/organizations/models.py:86
 msgid "Beliebige CSS-Regeln, nach den Standard-Styles geladen."
 msgstr "Beliebige CSS-Regeln, die nach den Standard-Styles geladen werden."
 
-
-#: trackable/organizations/views.py:62
+#: trackable/organizations/views.py:67
 msgid "You are already part of an organization."
 msgstr "Sie sind bereits Mitglied einer Organisation."
 
-
-#: trackable/organizations/views.py:78
+#: trackable/organizations/views.py:83
 #, python-format
 msgid "Organization \"%(name)s\" created successfully!"
 msgstr "Organisation \"%(name)s\" wurde erfolgreich erstellt!"
 
-
-#: trackable/organizations/views.py:95
+#: trackable/organizations/views.py:100
 msgid "restricted"
 msgstr "eingeschränkt"
 
-
-#: trackable/organizations/views.py:98
+#: trackable/organizations/views.py:103
 msgid "classic"
 msgstr "klassisch"
 
-
-#: trackable/organizations/views.py:102
+#: trackable/organizations/views.py:107
 #, python-format
 msgid "Time tracking mode set to %(mode)s."
 msgstr "Zeiterfassungsmodus auf %(mode)s gesetzt."
 
-
-#: trackable/organizations/views.py:113
+#: trackable/organizations/views.py:118
 msgid "enabled"
 msgstr "aktiviert"
 
-
-#: trackable/organizations/views.py:113
-#| msgid "Enabled,Disabled"
+#: trackable/organizations/views.py:118
 msgid "disabled"
 msgstr "deaktiviert"
 
-
-#: trackable/organizations/views.py:116
+#: trackable/organizations/views.py:121
 #, python-format
 msgid "Holidays %(status)s."
 msgstr "Feiertage %(status)s."
 
-
-#: trackable/organizations/views.py:140
-#, python-format
-msgid "Employee at %(org)s"
-msgstr "Mitarbeiter bei %(org)s"
-
-
-#: trackable/organizations/views.py:149
+#: trackable/organizations/views.py:154
 #, python-format
 msgid "Employee \"%(name)s\" created successfully!"
 msgstr "Mitarbeiter \"%(name)s\" wurde erfolgreich erstellt!"
 
-
-#: trackable/organizations/views.py:251
+#: trackable/organizations/views.py:256
 msgid "Invalid value for target hours."
 msgstr "Ungültiger Wert für Soll-Stunden."
 
-
-#: trackable/organizations/views.py:255
+#: trackable/organizations/views.py:260
 msgid "Weekly target hours updated."
 msgstr "Wöchentliche Soll-Stunden aktualisiert."
 
-
-#: trackable/organizations/views.py:284
+#: trackable/organizations/views.py:289
 msgid "Invalid date format for contract start date."
 msgstr "Ungültiges Datumsformat für Vertragsstart."
 
-
-#: trackable/organizations/views.py:293
+#: trackable/organizations/views.py:298
 msgid "Invalid date format for contract end date."
 msgstr "Ungültiges Datumsformat für Vertragsende."
 
-
-#: trackable/organizations/views.py:305
+#: trackable/organizations/views.py:310
 msgid "Contract dates updated."
 msgstr "Vertragsdaten aktualisiert."
 
-
-#: trackable/organizations/views.py:542 trackable/organizations/views.py:771
+#: trackable/organizations/views.py:550 trackable/organizations/views.py:795
 msgid "You do not have permission to modify this entry."
 msgstr "Sie haben keine Berechtigung, diesen Eintrag zu bearbeiten."
 
-
-#: trackable/organizations/views.py:549
+#: trackable/organizations/views.py:557
 msgid "new_date is required."
 msgstr "new_date ist erforderlich."
 
-
-#: trackable/organizations/views.py:554
+#: trackable/organizations/views.py:562
 msgid "Invalid date format."
 msgstr "Ungültiges Datumsformat."
 
-
-#: trackable/organizations/views.py:575
+#: trackable/organizations/views.py:583
 msgid "Invalid time format."
 msgstr "Ungültiges Zeitformat."
 
+#: trackable/organizations/views.py:604
+msgid "You cannot remove yourself from the organization."
+msgstr "Sie können sich nicht selbst aus der Organisation entfernen."
 
-#: trackable/organizations/views.py:598
+#: trackable/organizations/views.py:610
+msgid "You cannot remove the organization owner."
+msgstr "Sie können den Eigentümer der Organisation nicht entfernen."
+
+#: trackable/organizations/views.py:615
+msgid "You cannot remove another manager."
+msgstr "Sie können einen anderen Manager nicht entfernen."
+
+#: trackable/organizations/views.py:622
 #, python-format
-msgid "%(name)s has been removed from the organization."
-msgstr "%(name)s wurde aus der Organisation entfernt."
+msgid "%(name)s's account and all associated data have been deleted."
+msgstr "Das Konto von %(name)s und alle zugehörigen Daten wurden gelöscht."
 
-
-#: trackable/organizations/views.py:647
+#: trackable/organizations/views.py:671
 #, python-format
 msgid "Holiday \"%(name)s\" added successfully!"
 msgstr "Feiertag \"%(name)s\" wurde erfolgreich hinzugefügt!"
 
-
-#: trackable/organizations/views.py:669
+#: trackable/organizations/views.py:693
 msgid "Holiday deleted."
 msgstr "Feiertag wurde gelöscht."
 
-
-#: trackable/organizations/views.py:681
+#: trackable/organizations/views.py:705
 msgid "Branding saved."
 msgstr "Design gespeichert."
 
-
-#: trackable/organizations/views.py:700
+#: trackable/organizations/views.py:724
 msgid "No organization membership."
 msgstr "Keine Organisationsmitgliedschaft."
 
-
-#: trackable/organizations/views.py:703 trackable/organizations/views.py:775
+#: trackable/organizations/views.py:727 trackable/organizations/views.py:799
 msgid "Method not allowed."
 msgstr "Methode nicht erlaubt."
 
-
-#: trackable/organizations/views.py:712
+#: trackable/organizations/views.py:736
 msgid "Missing required fields."
 msgstr "Erforderliche Felder fehlen."
 
-
-#: trackable/organizations/views.py:719
+#: trackable/organizations/views.py:743
 msgid "Profile does not belong to this organization."
 msgstr "Eintrag gehört nicht zu Ihrer Organisation."
 
-
-#: trackable/organizations/views.py:725
+#: trackable/organizations/views.py:749
 msgid "You can only create entries for yourself."
 msgstr "Sie können nur Einträge für sich selbst erstellen."
 
-
-#: trackable/organizations/views.py:731
+#: trackable/organizations/views.py:755
 msgid "You do not have permission to create this entry."
 msgstr "Sie haben keine Berechtigung, diesen Eintrag zu erstellen."
-
 
 #: trackable/profiles/forms.py:65
 msgid "Street, ZIP, City"
 msgstr "Straße, PLZ, Ort"
 
-
 #: trackable/profiles/forms.py:67
 msgid "e.g. 50,00"
 msgstr "z. B. 50,00"
-
 
 #: trackable/profiles/forms.py:69
 msgid "Contract start, department, notes for payroll, …"
 msgstr "Vertragsbeginn, Abteilung, Notizen für die Lohnabrechnung, …"
 
-
-#: trackable/profiles/views.py:24
+#: trackable/profiles/views.py:25
 #, python-format
 msgid "Profile \"%(title)s\" was created successfully!"
 msgstr "Profil \"%(title)s\" wurde erfolgreich erstellt!"
 
-
-#: trackable/profiles/views.py:104
+#: trackable/profiles/views.py:114
 msgid "Profile was updated successfully!"
 msgstr "Profil wurde erfolgreich aktualisiert!"
 
-
-#: trackable/profiles/views.py:116
+#: trackable/profiles/views.py:126
 msgid "Profile was deleted."
 msgstr "Profil wurde gelöscht."
-
 
 #: trackable/timetracking/forms.py:22
 msgid "What did you work on? (optional)"
 msgstr "Was wurde gemacht? (optional)"
 
-
 #: trackable/timetracking/forms.py:40
 msgid "Description (optional)"
 msgstr "Beschreibung (optional)"
 
-
 #: trackable/timetracking/forms.py:45
 msgid "e.g. Summer vacation"
-msgstr "z.B. Sommerurlaub"
+msgstr "z. B. Sommerurlaub"
 
+#: trackable/timetracking/views.py:55
+msgid "You do not have permission to add time entries for this profile."
+msgstr "Sie haben keine Berechtigung, Zeiteinträge für dieses Profil hinzuzufügen."
 
-#: trackable/timetracking/views.py:51
-msgid "Manual time entry is disabled. Please use the timer."
-msgstr "Manuelle Zeiteinträge sind deaktiviert. Bitte nutzen Sie den Timer."
-
-
-#: trackable/timetracking/views.py:62
+#: trackable/timetracking/views.py:66
 #, python-format
 msgid "Time entry for %(date)s was saved successfully!"
 msgstr "Zeiteintrag für %(date)s wurde erfolgreich gespeichert!"
 
+#: trackable/timetracking/views.py:89
+msgid "You do not have permission to edit this time entry."
+msgstr "Sie haben keine Berechtigung, diesen Zeiteintrag zu bearbeiten."
 
-#: trackable/timetracking/views.py:80
-msgid "Editing time entries is disabled in timer-only mode."
-msgstr "Bearbeiten von Zeiteinträgen ist im Nur Timer-Modus deaktiviert."
-
-
-#: trackable/timetracking/views.py:87
+#: trackable/timetracking/views.py:96
 msgid "Time entry was updated successfully!"
 msgstr "Zeiteintrag wurde erfolgreich aktualisiert!"
 
+#: trackable/timetracking/views.py:123
+msgid "You do not have permission to delete this time entry."
+msgstr "Sie haben keine Berechtigung, diesen Zeiteintrag zu löschen."
 
-#: trackable/timetracking/views.py:110
+#: trackable/timetracking/views.py:131
 msgid "Time entry was deleted."
 msgstr "Zeiteintrag wurde gelöscht."
 
+#: trackable/timetracking/views.py:198 trackable/timetracking/views.py:225
+#: trackable/timetracking/views.py:241
+msgid "Vacation tracking is disabled for your organization."
+msgstr "Die Urlaubsverwaltung ist für Ihre Organisation deaktiviert."
 
-#: trackable/timetracking/views.py:167
+#: trackable/timetracking/views.py:207
 msgid "End date must be after start date."
 msgstr "Das Enddatum muss nach dem Startdatum liegen."
 
-
-#: trackable/timetracking/views.py:170
+#: trackable/timetracking/views.py:210
 msgid "Vacation entry was saved successfully!"
 msgstr "Urlaubseintrag wurde erfolgreich gespeichert!"
 
-
-#: trackable/timetracking/views.py:185
+#: trackable/timetracking/views.py:231
 msgid "Vacation entry was deleted."
 msgstr "Urlaubseintrag wurde gelöscht."
 
+#~ msgid ""
+#~ "Their account and time data will remain, but you will no longer be able "
+#~ "to view their data."
+#~ msgstr ""
+#~ "Das Konto und die Zeiterfassungsdaten bleiben erhalten, aber Sie können "
+#~ "die Daten nicht mehr einsehen."
+
+#~ msgid "Manual time entry is disabled. Please use the timer."
+#~ msgstr "Manuelle Zeiteinträge sind deaktiviert. Bitte nutzen Sie den Timer."
+
+#~ msgid "Editing time entries is disabled in timer-only mode."
+#~ msgstr "Bearbeiten von Zeiteinträgen ist im Nur Timer-Modus deaktiviert."
 
 #~ msgid "Team Calendar"
 #~ msgstr "Team-Kalender"
 
-
 #~ msgid "day_id, start_time, and week_start are required."
 #~ msgstr "day_id, start_time und week_start sind erforderlich."
 
-
 #~ msgid "Standard working hours per week (e.g. 40)."
 #~ msgstr "Standard-Wochenarbeitszeit (z. B. 40)."
-

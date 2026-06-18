@@ -194,12 +194,19 @@ class OrganizationViewTest(TestCase):
         OrganizationMembership.objects.create(
             organization=self.org, user=employee, role="employee"
         )
+        Profile.objects.create(
+            user=employee,
+            title="Employee Profile",
+            position="Worker",
+            weekly_hours=40,
+            hourly_rate=20,
+        )
         response = self.client.post(
             reverse("employee_remove", kwargs={"user_id": employee.pk})
         )
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(OrganizationMembership.objects.filter(user=employee).exists())
-        self.assertTrue(User.objects.filter(username="employee").exists())
+        self.assertFalse(User.objects.filter(username="employee").exists())
+        self.assertFalse(Profile.objects.filter(user=employee).exists())
 
     def test_non_manager_cannot_create_employee(self):
         employee = User.objects.create_user(

@@ -8,12 +8,14 @@
     <p style="color:var(--ctp-subtext0); margin-bottom:30px;">
         {% blocktrans with name=employee.get_full_name|default:employee.username %}Are you sure you want to remove <strong>{{ name }}</strong> from the organization?{% endblocktrans %}
     </p>
-    <p style="color:var(--ctp-subtext0); margin-bottom:30px; font-size:.9rem;">{% trans "Their account and time data will remain, but you will no longer be able to view their data." %}</p>
+    <p style="color:var(--ctp-subtext0); margin-bottom:30px; font-size:.9rem;">
+        {% trans "The employee account and all associated time entries, profiles, and vacation data will be permanently deleted." %}
+    </p>
     <form method="post">
         {% csrf_token %}
         <div style="display:flex; gap:12px; justify-content:center;">
             <a href="/org/" class="btn btn-secondary">{% trans "Cancel" %}</a>
-            <button type="submit" class="btn btn-primary" style="background:var(--ctp-red);">{% trans "Remove" %}</button>
+            <button type="submit" class="btn btn-primary" style="background:var(--ctp-red);">{% trans "Delete employee account" %}</button>
         </div>
     </form>
 </div>

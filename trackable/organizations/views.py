@@ -600,11 +600,27 @@ def employee_remove(request, user_id):
     employee = employee_membership.user
 
     if request.method == "POST":
-        employee_membership.delete()
+        if employee == request.user:
+            messages.error(request, _("You cannot remove yourself from the organization."))
+            return redirect("employee_detail", user_id=user_id)
+
+        if employee == organization.created_by:
+            messages.error(
+                request,
+                _("You cannot remove the organization owner."),
+            )
+            return redirect("employee_detail", user_id=user_id)
+
+        if employee_membership.is_manager:
+            messages.error(request, _("You cannot remove another manager."))
+            return redirect("employee_detail", user_id=user_id)
+
+        employee_name = employee.get_full_name() or employee.username
+        employee.delete()
         messages.success(
             request,
-            _("%(name)s has been removed from the organization.")
-            % {"name": employee.get_full_name() or employee.username},
+            _("%(name)s's account and all associated data have been deleted.")
+            % {"name": employee_name},
         )
         return redirect("org_dashboard")
 
