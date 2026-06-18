@@ -1,0 +1,13 @@
+{% load i18n %}
+{% get_available_languages as LANGUAGES %}
+<form method="post" action="{% url 'set_language' %}" class="language-form">
+    {% csrf_token %}
+    <label for="{{ select_id }}" class="visually-hidden">{% trans "Language" %}</label>
+    <select name="language" id="{{ select_id }}" class="language-select" onchange="this.form.submit()" aria-label="{% trans 'Select language' %}">
+        {% for lang_code, lang_name in LANGUAGES %}
+        <option value="{{ lang_code }}"{% if lang_code == LANGUAGE_CODE %} selected{% endif %}>
+            {{ lang_name }}
+        </option>
+        {% endfor %}
+    </select>
+</form>

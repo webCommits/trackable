@@ -642,6 +642,18 @@ hr, .divider { border: none; border-top: 1px solid var(--ctp-overlay0); margin: 
     .site-nav form .btn { width: 100%; justify-content: center; padding: 11px 14px; font-size: .95rem; }
     .site-nav .btn-primary { display: flex; width: 100%; justify-content: center; }
 
+    .language-form { width: 100%; }
+    .language-select {
+        width: 100%;
+        height: 44px;
+        font-size: .95rem;
+    }
+    .nav-language-switcher {
+        display: block;
+        margin-bottom: 6px;
+    }
+    .header-right .language-form { display: none; }
+
     .content  { padding: 20px; }
     .card     { padding: 16px 18px; }
     h1        { font-size: 1.45rem; }
@@ -1115,6 +1127,55 @@ hr, .divider { border: none; border-top: 1px solid var(--ctp-overlay0); margin: 
     background: rgba(202,158,230,.10);
     border-color: rgba(202,158,230,.30);
     color: var(--ctp-text);
+}
+
+/* ─── Language Switcher ─── */
+.language-form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.language-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    color: var(--ctp-subtext1);
+    border: 1px solid rgba(202,158,230,.15);
+    border-radius: var(--radius-sm);
+    padding: 0 28px 0 11px;
+    height: 38px;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a6adc8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 9px center;
+}
+
+.language-select:hover,
+.language-select:focus {
+    background: rgba(202,158,230,.10);
+    border-color: rgba(202,158,230,.30);
+    color: var(--ctp-text);
+    outline: none;
+}
+
+.nav-language-switcher {
+    display: none;
+}
+
+/* ─── Visually hidden helper ─── */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 /* Icon visibility: dark mode shows sun, light mode shows moon */
