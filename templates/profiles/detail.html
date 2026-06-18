@@ -21,9 +21,11 @@
                 📅 {% trans "Weekly Calendar" %}
             </a>
             {% endif %}
+            {% if can_log_time %}
             <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 30px;">
                 + {% trans "Log time" %}
             </a>
+            {% endif %}
         </div>
     </div>
     
@@ -95,7 +97,9 @@
 
     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
         <h2 style="margin: 0; color: var(--ctp-mauve);">{% trans "Monthly overview" %}</h2>
+        {% if show_vacation %}
         <a href="/vacation/{{ profile.id }}/" class="btn btn-secondary btn-sm" style="color: var(--ctp-teal); border-color: rgba(23,146,153,.3);">🏖 {% trans "Vacation overview" %}</a>
+        {% endif %}
     </div>
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
         {% for month in months %}
@@ -132,7 +136,9 @@
         <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--ctp-subtext0);">
             <h3 style="margin-bottom: 20px;">{% trans "No time entries yet" %}</h3>
             <p style="margin-bottom: 20px;">{% trans "Start tracking your working hours now." %}</p>
+            {% if can_log_time %}
             <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary">+ {% trans "Log time" %}</a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>

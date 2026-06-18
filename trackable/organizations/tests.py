@@ -1,9 +1,13 @@
 from decimal import Decimal
-from django.test import TestCase
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django.test import RequestFactory, TestCase
 
 from trackable.organizations.forms import EmployeeCreateForm
 from trackable.organizations.models import Organization, OrganizationMembership
+from trackable.profiles.models import Profile
 
 
 User = get_user_model()
@@ -94,3 +98,57 @@ class EmployeeCreateFormTest(TestCase):
         user = form.save()
         self.assertEqual(user.username, "employee6")
         self.assertTrue(user.check_password("secret123"))
+
+
+class EmployeeProfileDetailVacationTest(TestCase):
+    def setUp(self):
+        self.manager = User.objects.create_user(
+            username="manager", email="manager@example.com", password="secret"
+        )
+        self.employee = User.objects.create_user(
+            username="employee", email="employee@example.com", password="secret"
+        )
+        self.organization = Organization.objects.create(
+            name="Test Org",
+            created_by=self.manager,
+            time_tracking_mode="classic",
+            holidays_enabled=False,
+        )
+        OrganizationMembership.objects.create(
+            organization=self.organization, user=self.manager, role="manager"
+        )
+        OrganizationMembership.objects.create(
+            organization=self.organization, user=self.employee, role="employee"
+        )
+        self.profile = Profile.objects.create(
+            user=self.employee,
+            title="Employee Profile",
+            position="Worker",
+            weekly_hours=40,
+            hourly_rate=20,
+        )
+
+    def _get_context(self):
+        from trackable.organizations.views import employee_profile_detail
+
+        request = RequestFactory().get("/")
+        request.user = self.manager
+        captured = {}
+
+        def mock_render(request, template_name, context, **kwargs):
+            captured[template_name] = context
+            return HttpResponse("rendered")
+
+        with patch("trackable.organizations.views.render", mock_render):
+            response = employee_profile_detail(
+                request,
+                user_id=self.employee.id,
+                profile_id=self.profile.id,
+            )
+
+        self.assertEqual(response.status_code, 200)
+        return captured["organizations/employee_profile_detail.html"]
+
+    def test_organization_holidays_disabled_in_context(self):
+        context = self._get_context()
+        self.assertFalse(context["organization"].holidays_enabled)

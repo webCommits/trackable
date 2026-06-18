@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from trackable.organizations.helpers import can_edit_time_entries
 from trackable.profiles.forms import ProfileForm
 from trackable.profiles.models import Profile
 
@@ -60,6 +61,13 @@ def profile_detail(request, pk):
     week_total = sum(d["total_hours"] for d in week_days)
     has_org = request.user.is_org_member
 
+    can_log_time = can_edit_time_entries(request.user)
+
+    membership = getattr(request.user, "organization_membership", None)
+    show_vacation = True
+    if membership:
+        show_vacation = membership.organization.holidays_enabled
+
     # ── Monthly overview ──
     entry_months = set(
         profile.time_entries.values_list("date__year", "date__month").distinct()
@@ -91,6 +99,8 @@ def profile_detail(request, pk):
         "week_total": week_total,
         "week_monday": monday,
         "has_org": has_org,
+        "can_log_time": can_log_time,
+        "show_vacation": show_vacation,
     })
 
 

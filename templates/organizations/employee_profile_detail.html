@@ -137,6 +137,7 @@
                 <th>{% trans "Break" %}</th>
                 <th>{% trans "Hours" %}</th>
                 <th>{% trans "Activity" %}</th>
+                {% if show_actions %}<th></th>{% endif %}
             </tr>
         </thead>
         <tbody>
@@ -148,10 +149,19 @@
                 <td>{{ entry.pause_duration }}h</td>
                 <td><strong>{{ entry.hours_worked|floatformat:2 }}h</strong></td>
                 <td style="color:var(--ctp-subtext1); font-size:.9em;">{{ entry.notes|default:"" }}</td>
+                {% if show_actions %}
+                <td style="white-space: nowrap;">
+                    <a href="/entry/{{ entry.pk }}/edit/" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
+                    <form method="post" action="/entry/{{ entry.pk }}/delete/" style="display:inline" onsubmit="return confirm('{% trans "Delete this entry?" %}')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger-light">{% trans "Delete" %}</button>
+                    </form>
+                </td>
+                {% endif %}
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align:center; color:var(--ctp-subtext0);">
+                <td colspan="{% if show_actions %}7{% else %}6{% endif %}" style="text-align:center; color:var(--ctp-subtext0);">
                     {% trans "No entries for this month." %}
                 </td>
             </tr>
@@ -190,4 +200,13 @@
     </table>
 </div>
 {% endif %}
+
+<div style="margin-top: 10px; margin-bottom: 40px;">
+    {% if show_actions %}
+    <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary">+ {% trans "Add time entry" %}</a>
+    {% endif %}
+    {% if organization.holidays_enabled %}
+    <a href="/vacation/{{ profile.id }}/add/" class="btn btn-secondary"{% if show_actions %} style="margin-left: 10px;"{% endif %}>+ {% trans "Add vacation" %}</a>
+    {% endif %}
+</div>
 {% endblock %}

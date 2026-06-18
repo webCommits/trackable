@@ -12,7 +12,12 @@ from trackable.organizations.forms import (
     OrganizationBrandingForm,
 )
 from trackable.organizations.decorators import org_manager_required
-from trackable.organizations.helpers import can_edit_time_entries, can_modify_entry, can_create_calendar_entry
+from trackable.organizations.helpers import (
+    can_edit_time_entries,
+    can_modify_entry,
+    can_create_calendar_entry,
+    can_manage_profile_time_entries,
+)
 from trackable.profiles.models import Profile
 from trackable.core.models import Holiday
 from trackable.accounts.models import User
@@ -350,6 +355,8 @@ def employee_profile_detail(request, user_id, profile_id):
     entry_months.add((timezone.now().year, timezone.now().month))
     available_months = sorted(entry_months, reverse=True)
 
+    show_actions = can_manage_profile_time_entries(request.user, profile)
+
     return render(
         request,
         "organizations/employee_profile_detail.html",
@@ -368,6 +375,7 @@ def employee_profile_detail(request, user_id, profile_id):
             "balance": balance,
             "total_vacation_days": total_vacation_days,
             "available_months": available_months,
+            "show_actions": show_actions,
         },
     )
 

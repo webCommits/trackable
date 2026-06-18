@@ -1,8 +1,12 @@
 from decimal import Decimal
-from django.test import TestCase
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django.test import RequestFactory, TestCase
 
 from trackable.core.utils import decimal_to_hours_and_minutes, hours_and_minutes_to_decimal
+from trackable.organizations.models import Organization, OrganizationMembership
 from trackable.profiles.forms import ProfileForm
 from trackable.profiles.models import Profile
 
@@ -119,3 +123,66 @@ class ProfileFormTest(TestCase):
         form = ProfileForm(instance=profile)
         self.assertEqual(form.initial.get("weekly_hours_hours"), 4)
         self.assertEqual(form.initial.get("weekly_hours_minutes"), 20)
+
+
+class ProfileDetailContextTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpass"
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+            title="Dev",
+            position="Senior",
+            weekly_hours=Decimal("40.0000"),
+            hourly_rate=Decimal("50.0000"),
+        )
+
+    def _get_context(self, user):
+        from trackable.profiles.views import profile_detail
+
+        request = RequestFactory().get("/")
+        request.user = user
+        captured = {}
+
+        def mock_render(request, template_name, context, **kwargs):
+            captured[template_name] = context
+            return HttpResponse("rendered")
+
+        with patch("trackable.profiles.views.render", mock_render):
+            response = profile_detail(request, pk=self.profile.pk)
+
+        self.assertEqual(response.status_code, 200)
+        return captured["profiles/detail.html"]
+
+    def test_user_without_org_can_log_time_and_see_vacation(self):
+        context = self._get_context(self.user)
+        self.assertTrue(context["can_log_time"])
+        self.assertTrue(context["show_vacation"])
+
+    def test_employee_in_restricted_mode_cannot_log_time(self):
+        org = Organization.objects.create(
+            name="Test Org",
+            created_by=self.user,
+            time_tracking_mode="restricted",
+        )
+        OrganizationMembership.objects.create(
+            organization=org, user=self.user, role="employee"
+        )
+        context = self._get_context(self.user)
+        self.assertFalse(context["can_log_time"])
+        self.assertTrue(context["show_vacation"])
+
+    def test_employee_with_disabled_holidays_cannot_see_vacation(self):
+        org = Organization.objects.create(
+            name="Test Org",
+            created_by=self.user,
+            time_tracking_mode="classic",
+            holidays_enabled=False,
+        )
+        OrganizationMembership.objects.create(
+            organization=org, user=self.user, role="employee"
+        )
+        context = self._get_context(self.user)
+        self.assertTrue(context["can_log_time"])
+        self.assertFalse(context["show_vacation"])

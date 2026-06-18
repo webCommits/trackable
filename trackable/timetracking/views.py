@@ -14,7 +14,12 @@ from django.views.decorators.http import require_http_methods
 from trackable.timetracking.forms import TimeEntryForm, VacationEntryForm
 from trackable.timetracking.models import TimeEntry, VacationEntry, ActiveTimer
 from trackable.profiles.models import Profile
-from trackable.organizations.helpers import can_edit_time_entries
+from trackable.organizations.helpers import (
+    can_edit_time_entries,
+    can_manage_profile_time_entries,
+    can_manage_time_entry,
+    is_org_manager,
+)
 
 
 @login_required
@@ -44,11 +49,10 @@ def home(request):
 
 @login_required
 def add_entry(request, profile_id):
-    profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+    profile = get_object_or_404(Profile, pk=profile_id)
 
-    # Timer-only mode check
-    if not can_edit_time_entries(request.user):
-        messages.error(request, _("Manual time entry is disabled. Please use the timer."))
+    if not can_manage_profile_time_entries(request.user, profile):
+        messages.error(request, _("You do not have permission to add time entries for this profile."))
         return redirect("home")
 
     if request.method == "POST":
@@ -62,6 +66,12 @@ def add_entry(request, profile_id):
                 _("Time entry for %(date)s was saved successfully!")
                 % {"date": entry.date},
             )
+            if is_org_manager(request.user) and profile.user != request.user:
+                return redirect(
+                    "employee_profile_detail",
+                    user_id=profile.user_id,
+                    profile_id=profile.pk,
+                )
             return redirect("profile_detail", pk=profile.pk)
     else:
         form = TimeEntryForm()
@@ -72,19 +82,24 @@ def add_entry(request, profile_id):
 
 @login_required
 def edit_entry(request, pk):
-    entry = get_object_or_404(TimeEntry, pk=pk, profile__user=request.user)
+    entry = get_object_or_404(TimeEntry, pk=pk)
     profile = entry.profile
 
-    # Timer-only mode check
-    if not can_edit_time_entries(request.user):
-        messages.error(request, _("Editing time entries is disabled in timer-only mode."))
-        return redirect("monthly_table", profile_id=profile.pk, year=entry.date.year, month=entry.date.month)
+    if not can_manage_time_entry(request.user, entry):
+        messages.error(request, _("You do not have permission to edit this time entry."))
+        return redirect("home")
 
     if request.method == "POST":
         form = TimeEntryForm(request.POST, instance=entry)
         if form.is_valid():
             form.save()
             messages.success(request, _("Time entry was updated successfully!"))
+            if is_org_manager(request.user) and profile.user != request.user:
+                return redirect(
+                    "employee_profile_detail",
+                    user_id=profile.user_id,
+                    profile_id=profile.pk,
+                )
             return redirect(
                 "monthly_table",
                 profile_id=profile.pk,
@@ -102,12 +117,25 @@ def edit_entry(request, pk):
 
 @login_required
 def delete_entry(request, pk):
-    entry = get_object_or_404(TimeEntry, pk=pk, profile__user=request.user)
+    entry = get_object_or_404(TimeEntry, pk=pk)
+
+    if not can_manage_time_entry(request.user, entry):
+        messages.error(request, _("You do not have permission to delete this time entry."))
+        return redirect("home")
+
     year, month = entry.date.year, entry.date.month
     profile_id = entry.profile_id
+    user_id = entry.profile.user_id
     if request.method == "POST":
         entry.delete()
         messages.success(request, _("Time entry was deleted."))
+
+    if is_org_manager(request.user) and user_id != request.user.id:
+        return redirect(
+            "employee_profile_detail",
+            user_id=user_id,
+            profile_id=profile_id,
+        )
     return redirect("monthly_table", profile_id=profile_id, year=year, month=month)
 
 
@@ -132,6 +160,11 @@ def monthly_table(request, profile_id, year, month):
     # Show edit/delete actions?
     show_actions = can_edit_time_entries(request.user)
 
+    membership = getattr(request.user, "organization_membership", None)
+    show_vacation = True
+    if membership:
+        show_vacation = membership.organization.holidays_enabled
+
     return render(
         request,
         "timetracking/monthly_table.html",
@@ -148,6 +181,7 @@ def monthly_table(request, profile_id, year, month):
             "balance": balance,
             "total_vacation_days": total_vacation_days,
             "show_actions": show_actions,
+            "show_vacation": show_vacation,
         },
     )
 
@@ -158,6 +192,12 @@ def monthly_table(request, profile_id, year, month):
 @login_required
 def add_vacation(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+
+    membership = getattr(request.user, "organization_membership", None)
+    if membership and not membership.organization.holidays_enabled:
+        messages.error(request, _("Vacation tracking is disabled for your organization."))
+        return redirect("home")
+
     if request.method == "POST":
         form = VacationEntryForm(request.POST)
         if form.is_valid():
@@ -179,6 +219,12 @@ def add_vacation(request, profile_id):
 @login_required
 def delete_vacation(request, pk):
     vacation = get_object_or_404(VacationEntry, pk=pk, profile__user=request.user)
+
+    membership = getattr(request.user, "organization_membership", None)
+    if membership and not membership.organization.holidays_enabled:
+        messages.error(request, _("Vacation tracking is disabled for your organization."))
+        return redirect("home")
+
     profile_id = vacation.profile_id
     if request.method == "POST":
         vacation.delete()
@@ -189,6 +235,12 @@ def delete_vacation(request, pk):
 @login_required
 def vacation_overview(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
+
+    membership = getattr(request.user, "organization_membership", None)
+    if membership and not membership.organization.holidays_enabled:
+        messages.error(request, _("Vacation tracking is disabled for your organization."))
+        return redirect("home")
+
     from django.utils.timezone import now
 
     current_year = now().year

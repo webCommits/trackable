@@ -6,7 +6,11 @@
 {% block content %}
 <div class="content" style="max-width: 600px; margin: 0 auto;">
     <div style="margin-bottom: 30px;">
+        {% if request.user == profile.user %}
         <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary">← {% trans "Back" %}</a>
+        {% else %}
+        <a href="/org/employees/{{ profile.user.id }}/profiles/{{ profile.id }}/" class="btn btn-secondary">← {% trans "Back" %}</a>
+        {% endif %}
     </div>
 
     <h2 style="text-align: center; margin-bottom: 30px; color: var(--ctp-mauve);">

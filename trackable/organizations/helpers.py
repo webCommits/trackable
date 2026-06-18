@@ -15,6 +15,41 @@ def can_edit_time_entries(user):
     return membership.is_manager
 
 
+def is_org_manager(user):
+    """Return True if the user is a manager in their organization."""
+    membership = getattr(user, "organization_membership", None)
+    return membership is not None and membership.is_manager
+
+
+def get_user_organization(user):
+    """Return the organization of a user, or None."""
+    membership = getattr(user, "organization_membership", None)
+    return membership.organization if membership else None
+
+
+def can_manage_profile_time_entries(user, profile):
+    """Check if a user can add/edit/delete time entries for a profile via form.
+
+    - Owner of the profile: allowed if can_edit_time_entries(user)
+    - Manager of the same organization: always allowed (bypasses restricted mode)
+    """
+    if profile.user == user:
+        return can_edit_time_entries(user)
+
+    if not is_org_manager(user):
+        return False
+
+    user_org = get_user_organization(user)
+    profile_org = get_user_organization(profile.user)
+
+    return user_org is not None and user_org == profile_org
+
+
+def can_manage_time_entry(user, entry):
+    """Check if a user can edit/delete a specific time entry via form."""
+    return can_manage_profile_time_entries(user, entry.profile)
+
+
 def can_modify_entry(user, entry):
     """Check if a user can modify (edit/move/delete) a specific time entry
     in the weekly calendar (shared planning view).
