@@ -539,7 +539,7 @@ def org_weekly_calendar(request):
 
 
 @login_required
-@org_manager_required
+@require_http_methods(["POST"])
 def move_entry(request, entry_id):
     from trackable.timetracking.models import TimeEntry
 

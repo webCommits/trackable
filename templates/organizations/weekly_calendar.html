@@ -395,7 +395,7 @@
                          data-start-mins="{{ entry.start_mins }}"
                          data-duration="{{ entry.duration_mins }}"
                          data-notes="{{ entry.notes|escapejs }}"
-                         data-hours="{{ entry.hours_worked|floatformat:1 }}">
+                         data-hours="{{ entry.hours_worked|stringformat:".1f" }}">
                         <div class="entry-name">{{ entry.user_name }}</div>
                         <div class="entry-time">{{ entry.start_time_str }}–{{ entry.end_time_str }}</div>
                         {% if entry.notes %}
@@ -500,7 +500,7 @@
     'use strict';
 
     // ── Config ──
-    const PX_PER_HOUR = {{ PIXEL_RATIO|floatformat:4 }};
+    const PX_PER_HOUR = {{ PIXEL_RATIO|stringformat:".4f" }};
     const GRID_START_MINS = {{ grid_start_mins }};
     const IS_MANAGER = {{ is_manager|lower }};
     const CURRENT_USER_ID = {{ request.user.id }};

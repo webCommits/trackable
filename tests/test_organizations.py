@@ -460,8 +460,8 @@ class TimeTrackingModeTest(TestCase):
         entry.refresh_from_db()
         self.assertEqual(entry.date.isoformat(), new_date)
 
-    def test_move_entry_as_employee_denied(self):
-        """Employee cannot move entries."""
+    def test_move_entry_as_employee_own_entry(self):
+        """Employee can move their own entries."""
         from datetime import datetime as dt, timedelta
 
         today = dt.now().date()
@@ -486,7 +486,44 @@ class TimeTrackingModeTest(TestCase):
             reverse("move_entry", kwargs={"entry_id": entry.pk}),
             {"new_date": new_date},
         )
-        self.assertEqual(response.status_code, 302)  # redirected to login/error
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+        entry.refresh_from_db()
+        self.assertEqual(entry.date.isoformat(), new_date)
+
+    def test_move_entry_as_employee_other_entry_denied(self):
+        """Employee cannot move another employee's entries."""
+        from datetime import datetime as dt, timedelta
+
+        today = dt.now().date()
+        other_employee = User.objects.create_user(
+            username="other_employee", email="other@example.com", password="pass123"
+        )
+        OrganizationMembership.objects.create(
+            organization=self.org, user=other_employee, role="employee"
+        )
+        profile = Profile.objects.create(
+            user=other_employee,
+            title="Dev",
+            position="Developer",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        entry = TimeEntry.objects.create(
+            profile=profile,
+            date=today,
+            start_time=dt.now().time(),
+            end_time=(dt.now() + timedelta(hours=8)).time(),
+            pause_duration=1,
+        )
+
+        self.client.login(username="employee", password="pass123")
+        new_date = (today + timedelta(days=1)).isoformat()
+        response = self.client.post(
+            reverse("move_entry", kwargs={"entry_id": entry.pk}),
+            {"new_date": new_date},
+        )
+        self.assertEqual(response.status_code, 403)
 
 
 # Make TimeEntry available for tests above
