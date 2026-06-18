@@ -127,12 +127,12 @@
     </div>
     {% endif %}
 
-    <div style="margin-top: 10px;">
+    <div class="btn-group" style="margin-top: 10px;">
         {% if show_actions %}
         <a href="/add-entry/{{ profile.id }}/" class="btn btn-primary">+ {% trans "Add time entry" %}</a>
         {% endif %}
         {% if show_vacation %}
-        <a href="/vacation/{{ profile.id }}/add/" class="btn btn-secondary"{% if show_actions %} style="margin-left: 10px;"{% endif %}>+ {% trans "Add vacation" %}</a>
+        <a href="/vacation/{{ profile.id }}/add/" class="btn btn-secondary">+ {% trans "Add vacation" %}</a>
         {% endif %}
     </div>
 </div>

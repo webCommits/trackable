@@ -1516,6 +1516,21 @@ hr, .divider { border: none; border-top: 1px solid var(--ctp-overlay0); margin: 
     align-items: center;
 }
 
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.btn-group .btn {
+    flex: 1 1 140px;
+    min-width: 0;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+    overflow-wrap: break-word;
+}
+
 .settings-row {
     display: flex;
     flex-wrap: wrap;
@@ -1611,6 +1626,13 @@ hr, .divider { border: none; border-top: 1px solid var(--ctp-overlay0); margin: 
     .table-actions .btn,
     .table-actions form {
         width: 100%;
+    }
+
+    .btn-group .btn {
+        white-space: normal;
+        line-height: 1.25;
+        padding-left: 12px;
+        padding-right: 12px;
     }
 }
 
