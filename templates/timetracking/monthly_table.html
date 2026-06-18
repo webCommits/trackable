@@ -75,7 +75,7 @@
                     <td><strong>{{ entry.hours_worked|floatformat:2 }}h</strong></td>
                     <td style="color: var(--ctp-subtext1); font-size: .9em;">{{ entry.notes|default:"" }}</td>
                     {% if show_actions %}
-                    <td style="white-space: nowrap;">
+                    <td class="table-actions">
                         <a href="/entry/{{ entry.pk }}/edit/" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
                         <form method="post" action="/entry/{{ entry.pk }}/delete/" style="display:inline" onsubmit="return confirm('{% trans "Delete this entry?" %}')">
                             {% csrf_token %}

@@ -4,12 +4,14 @@
 {% block nav_profiles %}active{% endblock %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
-    <div>
+<div class="page-actions">
+    <div class="page-actions-title">
         <h1>{% trans "Profiles" %}</h1>
         <p style="color:var(--ctp-subtext0); margin-top:4px;">{% trans "Manage your work profiles." %}</p>
     </div>
-    <a href="/profiles/create/" class="btn btn-primary">+ {% trans "New profile" %}</a>
+    <div class="page-actions-buttons">
+        <a href="/profiles/create/" class="btn btn-primary">+ {% trans "New profile" %}</a>
+    </div>
 </div>
 
 {% if profiles %}
@@ -20,9 +22,9 @@
             <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:3px;">{{ profile.position }}</div>
             <div style="font-weight:600; font-size:.95rem; color:var(--ctp-text);">{{ profile.title }}</div>
         </div>
-        <div style="display:flex; gap:24px; flex-shrink:0; font-size:.82rem; color:var(--ctp-subtext0);">
-            <span>🕐 {{ profile.weekly_hours }}h / {% trans "week" %}</span>
-            <span>💶 {{ profile.hourly_rate }} €/h</span>
+        <div style="display:flex; gap:24px; flex-wrap:wrap; row-gap:4px; font-size:.82rem; color:var(--ctp-subtext0);">
+            <span>🕐 {{ profile.weekly_hours|floatformat:1 }}h / {% trans "week" %}</span>
+            <span>💶 {{ profile.hourly_rate|floatformat:2 }} €/h</span>
         </div>
         <div style="display:flex; gap:8px; flex-shrink:0;">
             <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary btn-sm">{% trans "Open" %}</a>

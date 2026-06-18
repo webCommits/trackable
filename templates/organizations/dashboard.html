@@ -3,14 +3,14 @@
 {% block title %}{% trans "Organization" %}{% endblock %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px;">
-    <div>
+<div class="page-actions">
+    <div class="page-actions-title">
         <h1>{{ organization.name }}</h1>
         <p style="color:var(--ctp-subtext0); margin-top:4px;">{% trans "Manage your team and view employee time data." %}</p>
     </div>
-    <div style="display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap;">
+    <div class="page-actions-buttons">
         <a href="/org/holidays/" class="btn btn-secondary" style="color:var(--ctp-teal); border-color:rgba(23,146,153,.3);">🎌 {% trans "Holidays" %}</a>
-        <a href="{% url 'time_entry_import' %}" class="btn btn-secondary btn-sm">📥 {% trans "Import time entries" %}</a>
+        <a href="{% url 'time_entry_import' %}" class="btn btn-secondary btn-sm">📥 {% trans "Import" %}</a>
         <a href="/org/employees/create/" class="btn btn-primary">+ {% trans "Add employee" %}</a>
     </div>
 </div>
@@ -29,12 +29,12 @@
 <!-- ⚙️ Settings: Timer Mode + Weekly Calendar -->
 <div class="card" style="margin-bottom:24px; padding:20px; border:1px solid rgba(202,158,230,.15);">
     <h3 style="color:var(--ctp-mauve); margin-bottom:16px;">⚙️ {% trans "Team Settings" %}</h3>
-    <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:.9rem; font-weight:600;">{% trans "Time tracking mode" %}
-                <span class="help-icon" title="{% trans "In restricted mode, employees can only record time via the start/stop timer. Managers retain full access." %}" tabindex="0">ⓘ</span>
-            </span>
-            <form method="post" action="/org/toggle-time-tracking-mode/" style="display:inline;">
+    <div class="settings-row" style="margin-bottom:16px;">
+        <span class="settings-label">{% trans "Time tracking mode" %}
+            <span class="help-icon" title="{% trans "In restricted mode, employees can only record time via the start/stop timer. Managers retain full access." %}" tabindex="0">ⓘ</span>
+        </span>
+        <div class="settings-control">
+            <form method="post" action="/org/toggle-time-tracking-mode/">
                 {% csrf_token %}
                 <select name="mode" onchange="this.form.submit()"
                         style="padding:6px 12px; border-radius:8px;
@@ -49,17 +49,19 @@
                     </option>
                 </select>
             </form>
-            <span style="font-size:.82rem; color:var(--ctp-subtext0);">
-                {% if organization.time_tracking_mode == "restricted" %}
-                    🔴 {% trans "Restricted – Timer only (managers can edit)" %}
-                {% else %}
-                    🟢 {% trans "Classic – Full CRUD access" %}
-                {% endif %}
-            </span>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:.9rem; font-weight:600;">🎌 {% trans "Holidays" %}</span>
-            <form method="post" action="/org/toggle-holidays/" style="display:inline;">
+        <span class="settings-status">
+            {% if organization.time_tracking_mode == "restricted" %}
+                🔴 {% trans "Restricted – Timer only (managers can edit)" %}
+            {% else %}
+                🟢 {% trans "Classic – Full CRUD access" %}
+            {% endif %}
+        </span>
+    </div>
+    <div class="settings-row" style="margin-bottom:16px;">
+        <span class="settings-label">🎌 {% trans "Holidays" %}</span>
+        <div class="settings-control">
+            <form method="post" action="/org/toggle-holidays/">
                 {% csrf_token %}
                 <select name="holidays" onchange="this.form.submit()"
                         style="padding:6px 12px; border-radius:8px;
@@ -74,18 +76,18 @@
                     </option>
                 </select>
             </form>
-            <span style="font-size:.82rem; color:var(--ctp-subtext0);">
-                {% if organization.holidays_enabled %}
-                    🟢 {% trans "Holidays are deducted from vacation days" %}
-                {% else %}
-                    🔴 {% trans "Holidays are ignored in vacation calculation" %}
-                {% endif %}
-            </span>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; min-width:150px; text-align:right;">
-            <a href="/org/weekly/" class="btn btn-primary btn-sm">📅 {% trans "Weekly Calendar" %}</a>
-            <a href="/org/branding/" class="btn btn-secondary btn-sm" style="min-height:44px;">🎨 {% trans "Branding" %}</a>
-        </div>
+        <span class="settings-status">
+            {% if organization.holidays_enabled %}
+                🟢 {% trans "Holidays are deducted from vacation days" %}
+            {% else %}
+                🔴 {% trans "Holidays are ignored in vacation calculation" %}
+            {% endif %}
+        </span>
+    </div>
+    <div class="page-actions-buttons">
+        <a href="/org/weekly/" class="btn btn-primary btn-sm">📅 {% trans "Weekly Calendar" %}</a>
+        <a href="/org/branding/" class="btn btn-secondary btn-sm" style="min-height:44px;">🎨 {% trans "Branding" %}</a>
     </div>
 </div>
 

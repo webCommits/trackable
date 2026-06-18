@@ -17,9 +17,9 @@
     <p style="color:var(--ctp-subtext0); margin-bottom:5px;">
         <strong>{% trans "Weekly target hours" %}:</strong>
         {% if profile.weekly_target_hours %}
-            {{ profile.weekly_target_hours }}h
+            {{ profile.weekly_target_hours|floatformat:1 }}h
         {% else %}
-            {{ profile.weekly_hours }}h <em style="color:var(--ctp-overlay2);">({% trans "from profile" %})</em>
+            {{ profile.weekly_hours|floatformat:1 }}h <em style="color:var(--ctp-overlay2);">({% trans "from profile" %})</em>
         {% endif %}
         <a href="#" onclick="document.getElementById('target-hours-form').style.display='block'; this.style.display='none'; return false;"
            style="margin-left:10px; font-size:.85rem; color:var(--ctp-blue); cursor:pointer;">✏ {% trans "Edit" %}</a>
@@ -150,7 +150,7 @@
                 <td><strong>{{ entry.hours_worked|floatformat:2 }}h</strong></td>
                 <td style="color:var(--ctp-subtext1); font-size:.9em;">{{ entry.notes|default:"" }}</td>
                 {% if show_actions %}
-                <td style="white-space: nowrap;">
+                <td class="table-actions">
                     <a href="/entry/{{ entry.pk }}/edit/" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
                     <form method="post" action="/entry/{{ entry.pk }}/delete/" style="display:inline" onsubmit="return confirm('{% trans "Delete this entry?" %}')">
                         {% csrf_token %}

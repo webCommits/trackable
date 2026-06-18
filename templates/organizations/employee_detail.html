@@ -20,7 +20,7 @@
             <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:3px;">{{ pd.profile.position }}</div>
             <h3 style="margin:0;">{{ pd.profile.title }}</h3>
             <div style="font-size:.82rem; color:var(--ctp-subtext0); margin-top:4px;">
-                {{ pd.profile.weekly_hours }}h / {% trans "week" %} · €{{ pd.profile.hourly_rate }}/h
+                {{ pd.profile.weekly_hours|floatformat:1 }}h / {% trans "week" %} · €{{ pd.profile.hourly_rate|floatformat:2 }}/h
             </div>
         </div>
     </div>

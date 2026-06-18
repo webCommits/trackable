@@ -19,6 +19,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 .wc-nav .week-label {
     font-weight: 700;
@@ -26,6 +27,7 @@
     min-width: 220px;
     text-align: center;
     color: var(--ctp-text);
+    flex: 1 1 auto;
 }
 
 /* ── Grid wrapper ── */
@@ -302,6 +304,9 @@
 
 /* ── Mobile ── */
 @media (max-width: 768px) {
+    .wc-header { justify-content: center; }
+    .wc-nav { justify-content: center; }
+    .wc-nav .week-label { order: -1; width: 100%; min-width: auto; margin-bottom: 4px; }
     .wc-header-row .wc-day-header { min-width: 70px; font-size: .7rem; padding: 8px 2px; }
     .wc-day-col { min-width: 70px; }
     .wc-time-col { width: 44px; }

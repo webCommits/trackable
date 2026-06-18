@@ -1496,6 +1496,123 @@ hr, .divider { border: none; border-top: 1px solid var(--ctp-overlay0); margin: 
     .btn-sm { padding: 9px 14px; font-size: .82rem; }
 }
 
+/* ─── Responsive layout utilities ─── */
+.page-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+.page-actions .page-actions-title {
+    flex: 1 1 0;
+    min-width: 220px;
+}
+.page-actions .page-actions-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.settings-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+}
+.settings-row .settings-label {
+    font-size: .9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.settings-row .settings-control {
+    flex: 0 0 auto;
+    min-width: 160px;
+}
+.settings-row .settings-control select,
+.settings-row .settings-control form {
+    width: 100%;
+}
+.settings-row .settings-status {
+    font-size: .82rem;
+    color: var(--ctp-subtext0);
+    flex: 1 1 180px;
+    min-width: 180px;
+}
+
+.week-grid-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--ctp-overlay0);
+    border-radius: 10px;
+    background: var(--ctp-mantle);
+    margin-bottom: 20px;
+}
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(100px, 1fr));
+    gap: 12px;
+    min-width: 700px;
+    padding: 12px;
+}
+
+.table-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+@media (max-width: 480px) {
+    .page-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .page-actions .page-actions-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+    .page-actions .page-actions-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .settings-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .settings-row .settings-control,
+    .settings-row .settings-status {
+        width: 100%;
+        min-width: auto;
+    }
+    .settings-row .settings-control select,
+    .settings-row .settings-control form {
+        width: 100%;
+    }
+
+    .week-grid {
+        grid-template-columns: repeat(7, minmax(90px, 1fr));
+        min-width: 630px;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .table-actions .btn,
+    .table-actions form {
+        width: 100%;
+    }
+}
 
 .card-label {
     font-size: .7rem;
