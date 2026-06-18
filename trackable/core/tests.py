@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import translation
 
 
 class SetLanguageViewTest(TestCase):
@@ -42,3 +43,16 @@ class SetLanguageViewTest(TestCase):
 
     def test_url_reverse(self):
         self.assertEqual(reverse("set_language"), "/set-language/")
+
+
+class TranslationCoverageTest(TestCase):
+    def test_employee_at_org_is_translated(self):
+        translation.activate("de")
+        self.addCleanup(translation.deactivate)
+        result = translation.gettext("Employee at %(org)s") % {"org": "Acme"}
+        self.assertEqual(result, "Mitarbeiter bei Acme")
+
+    def test_employee_role_is_translated(self):
+        translation.activate("de")
+        self.addCleanup(translation.deactivate)
+        self.assertEqual(translation.gettext("Employee"), "Mitarbeiter")
