@@ -47,13 +47,14 @@
         return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     }
 
-    function enqueue(profileId, action) {
+    function enqueue(profileId, action, payload) {
         const queue = getQueue();
         queue.push({
             id: generateId(),
             profileId: profileId,
             action: action,
             clientTimestamp: new Date().toISOString(),
+            payload: payload || {},
             retryCount: 0,
             createdAt: Date.now(),
             lastAttempt: null,
@@ -143,7 +144,10 @@
                     'X-CSRFToken': getCsrfToken(),
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ client_timestamp: item.clientTimestamp }),
+                body: JSON.stringify(Object.assign(
+                    { client_timestamp: item.clientTimestamp },
+                    item.payload || {}
+                )),
             });
 
             const data = await resp.json();
@@ -170,6 +174,16 @@
             // "Timer is already paused" / "not paused" → Zustandskonflikt
             if (resp.status === 400) {
                 return true; // Server sagt was anderes → Queue-Item obsolet
+            }
+
+            // Bei Validierungsfehler (400) bei Stop → Modal mit Fehler wieder öffnen,
+            // State neu vom Server laden (war optimistisch bereits gelöscht)
+            if (resp.status === 400 && item.action === 'stop') {
+                try {
+                    showStopError(item.profileId, data.error || 'Validierungsfehler');
+                } catch (e) { /* Modal existiert evtl. nicht mehr */ }
+                fetchTimerStatus(item.profileId);
+                return true; // aus Queue entfernen, User muss erneut bestätigen
             }
 
             // anderer Fehler → wiederholen
@@ -367,6 +381,11 @@
                     elapsedSeconds: data.elapsed_seconds,
                     lastUpdate: now,
                 });
+                // pausedSeconds ins Modal-Dataset schreiben für populateStopModal
+                const modal = document.getElementById('stop-modal-' + profileId);
+                if (modal) {
+                    modal.dataset.pausedSeconds = String(data.total_paused_seconds || 0);
+                }
             } else {
                 timers.set(profileId, {
                     hasTimer: false,
@@ -498,9 +517,8 @@
 
                 const action = btn.getAttribute('data-action');
 
-                if (action === 'stop' && !confirm(
-                    'Timer wirklich stoppen? Die Zeit wird gespeichert.'
-                )) {
+                if (action === 'stop') {
+                    openStopModal(profileId);
                     return;
                 }
 
@@ -515,6 +533,215 @@
             if (profileId) {
                 fetchTimerStatus(profileId);
             }
+        });
+    }
+
+    // ── Stop Modal ─────────────────────────────────────────────
+
+    function openStopModal(profileId) {
+        const modal = document.getElementById('stop-modal-' + profileId);
+        if (!modal) return;
+
+        // Fehler-Banner zurücksetzen
+        hideStopError(profileId);
+
+        // Frischen Server-Status holen, Modal erst DANN anzeigen
+        // (vermeidet "leeres Modal" während des Server-Roundtrips)
+        fetchTimerStatus(profileId).then(() => {
+            const state = timers.get(profileId);
+            if (!state || !state.hasTimer) {
+                return; // kein Timer mehr, nichts zu tun
+            }
+            populateStopModal(profileId, state);
+
+            // Jetzt erst anzeigen
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            // ESC-Handler
+            modal._escHandler = function(e) {
+                if (e.key === 'Escape') closeStopModal(profileId);
+            };
+            document.addEventListener('keydown', modal._escHandler);
+
+            // Notiz-Feld fokussieren
+            setTimeout(function() {
+                const ta = modal.querySelector('[data-field="notes"]');
+                if (ta) ta.focus();
+            }, 80);
+        }).catch(() => {
+            // Server nicht erreichbar → Modal trotzdem zeigen mit Hinweis
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            showStopError(profileId, 'Status konnte nicht geladen werden. Notiz wird trotzdem gespeichert.');
+        });
+    }
+
+    function closeStopModal(profileId) {
+        const modal = document.getElementById('stop-modal-' + profileId);
+        if (!modal) return;
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        if (modal._escHandler) {
+            document.removeEventListener('keydown', modal._escHandler);
+            modal._escHandler = null;
+        }
+        hideStopError(profileId);
+        // Confirm-Button re-enable
+        const confirmBtn = modal.querySelector('[data-action="confirm"]');
+        if (confirmBtn) confirmBtn.disabled = false;
+    }
+
+    function populateStopModal(profileId, state) {
+        const modal = document.getElementById('stop-modal-' + profileId);
+        if (!modal) return;
+
+        const startTime = new Date(state.start_time);
+        const now = new Date();
+
+        // pausierte Sekunden aus Modal-Dataset (vom Server-Status gesetzt)
+        const pausedSeconds = parseInt(modal.dataset.pausedSeconds || '0', 10) || 0;
+
+        // Effektive End-Zeit:
+        // - Wenn pausiert: startTime + (elapsed + paused) Sekunden
+        // - Sonst: jetzt
+        let effectiveEnd;
+        if (state.is_paused) {
+            const elapsed = state.elapsedSeconds || 0;
+            effectiveEnd = new Date(startTime.getTime() + (elapsed + pausedSeconds) * 1000);
+        } else {
+            effectiveEnd = now;
+        }
+
+        // Anzeige
+        const dateOpts = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        const timeOpts = { hour: '2-digit', minute: '2-digit' };
+        const userLocale = (navigator.language || 'de-DE');
+
+        modal.querySelector('[data-field="display_date"]').textContent =
+            startTime.toLocaleDateString(userLocale, dateOpts);
+        modal.querySelector('[data-field="display_start"]').textContent =
+            startTime.toLocaleTimeString(userLocale, timeOpts);
+        modal.querySelector('[data-field="display_end"]').textContent =
+            effectiveEnd.toLocaleTimeString(userLocale, timeOpts);
+
+        const totalSeconds = (effectiveEnd - startTime) / 1000;
+        const workSeconds = Math.max(0, totalSeconds - pausedSeconds);
+        const hours = (workSeconds / 3600).toFixed(2);
+        const pauseHours = (pausedSeconds / 3600).toFixed(2);
+
+        modal.querySelector('[data-field="display_pause"]').textContent = pauseHours;
+        modal.querySelector('[data-field="display_hours"]').textContent = hours;
+
+        // Editierbare Felder mit Defaults füllen (nur wenn can_edit)
+        if (modal.dataset.canEdit === 'true') {
+            const dateInput = modal.querySelector('[data-field="date"]');
+            const startInput = modal.querySelector('[data-field="start_time"]');
+            const endInput = modal.querySelector('[data-field="end_time"]');
+            const pauseInput = modal.querySelector('[data-field="pause_duration"]');
+
+            if (dateInput) {
+                const y = startTime.getFullYear();
+                const m = String(startTime.getMonth() + 1).padStart(2, '0');
+                const d = String(startTime.getDate()).padStart(2, '0');
+                dateInput.value = y + '-' + m + '-' + d;
+            }
+            if (startInput) {
+                startInput.value = startTime.toTimeString().slice(0, 5);
+            }
+            if (endInput) {
+                endInput.value = effectiveEnd.toTimeString().slice(0, 5);
+            }
+            if (pauseInput) {
+                pauseInput.value = pauseHours;
+            }
+        }
+    }
+
+    function confirmStop(profileId) {
+        const modal = document.getElementById('stop-modal-' + profileId);
+        if (!modal) return;
+
+        const confirmBtn = modal.querySelector('[data-action="confirm"]');
+        if (confirmBtn && confirmBtn.disabled) return;
+        if (confirmBtn) confirmBtn.disabled = true;
+
+        const payload = {
+            notes: (modal.querySelector('[data-field="notes"]').value || '').slice(0, 1000)
+        };
+
+        if (modal.dataset.canEdit === 'true') {
+            const dateVal = modal.querySelector('[data-field="date"]').value;
+            const startVal = modal.querySelector('[data-field="start_time"]').value;
+            const endVal = modal.querySelector('[data-field="end_time"]').value;
+            const pauseVal = modal.querySelector('[data-field="pause_duration"]').value;
+
+            if (dateVal) payload.date = dateVal;
+            if (startVal) payload.start_time = startVal;
+            if (endVal) payload.end_time = endVal;
+            if (pauseVal !== '' && pauseVal !== null) {
+                payload.pause_duration = parseFloat(pauseVal);
+            }
+        }
+
+        // Optimistic state + queue (mit payload, damit Notiz gespeichert wird)
+        applyOptimisticState(profileId, 'stop');
+        enqueue(profileId, 'stop', payload);
+
+        // Modal schließen
+        closeStopModal(profileId);
+
+        // Notification
+        const noteInfo = payload.notes ? ' – Notiz gespeichert' : '';
+        showNotification('Timer gestoppt' + noteInfo, 'success');
+    }
+
+    function showStopError(profileId, message) {
+        const modal = document.getElementById('stop-modal-' + profileId);
+        if (!modal) return;
+        const errorEl = modal.querySelector('.stop-error');
+        if (!errorEl) return;
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        // Confirm-Button re-enable
+        const confirmBtn = modal.querySelector('[data-action="confirm"]');
+        if (confirmBtn) confirmBtn.disabled = false;
+    }
+
+    function hideStopError(profileId) {
+        const modal = document.getElementById('stop-modal-' + profileId);
+        if (!modal) return;
+        const errorEl = modal.querySelector('.stop-error');
+        if (!errorEl) return;
+        errorEl.textContent = '';
+        errorEl.style.display = 'none';
+    }
+
+    function initStopModals() {
+        document.querySelectorAll('.stop-overlay').forEach(function(modal) {
+            const profileId = modal.getAttribute('data-profile-id');
+            if (!profileId) return;
+
+            const cancelBtn = modal.querySelector('[data-action="cancel"]');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    closeStopModal(profileId);
+                });
+            }
+
+            const confirmBtn = modal.querySelector('[data-action="confirm"]');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    confirmStop(profileId);
+                });
+            }
+
+            // Klick auf Overlay (außerhalb des Modals) → schließen
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeStopModal(profileId);
+                }
+            });
         });
     }
 
@@ -548,12 +775,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             initTimerControls();
             initAllTimers();
+            initStopModals();
             reconcileOnPageLoad();
             updatePendingBadge();
         });
     } else {
         initTimerControls();
         initAllTimers();
+        initStopModals();
         reconcileOnPageLoad();
         updatePendingBadge();
     }

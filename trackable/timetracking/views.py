@@ -8,7 +8,9 @@ from django.utils.translation import gettext as _g
 from datetime import datetime, timedelta
 import calendar
 import csv
+import json
 from datetime import time as time_obj
+from datetime import date as date_obj
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from trackable.timetracking.forms import TimeEntryForm, VacationEntryForm
@@ -20,6 +22,9 @@ from trackable.organizations.helpers import (
     can_manage_time_entry,
     is_org_manager,
 )
+
+NOTES_MAX_LENGTH = 1000
+
 
 
 @login_required
@@ -296,9 +301,6 @@ def _parse_client_timestamp(request):
     Parse optional client_timestamp from request body (JSON or form).
     Returns a timezone-aware datetime or None.
     """
-    import json
-    from datetime import datetime
-
     ts_str = None
     if request.content_type == "application/json":
         try:
@@ -424,13 +426,107 @@ def resume_timer(request, profile_id):
     )
 
 
+def _parse_stop_request(request, user):
+    """Parse and validate stop_timer request body.
+
+    Returns a dict with keys:
+      - notes (str, always, max NOTES_MAX_LENGTH)
+      - date (date or None, only if can_edit_time_entries)
+      - start_time (time or None, only if can_edit_time_entries)
+      - end_time (time or None, only if can_edit_time_entries)
+      - pause_duration (float hours or None, only if can_edit_time_entries)
+      - error (str or None)
+      - field (str or None, set when error is set)
+    """
+    body = {}
+    if request.content_type == "application/json":
+        try:
+            body = json.loads(request.body) if request.body else {}
+        except (ValueError, AttributeError):
+            return {"error": "Invalid JSON body", "field": None, "notes": "",
+                    "date": None, "start_time": None, "end_time": None,
+                    "pause_duration": None}
+    else:
+        # Form-encoded fallback (z.B. für Tests / externe Clients)
+        body = {k: request.POST.getlist(k) if len(request.POST.getlist(k)) > 1 else v
+                for k, v in request.POST.items()} if request.POST else {}
+
+    notes_raw = body.get("notes") or ""
+    if not isinstance(notes_raw, str):
+        notes_raw = str(notes_raw)
+    notes = notes_raw[:NOTES_MAX_LENGTH]
+
+    result = {
+        "error": None,
+        "field": None,
+        "notes": notes,
+        "date": None,
+        "start_time": None,
+        "end_time": None,
+        "pause_duration": None,
+    }
+
+    if not can_edit_time_entries(user):
+        return result
+
+    def _err(field, msg):
+        result["error"] = msg
+        result["field"] = field
+
+    raw_date = body.get("date")
+    if raw_date:
+        try:
+            result["date"] = datetime.strptime(str(raw_date), "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            _err("date", f"Invalid date format: {raw_date}")
+            return result
+
+    raw_start = body.get("start_time")
+    if raw_start:
+        try:
+            result["start_time"] = datetime.strptime(str(raw_start), "%H:%M").time()
+        except (ValueError, TypeError):
+            _err("start_time", f"Invalid start_time format: {raw_start}")
+            return result
+
+    raw_end = body.get("end_time")
+    if raw_end:
+        try:
+            result["end_time"] = datetime.strptime(str(raw_end), "%H:%M").time()
+        except (ValueError, TypeError):
+            _err("end_time", f"Invalid end_time format: {raw_end}")
+            return result
+
+    raw_pause = body.get("pause_duration")
+    if raw_pause not in (None, ""):
+        try:
+            pause_val = float(raw_pause)
+            if pause_val < 0:
+                _err("pause_duration", "Break must be ≥ 0")
+                return result
+            result["pause_duration"] = pause_val
+        except (ValueError, TypeError):
+            _err("pause_duration", f"Invalid pause_duration: {raw_pause}")
+            return result
+
+    # No end > start check: end < start on the same day is interpreted
+    # as a day-rollover (e.g. night shift 22:00 → 06:00), matching the
+    # behaviour of TimeEntry.calculate_hours().
+
+    return result
+
+
 @login_required
 @require_http_methods(["POST"])
 def stop_timer(request, profile_id):
     """Stop timer and create TimeEntry.
 
     Accepts optional client_timestamp so queued offline stops
-    record the correct end time and duration.
+    record the correct end time and duration. Accepts optional
+    notes (always) and optional override fields for date /
+    start_time / end_time / pause_duration (only honored if
+    can_edit_time_entries(user) is True; ignored otherwise for
+    security).
     """
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
 
@@ -438,29 +534,41 @@ def stop_timer(request, profile_id):
     if not timer:
         return JsonResponse({"error": "No active timer found"}, status=404)
 
+    parsed = _parse_stop_request(request, request.user)
+    if parsed["error"]:
+        return JsonResponse(
+            {"error": parsed["error"], "field": parsed["field"]}, status=400
+        )
+
     client_ts = _parse_client_timestamp(request)
     stop_time = client_ts or timezone.now()
 
-    total_seconds = (
-        stop_time - timer.start_time
-    ).total_seconds() - timer.total_paused_seconds
+    entry_date = parsed["date"] or timer.start_time.date()
+    start_dt = parsed["start_time"] or timer.start_time.time()
+    end_dt = parsed["end_time"] or stop_time.time()
+    if parsed["pause_duration"] is not None:
+        pause_seconds = parsed["pause_duration"] * 3600
+    else:
+        pause_seconds = timer.total_paused_seconds
 
+    start_full = datetime.combine(entry_date, start_dt)
+    end_full = datetime.combine(entry_date, end_dt)
+    if end_full < start_full:
+        end_full = end_full + timedelta(days=1)
+
+    total_seconds = (end_full - start_full).total_seconds() - pause_seconds
     if total_seconds < 0:
         total_seconds = 0
-
     hours_worked = total_seconds / 3600
-
-    entry_date = timer.start_time.date()
-    start_time_obj = timer.start_time.time()
-    end_time_obj = stop_time.time()
 
     time_entry = TimeEntry.objects.create(
         profile=profile,
         date=entry_date,
-        start_time=start_time_obj,
-        end_time=end_time_obj,
-        pause_duration=round(timer.total_paused_seconds / 3600, 2),
+        start_time=start_dt,
+        end_time=end_dt,
+        pause_duration=round(pause_seconds / 3600, 2),
         hours_worked=round(hours_worked, 2),
+        notes=parsed["notes"],
     )
 
     timer.delete()
@@ -471,6 +579,7 @@ def stop_timer(request, profile_id):
             "hours_worked": round(hours_worked, 2),
             "entry_id": time_entry.id,
             "date": str(entry_date),
+            "notes_saved": bool(parsed["notes"]),
             "message": f"Time entry created: {round(hours_worked, 2)} hours",
         }
     )
