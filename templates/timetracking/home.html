@@ -35,55 +35,13 @@
             <span>🕐 {{ profile.weekly_hours|floatformat:1 }}h / {% trans "week" %}</span>
             {% if profile.address %}<span>📍 {{ profile.address }}</span>{% endif %}
         </div>
-        <div class="timer-controls" data-profile-id="{{ profile.id }}" style="margin-bottom:12px;">
+        <div class="timer-controls" data-profile-id="{{ profile.id }}" data-profile-title="{{ profile.title }}" style="margin-bottom:12px;">
             <div class="timer-display" data-profile-id="{{ profile.id }}"></div>
             <div class="flex-row" style="gap:6px;">
                 <button class="btn btn-primary" data-action="start" aria-label="{% trans 'Start timer for' %} {{ profile.title }}" style="flex:1; min-height:48px;">▶ {% trans "Start" %}</button>
                 <button class="btn btn-warning" data-action="pause" aria-label="{% trans 'Pause timer for' %} {{ profile.title }}" style="display:none; flex:1; min-height:48px;">⏸ {% trans "Pause" %}</button>
                 <button class="btn btn-success" data-action="resume" aria-label="{% trans 'Resume timer for' %} {{ profile.title }}" style="display:none; flex:1; min-height:48px;">▶ {% trans "Resume" %}</button>
                 <button class="btn btn-danger" data-action="stop" aria-label="{% trans 'Stop timer for' %} {{ profile.title }}" style="display:none; flex:1; min-height:48px;">⏹ {% trans "Stop" %}</button>
-            </div>
-        </div>
-
-        <div id="stop-modal-{{ profile.id }}" class="stop-overlay" data-profile-id="{{ profile.id }}" data-can-edit="{{ can_edit|yesno:'true,false' }}" data-paused-seconds="0" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="stop-modal-title-{{ profile.id }}">
-            <div class="stop-modal">
-                <h3 id="stop-modal-title-{{ profile.id }}">⏹ {% trans "Stop timer" %} – {{ profile.title }}</h3>
-
-                <div class="stop-summary">
-                    <p><strong>{% trans "Date" %}:</strong> <span data-field="display_date">—</span></p>
-                    <p><strong>{% trans "Start time" %}:</strong> <span data-field="display_start">—</span></p>
-                    <p><strong>{% trans "End time" %}:</strong> <span data-field="display_end">—</span></p>
-                    <p><strong>{% trans "Break" %}:</strong> <span data-field="display_pause">0.00</span> h</p>
-                    <p><strong>{% trans "Hours" %}:</strong> <span data-field="display_hours">0.00</span> h</p>
-                </div>
-
-                {% if can_edit %}
-                    <p class="stop-hint">{% trans "You can adjust the times below if needed." %}</p>
-                    <div class="stop-editable-fields">
-                        <label for="stop-date-{{ profile.id }}">{% trans "Date" %}</label>
-                        <input type="date" id="stop-date-{{ profile.id }}" data-field="date">
-                        <label for="stop-start-{{ profile.id }}">{% trans "Start time" %}</label>
-                        <input type="time" id="stop-start-{{ profile.id }}" data-field="start_time">
-                        <label for="stop-end-{{ profile.id }}">{% trans "End time" %}</label>
-                        <input type="time" id="stop-end-{{ profile.id }}" data-field="end_time">
-                        <label for="stop-pause-{{ profile.id }}">{% trans "Break (hours)" %}</label>
-                        <input type="number" id="stop-pause-{{ profile.id }}" step="0.25" min="0" data-field="pause_duration">
-                    </div>
-                {% else %}
-                    <p class="stop-hint">{% trans "Im Restricted-Modus können Zeiten nicht geändert werden. Du kannst trotzdem eine Notiz hinzufügen." %}</p>
-                {% endif %}
-
-                <div class="form-group" style="margin-top:16px;">
-                    <label for="stop-notes-{{ profile.id }}">{% trans "Activity / Notes" %} <span class="stop-optional">({% trans "optional" %})</span></label>
-                    <textarea id="stop-notes-{{ profile.id }}" data-field="notes" rows="3" maxlength="1000" placeholder="{% trans 'What did you work on?' %}"></textarea>
-                </div>
-
-                <div class="stop-error" style="display:none;" role="alert"></div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary btn-sm" data-action="cancel">{% trans "Cancel" %}</button>
-                    <button type="button" class="btn btn-danger btn-sm" data-action="confirm">{% trans "Save & stop" %}</button>
-                </div>
             </div>
         </div>
         <div class="flex-row" style="gap:8px;">
@@ -123,4 +81,47 @@
     </div>
 </div>
 {% endif %}
+
+{# ── Stop Timer Modal (ausserhalb der Karten, damit position:fixed greift) ── #}
+<div id="stop-modal" class="stop-overlay" data-profile-id="" data-can-edit="{{ can_edit|yesno:'true,false' }}" data-paused-seconds="0" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="stop-modal-title">
+    <div class="stop-modal">
+        <h3 id="stop-modal-title">⏹ {% trans "Stop timer" %}</h3>
+
+        <div class="stop-summary">
+            <p><strong>{% trans "Date" %}:</strong> <span data-field="display_date">—</span></p>
+            <p><strong>{% trans "Start time" %}:</strong> <span data-field="display_start">—</span></p>
+            <p><strong>{% trans "End time" %}:</strong> <span data-field="display_end">—</span></p>
+            <p><strong>{% trans "Break" %}:</strong> <span data-field="display_pause">0.00</span> h</p>
+            <p><strong>{% trans "Hours" %}:</strong> <span data-field="display_hours">0.00</span> h</p>
+        </div>
+
+        {% if can_edit %}
+            <p class="stop-hint">{% trans "You can adjust the times below if needed." %}</p>
+            <div class="stop-editable-fields">
+                <label for="stop-date">{% trans "Date" %}</label>
+                <input type="date" id="stop-date" data-field="date">
+                <label for="stop-start">{% trans "Start time" %}</label>
+                <input type="time" id="stop-start" data-field="start_time">
+                <label for="stop-end">{% trans "End time" %}</label>
+                <input type="time" id="stop-end" data-field="end_time">
+                <label for="stop-pause">{% trans "Break (hours)" %}</label>
+                <input type="number" id="stop-pause" step="0.25" min="0" data-field="pause_duration">
+            </div>
+        {% else %}
+            <p class="stop-hint">{% trans "Im Restricted-Modus können Zeiten nicht geändert werden. Du kannst trotzdem eine Notiz hinzufügen." %}</p>
+        {% endif %}
+
+        <div class="form-group" style="margin-top:16px;">
+            <label for="stop-notes">{% trans "Activity / Notes" %} <span class="stop-optional">({% trans "optional" %})</span></label>
+            <textarea id="stop-notes" data-field="notes" rows="3" maxlength="1000" placeholder="{% trans 'What did you work on?' %}"></textarea>
+        </div>
+
+        <div class="stop-error" style="display:none;" role="alert"></div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary btn-sm" data-action="cancel">{% trans "Cancel" %}</button>
+            <button type="button" class="btn btn-danger btn-sm" data-action="confirm">{% trans "Save & stop" %}</button>
+        </div>
+    </div>
+</div>
 {% endblock %}

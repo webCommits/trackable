@@ -382,7 +382,7 @@
                     lastUpdate: now,
                 });
                 // pausedSeconds ins Modal-Dataset schreiben für populateStopModal
-                const modal = document.getElementById('stop-modal-' + profileId);
+                const modal = getStopModal();
                 if (modal) {
                     modal.dataset.pausedSeconds = String(data.total_paused_seconds || 0);
                 }
@@ -537,74 +537,98 @@
     }
 
     // ── Stop Modal ─────────────────────────────────────────────
+    //
+    // Es gibt genau EIN #stop-modal-Element im Template, ausserhalb der
+    // .card-Container. Ohne diese Trennung wuerde position:fixed bei
+    // :hover-transformierten Vorfahren (.card:hover{transform:...}) zu
+    // position:absolute kollabieren → das Modal waere in der Kachel
+    // gefangen statt zentral zu erscheinen.
+
+    function getStopModal() {
+        return document.getElementById('stop-modal');
+    }
+
+    function getActiveStopProfileId() {
+        const m = getStopModal();
+        return m ? m.getAttribute('data-profile-id') || null : null;
+    }
 
     function openStopModal(profileId) {
-        const modal = document.getElementById('stop-modal-' + profileId);
+        const modal = getStopModal();
         if (!modal) return;
 
+        // Profil-Kontext setzen
+        modal.setAttribute('data-profile-id', String(profileId));
+
+        // Titel mit Profil-Name aktualisieren
+        const titleEl = modal.querySelector('#stop-modal-title');
+        const controls = document.querySelector(
+            '.timer-controls[data-profile-id="' + profileId + '"]'
+        );
+        const profileTitle = controls
+            ? controls.getAttribute('data-profile-title') || ''
+            : '';
+        if (titleEl) {
+            const baseTitle = (titleEl.getAttribute('data-base-title') || titleEl.textContent || '').trim();
+            if (profileTitle && !titleEl.getAttribute('data-base-title')) {
+                titleEl.setAttribute('data-base-title', baseTitle);
+            }
+            titleEl.textContent = baseTitle + (profileTitle ? ' \u2013 ' + profileTitle : '');
+        }
+
         // Fehler-Banner zurücksetzen
-        hideStopError(profileId);
+        hideStopError();
 
         // Frischen Server-Status holen, Modal erst DANN anzeigen
-        // (vermeidet "leeres Modal" während des Server-Roundtrips)
         fetchTimerStatus(profileId).then(() => {
             const state = timers.get(profileId);
             if (!state || !state.hasTimer) {
-                return; // kein Timer mehr, nichts zu tun
+                return; // kein Timer mehr
             }
-            populateStopModal(profileId, state);
+            populateStopModal(state);
 
-            // Jetzt erst anzeigen
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
-            // ESC-Handler
-            modal._escHandler = function(e) {
-                if (e.key === 'Escape') closeStopModal(profileId);
-            };
-            document.addEventListener('keydown', modal._escHandler);
-
-            // Notiz-Feld fokussieren
             setTimeout(function() {
                 const ta = modal.querySelector('[data-field="notes"]');
                 if (ta) ta.focus();
             }, 80);
         }).catch(() => {
-            // Server nicht erreichbar → Modal trotzdem zeigen mit Hinweis
+            // Server nicht erreichbar → Modal trotzdem zeigen
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            showStopError(profileId, 'Status konnte nicht geladen werden. Notiz wird trotzdem gespeichert.');
+            showStopError('Status konnte nicht geladen werden. Notiz wird trotzdem gespeichert.');
         });
     }
 
-    function closeStopModal(profileId) {
-        const modal = document.getElementById('stop-modal-' + profileId);
+    function closeStopModal() {
+        const modal = getStopModal();
         if (!modal) return;
         modal.style.display = 'none';
         document.body.style.overflow = '';
-        if (modal._escHandler) {
-            document.removeEventListener('keydown', modal._escHandler);
-            modal._escHandler = null;
-        }
-        hideStopError(profileId);
-        // Confirm-Button re-enable
+        modal.setAttribute('data-profile-id', '');
+        hideStopError();
         const confirmBtn = modal.querySelector('[data-action="confirm"]');
         if (confirmBtn) confirmBtn.disabled = false;
+        // Notiz + Override-Felder leeren, damit der naechste Aufruf frisch startet
+        const ta = modal.querySelector('[data-field="notes"]');
+        if (ta) ta.value = '';
+        ['date', 'start_time', 'end_time', 'pause_duration'].forEach(function(f) {
+            const el = modal.querySelector('[data-field="' + f + '"]');
+            if (el) el.value = '';
+        });
     }
 
-    function populateStopModal(profileId, state) {
-        const modal = document.getElementById('stop-modal-' + profileId);
+    function populateStopModal(state) {
+        const modal = getStopModal();
         if (!modal) return;
 
         const startTime = new Date(state.start_time);
         const now = new Date();
 
-        // pausierte Sekunden aus Modal-Dataset (vom Server-Status gesetzt)
         const pausedSeconds = parseInt(modal.dataset.pausedSeconds || '0', 10) || 0;
 
-        // Effektive End-Zeit:
-        // - Wenn pausiert: startTime + (elapsed + paused) Sekunden
-        // - Sonst: jetzt
         let effectiveEnd;
         if (state.is_paused) {
             const elapsed = state.elapsedSeconds || 0;
@@ -613,7 +637,6 @@
             effectiveEnd = now;
         }
 
-        // Anzeige
         const dateOpts = { year: 'numeric', month: '2-digit', day: '2-digit' };
         const timeOpts = { hour: '2-digit', minute: '2-digit' };
         const userLocale = (navigator.language || 'de-DE');
@@ -633,7 +656,6 @@
         modal.querySelector('[data-field="display_pause"]').textContent = pauseHours;
         modal.querySelector('[data-field="display_hours"]').textContent = hours;
 
-        // Editierbare Felder mit Defaults füllen (nur wenn can_edit)
         if (modal.dataset.canEdit === 'true') {
             const dateInput = modal.querySelector('[data-field="date"]');
             const startInput = modal.querySelector('[data-field="start_time"]');
@@ -646,21 +668,17 @@
                 const d = String(startTime.getDate()).padStart(2, '0');
                 dateInput.value = y + '-' + m + '-' + d;
             }
-            if (startInput) {
-                startInput.value = startTime.toTimeString().slice(0, 5);
-            }
-            if (endInput) {
-                endInput.value = effectiveEnd.toTimeString().slice(0, 5);
-            }
-            if (pauseInput) {
-                pauseInput.value = pauseHours;
-            }
+            if (startInput) startInput.value = startTime.toTimeString().slice(0, 5);
+            if (endInput) endInput.value = effectiveEnd.toTimeString().slice(0, 5);
+            if (pauseInput) pauseInput.value = pauseHours;
         }
     }
 
-    function confirmStop(profileId) {
-        const modal = document.getElementById('stop-modal-' + profileId);
+    function confirmStop() {
+        const modal = getStopModal();
         if (!modal) return;
+        const profileId = getActiveStopProfileId();
+        if (!profileId) return;
 
         const confirmBtn = modal.querySelector('[data-action="confirm"]');
         if (confirmBtn && confirmBtn.disabled) return;
@@ -684,32 +702,27 @@
             }
         }
 
-        // Optimistic state + queue (mit payload, damit Notiz gespeichert wird)
         applyOptimisticState(profileId, 'stop');
         enqueue(profileId, 'stop', payload);
+        closeStopModal();
 
-        // Modal schließen
-        closeStopModal(profileId);
-
-        // Notification
         const noteInfo = payload.notes ? ' – Notiz gespeichert' : '';
         showNotification('Timer gestoppt' + noteInfo, 'success');
     }
 
-    function showStopError(profileId, message) {
-        const modal = document.getElementById('stop-modal-' + profileId);
+    function showStopError(message) {
+        const modal = getStopModal();
         if (!modal) return;
         const errorEl = modal.querySelector('.stop-error');
         if (!errorEl) return;
         errorEl.textContent = message;
         errorEl.style.display = 'block';
-        // Confirm-Button re-enable
         const confirmBtn = modal.querySelector('[data-action="confirm"]');
         if (confirmBtn) confirmBtn.disabled = false;
     }
 
-    function hideStopError(profileId) {
-        const modal = document.getElementById('stop-modal-' + profileId);
+    function hideStopError() {
+        const modal = getStopModal();
         if (!modal) return;
         const errorEl = modal.querySelector('.stop-error');
         if (!errorEl) return;
@@ -718,30 +731,31 @@
     }
 
     function initStopModals() {
-        document.querySelectorAll('.stop-overlay').forEach(function(modal) {
-            const profileId = modal.getAttribute('data-profile-id');
-            if (!profileId) return;
+        const modal = getStopModal();
+        if (!modal) return;
 
-            const cancelBtn = modal.querySelector('[data-action="cancel"]');
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', function() {
-                    closeStopModal(profileId);
-                });
+        const cancelBtn = modal.querySelector('[data-action="cancel"]');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeStopModal);
+        }
+
+        const confirmBtn = modal.querySelector('[data-action="confirm"]');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', confirmStop);
+        }
+
+        // Klick auf Overlay (ausserhalb des .stop-modal) → schliessen
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeStopModal();
             }
+        });
 
-            const confirmBtn = modal.querySelector('[data-action="confirm"]');
-            if (confirmBtn) {
-                confirmBtn.addEventListener('click', function() {
-                    confirmStop(profileId);
-                });
+        // ESC schliesst (einmalig pro Modal registriert)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                closeStopModal();
             }
-
-            // Klick auf Overlay (außerhalb des Modals) → schließen
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeStopModal(profileId);
-                }
-            });
         });
     }
 
