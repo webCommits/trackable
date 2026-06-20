@@ -17,6 +17,7 @@
 
     // ── Globals ──────────────────────────────────────────────────
     const timers = new Map();           // lokaler Timer-State (wie bisher)
+    let queueProcessing = false;        // Schutz gegen parallele Queue-Läufe
     const POLL_INTERVAL = 5000;         // Server-Poll-Intervall (ms)
     const QUEUE_RETRY_BASE = 1000;      // Basis für exponentielles Backoff (ms)
     const QUEUE_RETRY_MAX = 30000;      // Max Backoff (30s)
@@ -47,13 +48,13 @@
         return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     }
 
-    function enqueue(profileId, action, payload) {
+    function enqueue(profileId, action, payload, clientTimestamp) {
         const queue = getQueue();
         queue.push({
             id: generateId(),
             profileId: profileId,
             action: action,
-            clientTimestamp: new Date().toISOString(),
+            clientTimestamp: clientTimestamp || new Date().toISOString(),
             payload: payload || {},
             retryCount: 0,
             createdAt: Date.now(),
@@ -93,37 +94,44 @@
     async function processQueue() {
         const queue = getQueue();
         if (queue.length === 0) return;
-
-        // Gruppiere nach Profil, verarbeite FIFO pro Profil
-        const byProfile = {};
-        for (const item of queue) {
-            if (!byProfile[item.profileId]) byProfile[item.profileId] = [];
-            byProfile[item.profileId].push(item);
+        if (queueProcessing) {
+            updatePendingBadge();
+            return;
         }
+        queueProcessing = true;
+        try {
+            // Gruppiere nach Profil, verarbeite FIFO pro Profil
+            const byProfile = {};
+            for (const item of queue) {
+                if (!byProfile[item.profileId]) byProfile[item.profileId] = [];
+                byProfile[item.profileId].push(item);
+            }
 
-        for (const [profileId, items] of Object.entries(byProfile)) {
-            for (const item of items) {
-                // Abgelaufenes Backoff? Nicht vor Ablauf retryen
-                if (item.lastAttempt) {
-                    const wait = Math.min(
-                        QUEUE_RETRY_BASE * Math.pow(2, item.retryCount),
-                        QUEUE_RETRY_MAX
-                    );
-                    if (Date.now() - item.lastAttempt < wait) {
-                        continue; // noch warten
+            for (const [profileId, items] of Object.entries(byProfile)) {
+                for (const item of items) {
+                    // Abgelaufenes Backoff? Nicht vor Ablauf retryen
+                    if (item.lastAttempt) {
+                        const wait = Math.min(
+                            QUEUE_RETRY_BASE * Math.pow(2, item.retryCount),
+                            QUEUE_RETRY_MAX
+                        );
+                        if (Date.now() - item.lastAttempt < wait) {
+                            continue; // noch warten
+                        }
+                    }
+
+                    const success = await processQueueItem(item);
+                    if (success) {
+                        removeFromQueue(item.id);
+                    } else {
+                        markAttempt(item.id);
                     }
                 }
-
-                const success = await processQueueItem(item);
-                if (success) {
-                    removeFromQueue(item.id);
-                } else {
-                    markAttempt(item.id);
-                }
             }
+        } finally {
+            queueProcessing = false;
+            updatePendingBadge();
         }
-
-        updatePendingBadge();
     }
 
     async function processQueueItem(item) {
@@ -163,6 +171,14 @@
             }
 
             // Fehler vom Server (400, 404, etc.)
+            // Stop-Validierungsfehler VOR generischem 400 behandeln
+            if (resp.status === 400 && item.action === 'stop') {
+                try {
+                    showStopError(item.profileId, data.error || 'Validierungsfehler');
+                } catch (e) { /* Modal existiert evtl. nicht mehr */ }
+                fetchTimerStatus(item.profileId);
+                return true; // aus Queue entfernen, User muss erneut bestätigen
+            }
             // "Timer already running" bei Start → jemand anderes hat gestartet
             if (item.action === 'start' && resp.status === 400) {
                 return true; // obsolete
@@ -174,16 +190,6 @@
             // "Timer is already paused" / "not paused" → Zustandskonflikt
             if (resp.status === 400) {
                 return true; // Server sagt was anderes → Queue-Item obsolet
-            }
-
-            // Bei Validierungsfehler (400) bei Stop → Modal mit Fehler wieder öffnen,
-            // State neu vom Server laden (war optimistisch bereits gelöscht)
-            if (resp.status === 400 && item.action === 'stop') {
-                try {
-                    showStopError(item.profileId, data.error || 'Validierungsfehler');
-                } catch (e) { /* Modal existiert evtl. nicht mehr */ }
-                fetchTimerStatus(item.profileId);
-                return true; // aus Queue entfernen, User muss erneut bestätigen
             }
 
             // anderer Fehler → wiederholen
@@ -225,6 +231,8 @@
                     isPaused: false,
                     elapsedSeconds: Math.max(0, elapsed),
                     lastUpdate: now,
+                    startTime: data.start_time,
+                    totalPausedSeconds: 0,
                 });
                 break;
 
@@ -240,6 +248,8 @@
                         td.elapsedSeconds = Math.floor(
                             td.elapsedSeconds + (now - td.lastUpdate)
                         );
+                        td.totalPausedSeconds = data.total_paused_seconds || td.totalPausedSeconds || 0;
+                        td.lastUpdate = now;
                         timers.set(profileId, td);
                     }
                 }
@@ -250,6 +260,7 @@
                     const td = timers.get(profileId);
                     if (td && td.isPaused) {
                         td.isPaused = false;
+                        td.totalPausedSeconds = data.total_paused_seconds || td.totalPausedSeconds || 0;
                         td.lastUpdate = now;
                         timers.set(profileId, td);
                     }
@@ -273,6 +284,8 @@
                     isPaused: false,
                     elapsedSeconds: 0,
                     lastUpdate: now,
+                    startTime: new Date().toISOString(),
+                    totalPausedSeconds: 0,
                 });
                 break;
 
@@ -380,6 +393,9 @@
                     isPaused: data.is_paused,
                     elapsedSeconds: data.elapsed_seconds,
                     lastUpdate: now,
+                    // start_time und totalPausedSeconds für Stop-Modal einfrieren
+                    startTime: data.start_time,
+                    totalPausedSeconds: data.total_paused_seconds || 0,
                 });
                 // pausedSeconds ins Modal-Dataset schreiben für populateStopModal
                 const modal = getStopModal();
@@ -486,19 +502,11 @@
         const profileIds = [...new Set(queue.map(i => i.profileId))];
         profileIds.forEach(pid => {
             fetchTimerStatus(pid).then(() => {
-                // Nach Status-Update: überschüssige Queue-Einträge entfernen
-                const pending = getPendingForProfile(pid);
-                pending.forEach(item => {
-                    // Hole frischen Status aus timers Map
-                    const state = timers.get(pid);
-                    if (!state) return;
-                    if (!isActionValid(item.action, {
-                        has_timer: state.hasTimer,
-                        is_paused: state.isPaused,
-                    })) {
-                        removeFromQueue(item.id);
-                    }
-                });
+                // Keine Queue-Einträge beim Page-Load löschen: Eine gültige
+                // Offline-Sequenz wie start→stop kann aus Sicht des aktuellen
+                // Serverstatus teilweise ungültig aussehen. Die FIFO-
+                // Verarbeitung in processQueueItem entscheidet später mit
+                // frischem Status pro Aktion.
                 updatePendingBadge();
             });
         });
@@ -583,9 +591,15 @@
         fetchTimerStatus(profileId).then(() => {
             const state = timers.get(profileId);
             if (!state || !state.hasTimer) {
+                showNotification('Kein aktiver Timer gefunden.', 'error');
                 return; // kein Timer mehr
             }
-            populateStopModal(state);
+            // Stop-Zeitpunkt einfrieren: aktueller Moment als FrozenTimestamp
+            const frozenTimestamp = new Date().toISOString();
+            modal.dataset.frozenTimestamp = frozenTimestamp;
+            const populated = populateStopModal(state, frozenTimestamp);
+            const confirmBtn = modal.querySelector('[data-action="confirm"]');
+            if (confirmBtn) confirmBtn.disabled = !populated;
 
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -596,9 +610,28 @@
             }, 80);
         }).catch(() => {
             // Server nicht erreichbar → Modal trotzdem zeigen
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            showStopError('Status konnte nicht geladen werden. Notiz wird trotzdem gespeichert.');
+            const frozenTimestamp = new Date().toISOString();
+            modal.dataset.frozenTimestamp = frozenTimestamp;
+            const state = timers.get(profileId);
+            const confirmBtn = modal.querySelector('[data-action="confirm"]');
+            if (state && state.hasTimer) {
+                // Lokaler State vorhanden → Modal mit eingefrorenen Werten füllen.
+                // Nur bei erfolgreich befülltem Modal bleibt Confirm aktiv
+                // (Offline-Stop möglich).
+                const populated = populateStopModal(state, frozenTimestamp);
+                if (confirmBtn) confirmBtn.disabled = !populated;
+                if (!populated) {
+                    showStopError('Status konnte nicht geladen werden; bitte Verbindung prüfen und erneut versuchen.');
+                }
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            } else {
+                // Kein lokaler State → Confirm deaktivieren, Fehler anzeigen
+                if (confirmBtn) confirmBtn.disabled = true;
+                showStopError('Status konnte nicht geladen werden; bitte Verbindung prüfen und erneut versuchen.');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
         });
     }
 
@@ -608,6 +641,8 @@
         modal.style.display = 'none';
         document.body.style.overflow = '';
         modal.setAttribute('data-profile-id', '');
+        modal.dataset.frozenTimestamp = '';
+        modal.dataset.pausedSeconds = '0';
         hideStopError();
         const confirmBtn = modal.querySelector('[data-action="confirm"]');
         if (confirmBtn) confirmBtn.disabled = false;
@@ -620,17 +655,26 @@
         });
     }
 
-    function populateStopModal(state) {
+    function populateStopModal(state, frozenTimestamp) {
         const modal = getStopModal();
-        if (!modal) return;
+        if (!modal) return false;
 
-        const startTime = new Date(state.start_time);
-        const now = new Date();
+        const rawStartTime = state.startTime || state.start_time;
+        const startTime = new Date(rawStartTime);
+        if (!rawStartTime || Number.isNaN(startTime.getTime())) {
+            showStopError('Startzeit konnte nicht gelesen werden. Bitte erneut versuchen.');
+            return false;
+        }
+        // Verwende eingefrorenen Zeitstempel statt now() für konsistente Werte
+        const now = frozenTimestamp ? new Date(frozenTimestamp) : new Date();
 
-        const pausedSeconds = parseInt(modal.dataset.pausedSeconds || '0', 10) || 0;
+        const pausedSeconds = parseInt(
+            state.totalPausedSeconds ?? modal.dataset.pausedSeconds ?? '0',
+            10
+        ) || 0;
 
         let effectiveEnd;
-        if (state.is_paused) {
+        if (state.isPaused) {
             const elapsed = state.elapsedSeconds || 0;
             effectiveEnd = new Date(startTime.getTime() + (elapsed + pausedSeconds) * 1000);
         } else {
@@ -672,6 +716,8 @@
             if (endInput) endInput.value = effectiveEnd.toTimeString().slice(0, 5);
             if (pauseInput) pauseInput.value = pauseHours;
         }
+
+        return true;
     }
 
     function confirmStop() {
@@ -703,7 +749,9 @@
         }
 
         applyOptimisticState(profileId, 'stop');
-        enqueue(profileId, 'stop', payload);
+        // Verwende eingefrorenen Zeitstempel aus dem Modal
+        const frozenTs = modal.dataset.frozenTimestamp;
+        enqueue(profileId, 'stop', payload, frozenTs);
         closeStopModal();
 
         const noteInfo = payload.notes ? ' – Notiz gespeichert' : '';

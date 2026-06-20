@@ -1,5 +1,6 @@
 from .base import *
 import os
+import tempfile
 
 # Use a separate database to avoid clobbering the dev database
 DATABASES = {
@@ -14,6 +15,9 @@ ALLOWED_HOSTS = ["*"]
 
 # Use locmem email backend so tests can assert on mail.outbox
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+# Store uploaded files in a writable temp directory during tests.
+MEDIA_ROOT = os.path.join(tempfile.gettempdir(), "trackable_test_media")
 
 # Speed up tests with faster password hasher
 PASSWORD_HASHERS = [

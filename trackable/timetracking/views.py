@@ -13,6 +13,7 @@ from datetime import time as time_obj
 from datetime import date as date_obj
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.db import IntegrityError, transaction
 from trackable.timetracking.forms import TimeEntryForm, VacationEntryForm
 from trackable.timetracking.models import TimeEntry, VacationEntry, ActiveTimer
 from trackable.profiles.models import Profile
@@ -300,6 +301,7 @@ def _parse_client_timestamp(request):
     """
     Parse optional client_timestamp from request body (JSON or form).
     Returns a timezone-aware datetime or None.
+    Future timestamps are clamped to timezone.now().
     """
     ts_str = None
     if request.content_type == "application/json":
@@ -325,6 +327,10 @@ def _parse_client_timestamp(request):
         # Normalize to UTC so all timer math is consistent
         # (ActiveTimer.start_time is stored as UTC by Django)
         dt = dt.astimezone(dt_timezone.utc)
+        # Clamp future timestamps to now to prevent future start/pause/stop
+        now = timezone.now()
+        if dt > now:
+            dt = now
         return dt
     except (ValueError, TypeError):
         return None
@@ -337,23 +343,30 @@ def start_timer(request, profile_id):
 
     Accepts optional client_timestamp (ISO 8601) so queued offline
     starts record the correct start time.
+    Uses select_for_update + atomic to prevent race conditions.
+    IntegrityError is caught and returns 400 instead of 500.
     """
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
-
-    existing_timer = ActiveTimer.objects.filter(
-        profile=profile, user=request.user
-    ).first()
-    if existing_timer:
-        return JsonResponse(
-            {"error": "Timer already running for this profile"}, status=400
-        )
 
     client_ts = _parse_client_timestamp(request)
     start_time = client_ts or timezone.now()
 
-    timer = ActiveTimer.objects.create(
-        profile=profile, user=request.user, start_time=start_time, is_paused=False
-    )
+    try:
+        with transaction.atomic():
+            existing_timer = ActiveTimer.objects.select_for_update().filter(
+                profile=profile, user=request.user
+            ).first()
+            if existing_timer:
+                return JsonResponse(
+                    {"error": "Timer already running for this profile"}, status=400
+                )
+            timer = ActiveTimer.objects.create(
+                profile=profile, user=request.user, start_time=start_time, is_paused=False
+            )
+    except IntegrityError:
+        return JsonResponse(
+            {"error": "Timer already running for this profile"}, status=400
+        )
 
     return JsonResponse(
         {
@@ -375,17 +388,24 @@ def pause_timer(request, profile_id):
     """
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
 
-    timer = ActiveTimer.objects.filter(profile=profile, user=request.user).first()
-    if not timer:
-        return JsonResponse({"error": "No active timer found"}, status=404)
+    with transaction.atomic():
+        timer = ActiveTimer.objects.select_for_update().filter(
+            profile=profile, user=request.user
+        ).first()
+        if not timer:
+            return JsonResponse({"error": "No active timer found"}, status=404)
 
-    if timer.is_paused:
-        return JsonResponse({"error": "Timer is already paused"}, status=400)
+        if timer.is_paused:
+            return JsonResponse({"error": "Timer is already paused"}, status=400)
 
-    client_ts = _parse_client_timestamp(request)
-    timer.pause_time = client_ts or timezone.now()
-    timer.is_paused = True
-    timer.save()
+        client_ts = _parse_client_timestamp(request)
+        timer.pause_time = client_ts or timezone.now()
+        # Clamp pause_time to start_time to prevent negative pause durations
+        # when client_timestamp is before the timer started (offline queue).
+        if timer.pause_time < timer.start_time:
+            timer.pause_time = timer.start_time
+        timer.is_paused = True
+        timer.save()
 
     return JsonResponse(
         {
@@ -406,20 +426,30 @@ def resume_timer(request, profile_id):
     """
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
 
-    timer = ActiveTimer.objects.filter(profile=profile, user=request.user).first()
-    if not timer:
-        return JsonResponse({"error": "No active timer found"}, status=404)
+    with transaction.atomic():
+        timer = ActiveTimer.objects.select_for_update().filter(
+            profile=profile, user=request.user
+        ).first()
+        if not timer:
+            return JsonResponse({"error": "No active timer found"}, status=404)
 
-    if not timer.is_paused:
-        return JsonResponse({"error": "Timer is not paused"}, status=400)
+        if not timer.is_paused:
+            return JsonResponse({"error": "Timer is not paused"}, status=400)
 
-    client_ts = _parse_client_timestamp(request)
-    resume_time = client_ts or timezone.now()
-    paused_duration = int((resume_time - timer.pause_time).total_seconds())
-    timer.total_paused_seconds += max(0, paused_duration)
-    timer.pause_time = None
-    timer.is_paused = False
-    timer.save()
+        if not timer.pause_time:
+            return JsonResponse({"error": "Paused timer has no pause time"}, status=400)
+
+        client_ts = _parse_client_timestamp(request)
+        resume_time = client_ts or timezone.now()
+        # Clamp resume_time to pause_time to prevent negative pause duration
+        # when client_timestamp is before the pause_time (offline queue).
+        if resume_time < timer.pause_time:
+            resume_time = timer.pause_time
+        paused_duration = int((resume_time - timer.pause_time).total_seconds())
+        timer.total_paused_seconds += max(0, paused_duration)
+        timer.pause_time = None
+        timer.is_paused = False
+        timer.save()
 
     return JsonResponse(
         {"status": "resumed", "total_paused_seconds": timer.total_paused_seconds}
@@ -527,60 +557,78 @@ def stop_timer(request, profile_id):
     start_time / end_time / pause_duration (only honored if
     can_edit_time_entries(user) is True; ignored otherwise for
     security).
+
+    DateTimeFields are converted to local project timezone via
+    timezone.localtime() before date()/time() extraction.
+    When the timer is paused, stop ends at pause_time (not stop_time).
+    Uses select_for_update + atomic for create+delete safety.
+    Response uses saved TimeEntry.hours_worked.
     """
     profile = get_object_or_404(Profile, pk=profile_id, user=request.user)
 
-    timer = ActiveTimer.objects.filter(profile=profile, user=request.user).first()
-    if not timer:
-        return JsonResponse({"error": "No active timer found"}, status=404)
+    with transaction.atomic():
+        timer = ActiveTimer.objects.select_for_update().filter(
+            profile=profile, user=request.user
+        ).first()
+        if not timer:
+            return JsonResponse({"error": "No active timer found"}, status=404)
 
-    parsed = _parse_stop_request(request, request.user)
-    if parsed["error"]:
-        return JsonResponse(
-            {"error": parsed["error"], "field": parsed["field"]}, status=400
+        parsed = _parse_stop_request(request, request.user)
+        if parsed["error"]:
+            return JsonResponse(
+                {"error": parsed["error"], "field": parsed["field"]}, status=400
+            )
+
+        client_ts = _parse_client_timestamp(request)
+        stop_time = client_ts or timezone.now()
+
+        # Clamp stop_time to start_time to prevent negative durations
+        # when client_timestamp is before the timer started (offline queue).
+        if stop_time < timer.start_time:
+            stop_time = timer.start_time
+
+        # Convert DateTimeFields to local project timezone before
+        # extracting date()/time() components.
+        local_start = timezone.localtime(timer.start_time)
+        local_stop = timezone.localtime(stop_time)
+
+        # If timer is paused, the effective stop is at pause_time, not now.
+        # Clamp pause_time against start_time to prevent overnight entries
+        # when pause_time was manipulated to be before start_time.
+        if timer.is_paused and timer.pause_time:
+            effective_stop = timezone.localtime(
+                max(timer.pause_time, timer.start_time)
+            )
+        else:
+            effective_stop = local_stop
+
+        entry_date = parsed["date"] or local_start.date()
+        start_dt = parsed["start_time"] or local_start.time()
+        end_dt = parsed["end_time"] or effective_stop.time()
+        if parsed["pause_duration"] is not None:
+            pause_seconds = parsed["pause_duration"] * 3600
+        else:
+            pause_seconds = timer.total_paused_seconds
+
+        time_entry = TimeEntry.objects.create(
+            profile=profile,
+            date=entry_date,
+            start_time=start_dt,
+            end_time=end_dt,
+            pause_duration=round(pause_seconds / 3600, 2),
+            notes=parsed["notes"],
         )
 
-    client_ts = _parse_client_timestamp(request)
-    stop_time = client_ts or timezone.now()
-
-    entry_date = parsed["date"] or timer.start_time.date()
-    start_dt = parsed["start_time"] or timer.start_time.time()
-    end_dt = parsed["end_time"] or stop_time.time()
-    if parsed["pause_duration"] is not None:
-        pause_seconds = parsed["pause_duration"] * 3600
-    else:
-        pause_seconds = timer.total_paused_seconds
-
-    start_full = datetime.combine(entry_date, start_dt)
-    end_full = datetime.combine(entry_date, end_dt)
-    if end_full < start_full:
-        end_full = end_full + timedelta(days=1)
-
-    total_seconds = (end_full - start_full).total_seconds() - pause_seconds
-    if total_seconds < 0:
-        total_seconds = 0
-    hours_worked = total_seconds / 3600
-
-    time_entry = TimeEntry.objects.create(
-        profile=profile,
-        date=entry_date,
-        start_time=start_dt,
-        end_time=end_dt,
-        pause_duration=round(pause_seconds / 3600, 2),
-        hours_worked=round(hours_worked, 2),
-        notes=parsed["notes"],
-    )
-
-    timer.delete()
+        timer.delete()
 
     return JsonResponse(
         {
             "status": "stopped",
-            "hours_worked": round(hours_worked, 2),
+            "hours_worked": float(time_entry.hours_worked),
             "entry_id": time_entry.id,
             "date": str(entry_date),
             "notes_saved": bool(parsed["notes"]),
-            "message": f"Time entry created: {round(hours_worked, 2)} hours",
+            "message": f"Time entry created: {float(time_entry.hours_worked)} hours",
         }
     )
 
@@ -596,13 +644,16 @@ def timer_status(request, profile_id):
 
     now = timezone.now()
     if timer.is_paused:
+        reference_time = timer.pause_time or now
         elapsed_seconds = (
-            timer.pause_time - timer.start_time
+            reference_time - timer.start_time
         ).total_seconds() - timer.total_paused_seconds
     else:
         elapsed_seconds = (
             now - timer.start_time
         ).total_seconds() - timer.total_paused_seconds
+
+    elapsed_seconds = max(0, elapsed_seconds)
 
     return JsonResponse(
         {
