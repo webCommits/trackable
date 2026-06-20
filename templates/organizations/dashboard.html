@@ -115,7 +115,15 @@
             <div style="font-weight:600; font-size:.95rem; color:var(--ctp-text);">{{ m.user.get_full_name|default:m.user.username }}</div>
             <div style="font-size:.82rem; color:var(--ctp-subtext0);">{{ m.user.email }}</div>
         </div>
-        <div style="display:flex; gap:8px; flex-shrink:0;">
+        <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+            {% if m.timer_status == "running" %}
+            <span class="badge" style="background:rgba(80,200,120,.15); color:var(--ctp-green); border:1px solid rgba(80,200,120,.3); padding:4px 10px; font-size:.78rem;">● {% trans "Timer running" %}</span>
+            {% elif m.timer_status == "paused" %}
+            <span class="badge" style="background:rgba(250,179,135,.15); color:var(--ctp-peach); border:1px solid rgba(250,179,135,.3); padding:4px 10px; font-size:.78rem;">◉ {% trans "Timer paused" %}</span>
+            {% endif %}
+            {% if m.timer_profile_titles %}
+            <span style="font-size:.72rem; color:var(--ctp-subtext0);">{{ m.timer_profile_titles }}</span>
+            {% endif %}
             <a href="/org/employees/{{ m.user.id }}/" class="btn btn-secondary" style="min-height:44px;">{% trans "View" %}</a>
             <a href="/org/employees/{{ m.user.id }}/remove/" class="btn btn-sm btn-danger-light" style="min-height:44px;">{% trans "Remove" %}</a>
         </div>

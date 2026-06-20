@@ -17,10 +17,21 @@
 <div class="card" style="margin-bottom:20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
         <div>
-            <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:3px;">{{ pd.profile.position }}</div>
-            <h3 style="margin:0;">{{ pd.profile.title }}</h3>
-            <div style="font-size:.82rem; color:var(--ctp-subtext0); margin-top:4px;">
-                {{ pd.profile.weekly_hours|floatformat:1 }}h / {% trans "week" %} · €{{ pd.profile.hourly_rate|floatformat:2 }}/h
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                    <div style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve); margin-bottom:3px;">{{ pd.profile.position }}</div>
+                    <h3 style="margin:0;">{{ pd.profile.title }}</h3>
+                    <div style="font-size:.82rem; color:var(--ctp-subtext0); margin-top:4px;">
+                        {{ pd.profile.weekly_hours|floatformat:1 }}h / {% trans "week" %} · €{{ pd.profile.hourly_rate|floatformat:2 }}/h
+                    </div>
+                </div>
+                {% if pd.active_timer %}
+                {% if pd.active_timer.is_paused %}
+                <span class="badge" style="background:rgba(250,179,135,.15); color:var(--ctp-peach); border:1px solid rgba(250,179,135,.3); padding:4px 10px; font-size:.78rem;">◉ {% trans "Timer paused" %}</span>
+                {% else %}
+                <span class="badge" style="background:rgba(80,200,120,.15); color:var(--ctp-green); border:1px solid rgba(80,200,120,.3); padding:4px 10px; font-size:.78rem;">● {% trans "Timer running" %}</span>
+                {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>

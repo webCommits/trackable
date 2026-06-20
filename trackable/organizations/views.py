@@ -22,7 +22,7 @@ from trackable.organizations.helpers import (
 from trackable.profiles.models import Profile
 from trackable.core.models import Holiday
 from trackable.accounts.models import User
-from trackable.timetracking.models import TimeEntry
+from trackable.timetracking.models import TimeEntry, ActiveTimer
 import json
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -49,6 +49,33 @@ def org_dashboard(request):
     memberships = organization.memberships.select_related("user").all()
     employee_memberships = [m for m in memberships if m.role == "employee"]
     manager_memberships = [m for m in memberships if m.role == "manager"]
+
+    # Load ActiveTimers for all employee profiles
+    employee_user_ids = [m.user_id for m in employee_memberships]
+    active_timers = ActiveTimer.objects.filter(
+        user_id__in=employee_user_ids,
+        profile__user_id__in=employee_user_ids,
+    ).select_related("profile", "user")
+
+    # Build per-user lookup
+    timers_by_user = {}
+    for at in active_timers:
+        timers_by_user.setdefault(at.user_id, []).append(at)
+
+    # Attach timer attributes to each employee membership
+    for m in employee_memberships:
+        timers = timers_by_user.get(m.user_id, [])
+        timers.sort(key=lambda t: t.created_at, reverse=True)
+        m.active_timers = timers
+        m.has_running_timer = any(t for t in timers if not t.is_paused)
+        m.has_paused_timer = any(t for t in timers if t.is_paused)
+        if m.has_running_timer:
+            m.timer_status = "running"
+        elif m.has_paused_timer:
+            m.timer_status = "paused"
+        else:
+            m.timer_status = None
+        m.timer_profile_titles = ", ".join(t.profile.title for t in timers)
 
     return render(
         request,
@@ -181,6 +208,13 @@ def employee_detail(request, user_id):
 
     profiles = employee.profiles.all()
 
+    # Load ActiveTimers for this employee's profiles
+    active_timers = ActiveTimer.objects.filter(
+        user=employee,
+        profile__user=employee,
+    ).select_related("profile", "user")
+    timers_by_profile = {at.profile_id: at for at in active_timers}
+
     current_date = datetime.now().date()
     profile_data = []
     for profile in profiles:
@@ -209,7 +243,11 @@ def employee_detail(request, user_id):
                 }
             )
 
-        profile_data.append({"profile": profile, "months": months})
+        profile_data.append({
+            "profile": profile,
+            "months": months,
+            "active_timer": timers_by_profile.get(profile.id),
+        })
 
     return render(
         request,

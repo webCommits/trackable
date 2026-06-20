@@ -1361,6 +1361,12 @@ msgstr "Fortsetzen"
 msgid "Stop timer for"
 msgstr "Timer stoppen für"
 
+msgid "Timer running"
+msgstr "Timer läuft"
+
+msgid "Timer paused"
+msgstr "Timer pausiert"
+
 msgid "Stop"
 msgstr "Stopp"
 
