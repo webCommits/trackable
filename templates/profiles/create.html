@@ -32,6 +32,11 @@
             {{ form.address }}
             {% for error in form.address.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
         </div>
+        <div class="form-group{% if form.target_hours_period.errors %} has-error{% endif %}">
+            <label for="{{ form.target_hours_period.id_for_label }}">{% trans "Target hours period" %}</label>
+            {{ form.target_hours_period }}
+            {% for error in form.target_hours_period.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </div>
         <div class="form-group{% if form.weekly_hours_hours.errors or form.weekly_hours_minutes.errors %} has-error{% endif %}">
             <label>{% trans "Weekly hours" %}</label>
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -43,6 +48,18 @@
             {% for error in form.weekly_hours_hours.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
             {% for error in form.weekly_hours_minutes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
             <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Enter weekly hours as hours and optional minutes (e.g. 4 h 20 min)." %}</small>
+        </div>
+        <div class="form-group{% if form.monthly_target_hours_hours.errors or form.monthly_target_hours_minutes.errors %} has-error{% endif %}">
+            <label>{% trans "Monthly target hours" %}</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                {{ form.monthly_target_hours_hours }}
+                <span style="white-space: nowrap;">{% trans "h" %}</span>
+                {{ form.monthly_target_hours_minutes }}
+                <span style="white-space: nowrap;">{% trans "min" %}</span>
+            </div>
+            {% for error in form.monthly_target_hours_hours.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            {% for error in form.monthly_target_hours_minutes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Use this when the employee's target is defined per month." %}</small>
         </div>
         <div class="form-group{% if form.hourly_rate.errors %} has-error{% endif %}">
             <label for="{{ form.hourly_rate.id_for_label }}">{% trans "Hourly rate (€)" %}</label>

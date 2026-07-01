@@ -34,6 +34,8 @@ from django.utils import timezone as tz
 import calendar
 
 from trackable.core.utils import hours_and_minutes_to_decimal
+from trackable.profiles.forms import monthly_to_weekly_equivalent
+from trackable.profiles.models import TARGET_HOURS_MONTHLY, TARGET_HOURS_WEEKLY
 
 
 @login_required
@@ -252,7 +254,7 @@ def employee_detail(request, user_id):
 @org_manager_required
 @require_http_methods(["POST"])
 def set_target_hours(request, user_id, profile_id):
-    """Set weekly_target_hours for an employee's profile (manager only)."""
+    """Set target hours for an employee's profile (manager only)."""
     membership = request.user.organization_membership
     organization = membership.organization
 
@@ -264,25 +266,49 @@ def set_target_hours(request, user_id, profile_id):
     employee = employee_membership.user
     profile = get_object_or_404(Profile, pk=profile_id, user=employee)
 
-    hours_str = request.POST.get("weekly_target_hours_hours", "").strip()
-    minutes_str = request.POST.get("weekly_target_hours_minutes", "").strip()
+    period = request.POST.get("target_hours_period") or TARGET_HOURS_WEEKLY
 
-    if hours_str == "" and minutes_str == "":
-        profile.weekly_target_hours = None
-    else:
+    if period == TARGET_HOURS_MONTHLY:
+        hours_str = request.POST.get("monthly_target_hours_hours", "").strip()
+        minutes_str = request.POST.get("monthly_target_hours_minutes", "").strip()
+        if hours_str == "" and minutes_str == "":
+            messages.error(request, _("Monthly target hours are required."))
+            return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
         try:
             hours = int(hours_str) if hours_str != "" else 0
             minutes = int(minutes_str) if minutes_str != "" else 0
             target_hours = hours_and_minutes_to_decimal(hours, minutes)
-            if target_hours > Decimal("99.9999"):
+            if target_hours > Decimal("999.9999"):
                 raise ValueError("Target hours too large")
-            profile.weekly_target_hours = target_hours
+            profile.target_hours_period = TARGET_HOURS_MONTHLY
+            profile.monthly_target_hours = target_hours
+            profile.weekly_hours = monthly_to_weekly_equivalent(target_hours)
+            profile.weekly_target_hours = None
         except (ValueError, TypeError):
             messages.error(request, _("Invalid value for target hours."))
             return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
+    else:
+        hours_str = request.POST.get("weekly_target_hours_hours", "").strip()
+        minutes_str = request.POST.get("weekly_target_hours_minutes", "").strip()
+        profile.target_hours_period = TARGET_HOURS_WEEKLY
+        profile.monthly_target_hours = None
+
+        if hours_str == "" and minutes_str == "":
+            profile.weekly_target_hours = None
+        else:
+            try:
+                hours = int(hours_str) if hours_str != "" else 0
+                minutes = int(minutes_str) if minutes_str != "" else 0
+                target_hours = hours_and_minutes_to_decimal(hours, minutes)
+                if target_hours > Decimal("99.9999"):
+                    raise ValueError("Target hours too large")
+                profile.weekly_target_hours = target_hours
+            except (ValueError, TypeError):
+                messages.error(request, _("Invalid value for target hours."))
+                return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
 
     profile.save()
-    messages.success(request, _("Weekly target hours updated."))
+    messages.success(request, _("Target hours updated."))
     return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
 
 

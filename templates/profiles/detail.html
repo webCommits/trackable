@@ -31,8 +31,13 @@
     
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
         <div class="card" style="text-align: center;">
-            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Weekly hours" %}</p>
-            <p style="font-size: 2rem; font-weight: bold; color: var(--ctp-mauve);">{{ profile.weekly_hours|floatformat:1 }}h</p>
+            <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Target hours" %}</p>
+            {% if profile.target_hours_period == "monthly" and profile.monthly_target_hours %}
+            <p style="font-size: 2rem; font-weight: bold; color: var(--ctp-mauve);">{{ profile.monthly_target_hours|floatformat:2 }}h/{% trans "month" %}</p>
+            <p style="color:var(--ctp-overlay2); font-size:.85rem;">≈ {{ profile.get_weekly_target_display_hours|floatformat:1 }}h/{% trans "week" %}</p>
+            {% else %}
+            <p style="font-size: 2rem; font-weight: bold; color: var(--ctp-mauve);">{{ profile.get_weekly_target_display_hours|floatformat:1 }}h/{% trans "week" %}</p>
+            {% endif %}
         </div>
         <div class="card" style="text-align: center;">
             <p style="color: var(--ctp-subtext0); margin-bottom: 10px;">{% trans "Hourly rate" %}</p>
@@ -92,8 +97,8 @@
     <div style="text-align: right; margin-bottom: 24px; font-size: .9rem;">
         <strong>{% trans "Week total" %}:</strong>
         <span style="color:var(--ctp-mauve); font-weight:bold;">{{ week_total|floatformat:1 }}h</span>
-        {% if profile.weekly_hours %}
-        <span style="color:var(--ctp-overlay2);"> / {{ profile.weekly_hours|floatformat:1 }}h {% trans "target" %}</span>
+        {% if profile.get_weekly_target_display_hours %}
+        <span style="color:var(--ctp-overlay2);"> / {{ profile.get_weekly_target_display_hours|floatformat:1 }}h {% trans "weekly target" %}</span>
         {% endif %}
     </div>
 

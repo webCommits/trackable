@@ -787,6 +787,57 @@ class SetTargetHoursTest(TestCase):
         self.profile.refresh_from_db()
         self.assertEqual(float(self.profile.weekly_target_hours), 30.0)
 
+    def test_set_target_hours_saves_monthly_value(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "target_hours_period": TARGET_HOURS_MONTHLY,
+                "monthly_target_hours_hours": "78",
+                "monthly_target_hours_minutes": "15",
+            },
+        )
+        self.assertRedirects(
+            response,
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+        )
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.target_hours_period, TARGET_HOURS_MONTHLY)
+        self.assertEqual(float(self.profile.monthly_target_hours), 78.25)
+        self.assertIsNone(self.profile.weekly_target_hours)
+        self.assertEqual(self.profile.get_target_hours(2026, 5), 78.25)
+
+    def test_set_target_hours_switches_monthly_back_to_weekly(self):
+        self.profile.target_hours_period = TARGET_HOURS_MONTHLY
+        self.profile.monthly_target_hours = 78.25
+        self.profile.save()
+        self.client.login(username="manager", password="pass123")
+
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "target_hours_period": "weekly",
+                "weekly_target_hours_hours": "18",
+                "weekly_target_hours_minutes": "0",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.target_hours_period, "weekly")
+        self.assertIsNone(self.profile.monthly_target_hours)
+        self.assertEqual(float(self.profile.weekly_target_hours), 18.0)
+        self.assertEqual(self.profile.get_target_hours(2026, 5), 78.26)
+
     def test_set_target_hours_clears_to_none(self):
         self.profile.weekly_target_hours = 30
         self.profile.save()
