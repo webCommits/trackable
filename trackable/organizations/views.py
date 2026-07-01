@@ -250,7 +250,6 @@ def employee_detail(request, user_id):
 
 
 @login_required
-@login_required
 @org_manager_required
 @require_http_methods(["POST"])
 def set_target_hours(request, user_id, profile_id):
@@ -294,7 +293,8 @@ def set_target_hours(request, user_id, profile_id):
         profile.monthly_target_hours = None
 
         if hours_str == "" and minutes_str == "":
-            profile.weekly_target_hours = None
+            messages.error(request, _("Weekly hours are required."))
+            return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
         else:
             try:
                 hours = int(hours_str) if hours_str != "" else 0
@@ -302,7 +302,8 @@ def set_target_hours(request, user_id, profile_id):
                 target_hours = hours_and_minutes_to_decimal(hours, minutes)
                 if target_hours > Decimal("99.9999"):
                     raise ValueError("Target hours too large")
-                profile.weekly_target_hours = target_hours
+                profile.weekly_hours = target_hours
+                profile.weekly_target_hours = None
             except (ValueError, TypeError):
                 messages.error(request, _("Invalid value for target hours."))
                 return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)

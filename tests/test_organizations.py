@@ -768,7 +768,7 @@ class SetTargetHoursTest(TestCase):
         self.profile.refresh_from_db()
         self.assertIsNone(self.profile.weekly_target_hours)
 
-    def test_set_target_hours_saves_value(self):
+    def test_set_target_hours_updates_weekly_hours(self):
         self.client.login(username="manager", password="pass123")
         response = self.client.post(
             reverse("set_target_hours", kwargs={
@@ -785,7 +785,9 @@ class SetTargetHoursTest(TestCase):
             }),
         )
         self.profile.refresh_from_db()
-        self.assertEqual(float(self.profile.weekly_target_hours), 30.0)
+        self.assertEqual(float(self.profile.weekly_hours), 30.0)
+        self.assertIsNone(self.profile.weekly_target_hours)
+        self.assertEqual(self.profile.get_target_hours(2026, 5), 130.44)
 
     def test_set_target_hours_saves_monthly_value(self):
         self.client.login(username="manager", password="pass123")
@@ -835,11 +837,13 @@ class SetTargetHoursTest(TestCase):
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.target_hours_period, "weekly")
         self.assertIsNone(self.profile.monthly_target_hours)
-        self.assertEqual(float(self.profile.weekly_target_hours), 18.0)
+        self.assertEqual(float(self.profile.weekly_hours), 18.0)
+        self.assertIsNone(self.profile.weekly_target_hours)
         self.assertEqual(self.profile.get_target_hours(2026, 5), 78.26)
 
-    def test_set_target_hours_clears_to_none(self):
+    def test_set_target_hours_requires_weekly_hours(self):
         self.profile.weekly_target_hours = 30
+        self.profile.weekly_hours = 40
         self.profile.save()
         self.client.login(username="manager", password="pass123")
         response = self.client.post(
@@ -849,15 +853,10 @@ class SetTargetHoursTest(TestCase):
             }),
             {"weekly_target_hours_hours": "", "weekly_target_hours_minutes": ""},
         )
-        self.assertRedirects(
-            response,
-            reverse("employee_profile_detail", kwargs={
-                "user_id": self.employee.id,
-                "profile_id": self.profile.id,
-            }),
-        )
+        self.assertEqual(response.status_code, 302)
         self.profile.refresh_from_db()
-        self.assertIsNone(self.profile.weekly_target_hours)
+        self.assertEqual(float(self.profile.weekly_hours), 40.0)
+        self.assertEqual(float(self.profile.weekly_target_hours), 30.0)
 
     def test_set_target_hours_wrong_org_manager_cant_set(self):
         """Manager of org A cannot set target hours on employee of org B."""
@@ -879,7 +878,7 @@ class SetTargetHoursTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_set_target_hours_updates_target_calculation(self):
-        """After setting weekly_target_hours=30, get_target_hours should use it."""
+        """After setting weekly hours=30, get_target_hours should use it."""
         self.client.login(username="manager", password="pass123")
         self.client.post(
             reverse("set_target_hours", kwargs={

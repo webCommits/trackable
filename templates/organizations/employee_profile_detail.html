@@ -37,8 +37,8 @@
             <option value="weekly"{% if profile.target_hours_period == "weekly" %} selected{% endif %}>{% trans "Weekly" %}</option>
             <option value="monthly"{% if profile.target_hours_period == "monthly" %} selected{% endif %}>{% trans "Monthly" %}</option>
         </select>
-        <label style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "Weekly target hours" %}:</label>
-        {% with profile.weekly_target_hours|default:profile.weekly_hours as target_value %}
+        <label style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "Weekly hours" %}:</label>
+        {% with profile.weekly_hours as target_value %}
         {% load profile_hours_minutes %}
         {% split_hours_minutes target_value as target_hours_minutes %}
         <input type="number" name="weekly_target_hours_hours" min="0" max="168"
@@ -50,7 +50,7 @@
                style="width:70px; padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text); margin:0 4px 0 8px;">
         <span style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "min" %}</span>
         {% endwith %}
-        <label style="color:var(--ctp-subtext0); font-size:.85rem; margin-left:12px;">{% trans "Monthly target hours" %}:</label>
+        <label style="color:var(--ctp-subtext0); font-size:.85rem; margin-left:12px;">{% trans "Monthly hours" %}:</label>
         {% split_hours_minutes profile.monthly_target_hours as monthly_target_hours_minutes %}
         <input type="number" name="monthly_target_hours_hours" min="0" max="999"
                value="{{ monthly_target_hours_minutes.0 }}"
