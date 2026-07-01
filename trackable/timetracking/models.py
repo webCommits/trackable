@@ -1,6 +1,13 @@
 from django.db import models
 from django.utils import timezone
 
+ENTRY_TYPE_ACTUAL = "actual"
+ENTRY_TYPE_PLANNED = "planned"
+ENTRY_TYPE_CHOICES = [
+    (ENTRY_TYPE_ACTUAL, "Actual"),
+    (ENTRY_TYPE_PLANNED, "Planned"),
+]
+
 
 class TimeEntry(models.Model):
     profile = models.ForeignKey(
@@ -12,6 +19,11 @@ class TimeEntry(models.Model):
     pause_duration = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     hours_worked = models.DecimalField(max_digits=4, decimal_places=2, editable=False)
     notes = models.TextField(blank=True, null=True)
+    entry_type = models.CharField(
+        max_length=10,
+        choices=ENTRY_TYPE_CHOICES,
+        default=ENTRY_TYPE_ACTUAL,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

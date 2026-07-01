@@ -5,7 +5,11 @@ from datetime import date, time
 from trackable.profiles.models import Profile
 from trackable.organizations.models import Organization, OrganizationMembership
 from trackable.core.models import Holiday
-from trackable.timetracking.models import TimeEntry
+from trackable.timetracking.models import (
+    ENTRY_TYPE_ACTUAL,
+    ENTRY_TYPE_PLANNED,
+    TimeEntry,
+)
 
 User = get_user_model()
 
@@ -229,3 +233,89 @@ class TimeAccountTests(TestCase):
         self.profile.save()
         target = self.profile.get_target_hours(2026, 5)
         self.assertEqual(target, 173.92)
+
+    def test_planned_entry_does_not_affect_monthly_hours(self):
+        """Planned entries created via weekly calendar should not affect monthly hours."""
+        from datetime import datetime
+        entry = TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 15),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+            entry_type=ENTRY_TYPE_PLANNED,
+        )
+        hours = self.profile.get_monthly_hours(2026, 5)
+        self.assertEqual(hours, 0)
+
+    def test_actual_entry_affects_monthly_hours(self):
+        """Actual entries should count toward monthly hours."""
+        from datetime import datetime
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 15),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+            entry_type=ENTRY_TYPE_ACTUAL,
+        )
+        hours = self.profile.get_monthly_hours(2026, 5)
+        self.assertEqual(hours, 8.0)
+
+    def test_planned_entry_does_not_affect_monthly_earnings(self):
+        """Planned entries should not affect monthly earnings."""
+        from datetime import datetime
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 15),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+            entry_type=ENTRY_TYPE_PLANNED,
+        )
+        earnings = self.profile.get_monthly_earnings(2026, 5)
+        self.assertEqual(earnings, 0)
+
+    def test_planned_entry_does_not_affect_balance(self):
+        """Planned entries should not affect balance calculation."""
+        from datetime import datetime
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 15),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+            entry_type=ENTRY_TYPE_PLANNED,
+        )
+        balance = self.profile.get_balance(2026, 5)
+        self.assertEqual(balance, -173.92)
+
+    def test_get_monthly_entries_excludes_planned(self):
+        """get_monthly_entries should only return actual entries."""
+        from datetime import datetime
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 10),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+            entry_type=ENTRY_TYPE_ACTUAL,
+        )
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 15),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+            entry_type=ENTRY_TYPE_PLANNED,
+        )
+        entries = self.profile.get_monthly_entries(2026, 5)
+        self.assertEqual(entries.count(), 1)
+        self.assertEqual(entries.first().entry_type, ENTRY_TYPE_ACTUAL)
+
+    def test_default_entry_type_is_actual(self):
+        """New TimeEntry without explicit entry_type should default to actual."""
+        from datetime import datetime
+        entry = TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 20),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+        )
+        self.assertEqual(entry.entry_type, ENTRY_TYPE_ACTUAL)
+        hours = self.profile.get_monthly_hours(2026, 5)
+        self.assertEqual(hours, 8.0)

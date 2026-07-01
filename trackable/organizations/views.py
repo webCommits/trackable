@@ -22,7 +22,11 @@ from trackable.organizations.helpers import (
 from trackable.profiles.models import Profile
 from trackable.core.models import Holiday
 from trackable.accounts.models import User
-from trackable.timetracking.models import TimeEntry, ActiveTimer
+from trackable.timetracking.models import (
+    ENTRY_TYPE_PLANNED,
+    TimeEntry,
+    ActiveTimer,
+)
 import json
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -805,6 +809,7 @@ def create_entry(request):
             end_time=end,
             notes=notes,
             pause_duration=0,
+            entry_type=ENTRY_TYPE_PLANNED,
         )
         return JsonResponse({
             "status": "ok",

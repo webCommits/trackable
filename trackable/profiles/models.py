@@ -42,13 +42,15 @@ class Profile(models.Model):
         from django.utils import timezone
         import calendar
         from datetime import datetime
+        from trackable.timetracking.models import ENTRY_TYPE_ACTUAL
 
         last_day = calendar.monthrange(year, month)[1]
         start_date = datetime(year, month, 1)
         end_date = datetime(year, month, last_day, 23, 59, 59)
 
         return self.time_entries.filter(
-            date__range=[start_date.date(), end_date.date()]
+            date__range=[start_date.date(), end_date.date()],
+            entry_type=ENTRY_TYPE_ACTUAL,
         )
 
     def get_monthly_hours(self, year, month):

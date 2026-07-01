@@ -681,7 +681,11 @@ class TimeTrackingModeTest(TestCase):
 
 
 # Make TimeEntry available for tests above
-from trackable.timetracking.models import TimeEntry
+from trackable.timetracking.models import (
+    ENTRY_TYPE_ACTUAL,
+    ENTRY_TYPE_PLANNED,
+    TimeEntry,
+)
 
 
 class SetTargetHoursTest(TestCase):
@@ -894,3 +898,94 @@ class OrganizationBrandingTest(TestCase):
         self.assertContains(resp, self.org.logo.url)
 
 
+class WeeklyCalendarEntryTest(TestCase):
+    """Tests for weekly calendar entry creation (planned vs actual)."""
+
+    def setUp(self):
+        self.client = Client()
+        self.manager = User.objects.create_user(
+            username="manager", email="manager@example.com", password="pass123"
+        )
+        self.org = Organization.objects.create(
+            name="Acme Corp", created_by=self.manager
+        )
+        self.membership = OrganizationMembership.objects.create(
+            organization=self.org, user=self.manager, role="manager"
+        )
+        self.employee = User.objects.create_user(
+            username="employee", email="emp@example.com", password="pass123"
+        )
+        OrganizationMembership.objects.create(
+            organization=self.org, user=self.employee, role="employee"
+        )
+        self.profile = Profile.objects.create(
+            user=self.employee,
+            title="Dev",
+            position="Developer",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        self.client.login(username="manager", password="pass123")
+
+    def test_create_entry_from_weekly_calendar_is_planned(self):
+        """POST to create_entry should create a planned entry."""
+        response = self.client.post(
+            reverse("create_entry"),
+            {
+                "profile_id": self.profile.id,
+                "date": "2026-07-15",
+                "start_time": "09:00",
+                "end_time": "17:00",
+                "notes": "Test planned entry",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "ok")
+        entry = TimeEntry.objects.get(pk=data["entry"]["id"])
+        self.assertEqual(entry.entry_type, ENTRY_TYPE_PLANNED)
+
+    def test_planned_entry_does_not_affect_employee_detail_balance(self):
+        """A planned entry should not affect the employee profile detail total hours/balance."""
+        self.client.post(
+            reverse("create_entry"),
+            {
+                "profile_id": self.profile.id,
+                "date": "2026-07-15",
+                "start_time": "09:00",
+                "end_time": "17:00",
+                "notes": "Planned",
+            },
+        )
+        resp = self.client.get(
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            })
+        )
+        self.assertEqual(resp.status_code, 200)
+        # Total hours should be 0 (planned entries excluded)
+        self.assertEqual(resp.context["total_hours"], 0)
+        # Balance should equal negative target hours
+        balance = resp.context["balance"]
+        target = resp.context["target_hours"]
+        self.assertAlmostEqual(balance, -target, places=2)
+
+    def test_actual_entry_still_affects_employee_detail(self):
+        """An actual entry should still affect the employee profile detail."""
+        from datetime import datetime
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 7, 15),
+            start_time=datetime.strptime("09:00", "%H:%M").time(),
+            end_time=datetime.strptime("17:00", "%H:%M").time(),
+            entry_type=ENTRY_TYPE_ACTUAL,
+        )
+        resp = self.client.get(
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            })
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context["total_hours"], 8.0)
