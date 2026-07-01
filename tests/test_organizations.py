@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from trackable.organizations.models import Organization, OrganizationMembership
 from trackable.core.models import Holiday
-from trackable.profiles.models import Profile
+from trackable.profiles.models import AVERAGE_WEEKS_PER_MONTH, Profile, TARGET_HOURS_MONTHLY
 from trackable.timetracking.models import VacationEntry
 from datetime import date, time
 
@@ -132,6 +132,32 @@ class OrganizationViewTest(TestCase):
         self.assertEqual(float(profile.weekly_hours), 35.0)
         self.assertEqual(profile.contract_start_date.isoformat(), "2026-06-01")
         self.assertEqual(profile.contract_end_date.isoformat(), "2026-12-31")
+
+    def test_employee_create_with_monthly_target_hours(self):
+        response = self.client.post(
+            reverse("employee_create"),
+            {
+                "username": "monthlyemp",
+                "email": "monthlyemp@example.com",
+                "first_name": "Monthly",
+                "last_name": "Emp",
+                "temp_password": "temppass123",
+                "temp_password_confirm": "temppass123",
+                "target_hours_period": TARGET_HOURS_MONTHLY,
+                "monthly_target_hours_hours": "78",
+                "monthly_target_hours_minutes": "15",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(username="monthlyemp")
+        profile = user.profiles.first()
+        self.assertEqual(profile.target_hours_period, TARGET_HOURS_MONTHLY)
+        self.assertEqual(float(profile.monthly_target_hours), 78.25)
+        self.assertAlmostEqual(
+            float(profile.weekly_hours),
+            78.25 / AVERAGE_WEEKS_PER_MONTH,
+            places=3,
+        )
 
     def test_employee_create_end_before_start_fails(self):
         response = self.client.post(

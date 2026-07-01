@@ -2,7 +2,12 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from datetime import date, time
-from trackable.profiles.models import AVERAGE_WEEKS_PER_MONTH, Profile, TARGET_HOURS_MONTHLY
+from trackable.profiles.models import (
+    AVERAGE_WEEKS_PER_MONTH,
+    Profile,
+    TARGET_HOURS_MONTHLY,
+    TARGET_HOURS_WEEKLY,
+)
 from trackable.organizations.models import Organization, OrganizationMembership
 from trackable.core.models import Holiday
 from trackable.timetracking.models import (
@@ -70,6 +75,48 @@ class ProfileViewTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Profile.objects.filter(user=self.user).exists())
+
+    def test_profile_create_with_monthly_target_hours(self):
+        response = self.client.post(
+            reverse("profile_create"),
+            {
+                "title": "Monthly Job",
+                "position": "Developer",
+                "target_hours_period": TARGET_HOURS_MONTHLY,
+                "monthly_target_hours_hours": 78,
+                "monthly_target_hours_minutes": 15,
+                "hourly_rate": 75.50,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        profile = Profile.objects.get(user=self.user, title="Monthly Job")
+        self.assertEqual(profile.target_hours_period, TARGET_HOURS_MONTHLY)
+        self.assertEqual(float(profile.monthly_target_hours), 78.25)
+        self.assertAlmostEqual(
+            float(profile.weekly_hours),
+            78.25 / AVERAGE_WEEKS_PER_MONTH,
+            places=3,
+        )
+
+    def test_profile_create_with_weekly_target_hours_default(self):
+        response = self.client.post(
+            reverse("profile_create"),
+            {
+                "title": "Weekly Job",
+                "position": "Developer",
+                "target_hours_period": TARGET_HOURS_WEEKLY,
+                "weekly_hours_hours": 18,
+                "weekly_hours_minutes": 0,
+                "hourly_rate": 75.50,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        profile = Profile.objects.get(user=self.user, title="Weekly Job")
+        self.assertEqual(profile.target_hours_period, TARGET_HOURS_WEEKLY)
+        self.assertIsNone(profile.monthly_target_hours)
+        self.assertEqual(float(profile.weekly_hours), 18.0)
 
     def test_profile_list(self):
         Profile.objects.create(

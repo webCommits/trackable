@@ -5,7 +5,13 @@ from trackable.core.utils import hours_and_minutes_to_decimal
 from trackable.organizations.models import Organization
 from trackable.accounts.models import User
 from trackable.core.models import Holiday
-from trackable.profiles.models import Profile
+from trackable.profiles.forms import monthly_to_weekly_equivalent
+from trackable.profiles.models import (
+    Profile,
+    TARGET_HOURS_MONTHLY,
+    TARGET_HOURS_PERIOD_CHOICES,
+    TARGET_HOURS_WEEKLY,
+)
 
 
 class OrganizationBrandingForm(forms.ModelForm):
@@ -57,10 +63,16 @@ class EmployeeCreateForm(forms.ModelForm):
         widget=forms.PasswordInput,
         label=_("Confirm temporary password"),
     )
+    target_hours_period = forms.ChoiceField(
+        choices=TARGET_HOURS_PERIOD_CHOICES,
+        initial=TARGET_HOURS_WEEKLY,
+        required=False,
+        label=_("Target hours period"),
+    )
     weekly_hours_hours = forms.IntegerField(
         min_value=0,
         max_value=168,
-        required=True,
+        required=False,
         label=_("Weekly hours"),
         initial=40,
         widget=forms.NumberInput(attrs={"placeholder": _("e.g. 4"), "min": 0, "max": 168}),
@@ -72,6 +84,21 @@ class EmployeeCreateForm(forms.ModelForm):
         initial=0,
         label=_("Minutes"),
         widget=forms.NumberInput(attrs={"placeholder": _("e.g. 20"), "min": 0, "max": 59}),
+    )
+    monthly_target_hours_hours = forms.IntegerField(
+        min_value=0,
+        max_value=999,
+        required=False,
+        label=_("Monthly hours"),
+        widget=forms.NumberInput(attrs={"placeholder": _("e.g. 78"), "min": 0, "max": 999}),
+    )
+    monthly_target_hours_minutes = forms.IntegerField(
+        min_value=0,
+        max_value=59,
+        required=False,
+        initial=0,
+        label=_("Minutes"),
+        widget=forms.NumberInput(attrs={"placeholder": _("e.g. 15"), "min": 0, "max": 59}),
     )
     contract_start_date = forms.DateField(
         label=_("Contract start date"),
@@ -110,7 +137,14 @@ class EmployeeCreateForm(forms.ModelForm):
 
         hours = cleaned_data.get("weekly_hours_hours")
         minutes = cleaned_data.get("weekly_hours_minutes") or 0
-        if hours is not None:
+        monthly_hours_input = cleaned_data.get("monthly_target_hours_hours")
+        monthly_minutes = cleaned_data.get("monthly_target_hours_minutes") or 0
+        period = cleaned_data.get("target_hours_period") or TARGET_HOURS_WEEKLY
+
+        if period == TARGET_HOURS_WEEKLY:
+            if hours is None:
+                self.add_error("weekly_hours_hours", _("Weekly hours are required."))
+                return cleaned_data
             weekly_hours = hours_and_minutes_to_decimal(hours, minutes)
             if weekly_hours > Decimal("99.9999"):
                 self.add_error(
@@ -118,6 +152,23 @@ class EmployeeCreateForm(forms.ModelForm):
                     _("Weekly hours must be at most 99.9999 hours."),
                 )
             cleaned_data["weekly_hours"] = weekly_hours
+            cleaned_data["monthly_target_hours"] = None
+        elif period == TARGET_HOURS_MONTHLY:
+            if monthly_hours_input is None:
+                self.add_error(
+                    "monthly_target_hours_hours", _("Monthly hours are required.")
+                )
+                return cleaned_data
+            monthly_hours = hours_and_minutes_to_decimal(
+                monthly_hours_input, monthly_minutes
+            )
+            if monthly_hours > Decimal("999.9999"):
+                self.add_error(
+                    "monthly_target_hours_hours",
+                    _("Monthly hours must be at most 999.9999 hours."),
+                )
+            cleaned_data["monthly_target_hours"] = monthly_hours
+            cleaned_data["weekly_hours"] = monthly_to_weekly_equivalent(monthly_hours)
 
         return cleaned_data
 
