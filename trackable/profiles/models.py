@@ -2,6 +2,12 @@ from django.db import models
 
 
 AVERAGE_WEEKS_PER_MONTH = 4.348
+TARGET_HOURS_WEEKLY = "weekly"
+TARGET_HOURS_MONTHLY = "monthly"
+TARGET_HOURS_PERIOD_CHOICES = [
+    (TARGET_HOURS_WEEKLY, "Weekly"),
+    (TARGET_HOURS_MONTHLY, "Monthly"),
+]
 
 
 class Profile(models.Model):
@@ -16,6 +22,20 @@ class Profile(models.Model):
         max_digits=6, decimal_places=4, null=True, blank=True,
         verbose_name="Weekly target hours",
         help_text="Override target hours per week. If empty, uses weekly hours.",
+    )
+    target_hours_period = models.CharField(
+        max_length=10,
+        choices=TARGET_HOURS_PERIOD_CHOICES,
+        default=TARGET_HOURS_WEEKLY,
+        verbose_name="Target hours period",
+    )
+    monthly_target_hours = models.DecimalField(
+        max_digits=7,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        verbose_name="Monthly target hours",
+        help_text="Target hours per month. Used when target hours period is monthly.",
     )
     hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
     contract_start_date = models.DateField(
@@ -105,10 +125,36 @@ class Profile(models.Model):
                 count += 1
         return count
 
+    def get_full_month_target_hours(self):
+        """Full-month target hours before contract pro-rating."""
+        if (
+            self.target_hours_period == TARGET_HOURS_MONTHLY
+            and self.monthly_target_hours is not None
+        ):
+            return float(self.monthly_target_hours)
+
+        weekly = (
+            float(self.weekly_target_hours)
+            if self.weekly_target_hours is not None
+            else float(self.weekly_hours)
+        )
+        return weekly * AVERAGE_WEEKS_PER_MONTH
+
+    def get_weekly_target_display_hours(self):
+        """Weekly-equivalent target hours for display."""
+        if (
+            self.target_hours_period == TARGET_HOURS_MONTHLY
+            and self.monthly_target_hours is not None
+        ):
+            return round(float(self.monthly_target_hours) / AVERAGE_WEEKS_PER_MONTH, 2)
+        if self.weekly_target_hours is not None:
+            return float(self.weekly_target_hours)
+        return float(self.weekly_hours)
+
     def get_target_hours(self, year, month):
         """Target hours (Soll) for this profile in a given month.
 
-        Formula: weekly_hours × 4.348 (average weeks per month).
+        Formula: weekly target × 4.348 or configured monthly target.
         Pro-rata bei Vertragsbeginn/-ende im Monat.
         Feiertage kürzen die Soll-Stunden nicht.
         Falls back to weekly_hours if weekly_target_hours is not set.
@@ -116,8 +162,7 @@ class Profile(models.Model):
         import calendar
         from datetime import date
 
-        base = float(self.weekly_target_hours) if self.weekly_target_hours is not None else float(self.weekly_hours)
-        full_target = base * AVERAGE_WEEKS_PER_MONTH
+        full_target = self.get_full_month_target_hours()
 
         _, last_day = calendar.monthrange(year, month)
         month_start = date(year, month, 1)

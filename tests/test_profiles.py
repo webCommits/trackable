@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from datetime import date, time
-from trackable.profiles.models import Profile
+from trackable.profiles.models import AVERAGE_WEEKS_PER_MONTH, Profile, TARGET_HOURS_MONTHLY
 from trackable.organizations.models import Organization, OrganizationMembership
 from trackable.core.models import Holiday
 from trackable.timetracking.models import (
@@ -175,6 +175,51 @@ class TimeAccountTests(TestCase):
         self.profile.save()
         target = self.profile.get_target_hours(2026, 5)
         self.assertEqual(target, 173.92)
+
+    def test_monthly_target_hours_use_monthly_value(self):
+        self.profile.target_hours_period = TARGET_HOURS_MONTHLY
+        self.profile.monthly_target_hours = 78.26
+        self.profile.weekly_target_hours = 30
+        self.profile.save()
+
+        target = self.profile.get_target_hours(2026, 5)
+
+        self.assertEqual(target, 78.26)
+
+    def test_monthly_target_hours_weekly_display_equivalent(self):
+        self.profile.target_hours_period = TARGET_HOURS_MONTHLY
+        self.profile.monthly_target_hours = 78.26
+        self.profile.save()
+
+        self.assertEqual(
+            self.profile.get_weekly_target_display_hours(),
+            round(78.26 / AVERAGE_WEEKS_PER_MONTH, 2),
+        )
+
+    def test_monthly_target_hours_with_contract_start_later(self):
+        self.profile.target_hours_period = TARGET_HOURS_MONTHLY
+        self.profile.monthly_target_hours = 78.26
+        self.profile.contract_start_date = date(2026, 6, 10)
+        self.profile.save()
+
+        target = self.profile.get_target_hours(2026, 6)
+
+        expected = round(78.26 * 15 / 22, 2)
+        self.assertEqual(target, expected)
+
+    def test_monthly_target_hours_affect_time_account(self):
+        self.profile.target_hours_period = TARGET_HOURS_MONTHLY
+        self.profile.monthly_target_hours = 78.26
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=6)
+
+        june = rows[0]
+        may = rows[1]
+        self.assertEqual(may["target_hours"], 78.26)
+        self.assertEqual(june["target_hours"], 78.26)
+        self.assertEqual(june["cumulative_balance"], -156.52)
 
     def test_target_hours_cleared_to_none(self):
         """Setting None falls back to weekly_hours"""
