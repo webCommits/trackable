@@ -159,7 +159,8 @@ class TimeAccountTests(TestCase):
         self.assertEqual(response.status_code, 200)
         # English locale in tests, check for English terms
         self.assertContains(response, "Target")
-        self.assertContains(response, "Balance")
+        self.assertContains(response, "Monthly balance")
+        self.assertContains(response, "Time account")
 
     def test_target_hours_uses_weekly_target_hours_when_set(self):
         """Overridden target → 30 × 4,348 = 130,44h"""
@@ -400,6 +401,10 @@ class MonthlyAccountRowsTests(TestCase):
         may = rows[1]
         self.assertEqual(may["cumulative_balance"], may_balance)
         self.assertEqual(june["cumulative_balance"], round(may_balance + june_balance, 2))
+        self.assertEqual(
+            self.profile.get_cumulative_balance(2026, 6),
+            round(may_balance + june_balance, 2),
+        )
 
     def test_rows_newest_first(self):
         self.profile.contract_start_date = date(2026, 5, 1)
@@ -460,3 +465,32 @@ class MonthlyAccountRowsTests(TestCase):
         self.assertEqual(first_row["year"], 2027)
         self.assertEqual(first_row["hours"], 0.0)
         self.assertIsNotNone(first_row["cumulative_balance"])
+
+    def test_profile_detail_uses_correct_cumulative_rows(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+        self._make_entry(2026, 5, 10, 9, 17)
+        self.client.login(username="testuser", password="test123")
+
+        response = self.client.get(reverse("profile_detail", kwargs={"pk": self.profile.pk}))
+        self.assertEqual(response.status_code, 200)
+        months = response.context["months"]
+        july = next(row for row in months if row["year"] == 2026 and row["month"] == 7)
+        may_balance = round(8.0 - 173.92, 2)
+        june_balance = round(0 - 173.92, 2)
+        july_balance = round(0 - 173.92, 2)
+        self.assertEqual(july["balance"], july_balance)
+        self.assertEqual(
+            july["cumulative_balance"],
+            round(may_balance + june_balance + july_balance, 2),
+        )
+
+    def test_profile_detail_week_summary_excludes_planned_entries(self):
+        self._make_entry(2026, 7, 1, 9, 17, entry_type=ENTRY_TYPE_PLANNED)
+        self.client.login(username="testuser", password="test123")
+
+        response = self.client.get(reverse("profile_detail", kwargs={"pk": self.profile.pk}))
+        self.assertEqual(response.status_code, 200)
+        today = next(day for day in response.context["week_days"] if day["is_today"])
+        self.assertEqual(today["entry_count"], 0)
+        self.assertEqual(today["total_hours"], 0)

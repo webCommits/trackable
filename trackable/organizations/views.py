@@ -222,30 +222,10 @@ def employee_detail(request, user_id):
     current_date = datetime.now().date()
     profile_data = []
     for profile in profiles:
-        entry_months = set(
-            profile.time_entries.values_list("date__year", "date__month").distinct()
+        months = profile.get_monthly_account_rows(
+            until_year=current_date.year,
+            until_month=current_date.month,
         )
-        entry_months.add((current_date.year, current_date.month))
-
-        months = []
-        cumulative_balance = 0
-        for year, month in sorted(entry_months, reverse=True):
-            hours = profile.get_monthly_hours(year, month)
-            target = profile.get_target_hours(year, month)
-            balance = profile.get_balance(year, month)
-            cumulative_balance += balance
-            months.append(
-                {
-                    "year": year,
-                    "month": month,
-                    "month_name": datetime(year, month, 1).strftime("%B %Y"),
-                    "hours": hours,
-                    "target_hours": target,
-                    "balance": balance,
-                    "cumulative_balance": cumulative_balance,
-                    "earnings": profile.get_monthly_earnings(year, month),
-                }
-            )
 
         profile_data.append({
             "profile": profile,
@@ -389,6 +369,7 @@ def employee_profile_detail(request, user_id, profile_id):
     total_earnings = profile.get_monthly_earnings(year, month)
     target_hours = profile.get_target_hours(year, month)
     balance = profile.get_balance(year, month)
+    cumulative_balance = profile.get_cumulative_balance(year, month)
     total_vacation_days = sum(v.workdays for v in vacation_entries)
     month_name = datetime(year, month, 1).strftime("%B %Y")
 
@@ -416,6 +397,7 @@ def employee_profile_detail(request, user_id, profile_id):
             "total_earnings": total_earnings,
             "target_hours": target_hours,
             "balance": balance,
+            "cumulative_balance": cumulative_balance,
             "total_vacation_days": total_vacation_days,
             "available_months": available_months,
             "show_actions": show_actions,

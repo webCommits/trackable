@@ -114,13 +114,13 @@
                 </div>
                 <div style="flex:1; min-width:120px; text-align:right;">
                     <p style="margin-bottom:3px;">
-                        <strong>{% trans "Balance" %}:</strong>
+                        <strong>{% trans "Monthly balance" %}:</strong>
                         <span style="color:{% if month.balance > 0 %}var(--ctp-green){% elif month.balance < 0 %}var(--ctp-red){% else %}var(--ctp-subtext0){% endif %}; font-weight:bold;">
                             {{ month.balance|floatformat:2 }}h
                         </span>
                     </p>
                     <p style="margin-bottom:3px;">
-                        <strong>{% trans "Cumulative" %}:</strong>
+                        <strong>{% trans "Time account" %}:</strong>
                         <span style="color:{% if month.cumulative_balance > 0 %}var(--ctp-green){% elif month.cumulative_balance < 0 %}var(--ctp-red){% else %}var(--ctp-subtext0){% endif %};">
                             {{ month.cumulative_balance|floatformat:2 }}h
                         </span>

@@ -34,6 +34,7 @@ def profile_detail(request, pk):
     profile = get_object_or_404(Profile, pk=pk, user=request.user)
 
     from datetime import datetime, timedelta
+    from trackable.timetracking.models import ENTRY_TYPE_ACTUAL
 
     current_date = timezone.now().date()
 
@@ -44,7 +45,7 @@ def profile_detail(request, pk):
     week_days = []
     for i in range(7):
         day = monday + timedelta(days=i)
-        day_entries = profile.time_entries.filter(date=day)
+        day_entries = profile.time_entries.filter(date=day, entry_type=ENTRY_TYPE_ACTUAL)
         total_hours = sum(
             (float(e.hours_worked) for e in day_entries)
         )
@@ -69,28 +70,10 @@ def profile_detail(request, pk):
         show_vacation = membership.organization.holidays_enabled
 
     # ── Monthly overview ──
-    entry_months = set(
-        profile.time_entries.values_list("date__year", "date__month").distinct()
+    months = profile.get_monthly_account_rows(
+        until_year=current_date.year,
+        until_month=current_date.month,
     )
-    entry_months.add((current_date.year, current_date.month))
-
-    months = []
-    cumulative_balance = 0
-    for year, month in sorted(entry_months, reverse=True):
-        hours = profile.get_monthly_hours(year, month)
-        target = profile.get_target_hours(year, month)
-        balance = profile.get_balance(year, month)
-        cumulative_balance += balance
-        months.append({
-            "year": year,
-            "month": month,
-            "month_name": datetime(year, month, 1).strftime("%B %Y"),
-            "hours": hours,
-            "target_hours": target,
-            "balance": balance,
-            "cumulative_balance": cumulative_balance,
-            "earnings": profile.get_monthly_earnings(year, month),
-        })
 
     return render(request, "profiles/detail.html", {
         "profile": profile,

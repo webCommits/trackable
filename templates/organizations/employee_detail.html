@@ -45,9 +45,14 @@
                 <div style="font-size:.85rem; color:var(--ctp-subtext0);">
                     <div><strong>{% trans "Target" %}:</strong> {{ m.target_hours|floatformat:2 }}h</div>
                     <div><strong>{% trans "Actual" %}:</strong> {{ m.hours|floatformat:2 }}h</div>
-                    <div><strong>{% trans "Balance" %}:</strong>
+                    <div><strong>{% trans "Monthly balance" %}:</strong>
                         <span style="color:{% if m.balance > 0 %}var(--ctp-green){% elif m.balance < 0 %}var(--ctp-red){% else %}var(--ctp-subtext0){% endif %};">
                             {{ m.balance|floatformat:2 }}h
+                        </span>
+                    </div>
+                    <div><strong>{% trans "Time account" %}:</strong>
+                        <span style="color:{% if m.cumulative_balance > 0 %}var(--ctp-green){% elif m.cumulative_balance < 0 %}var(--ctp-red){% else %}var(--ctp-subtext0){% endif %};">
+                            {{ m.cumulative_balance|floatformat:2 }}h
                         </span>
                     </div>
                     <div style="margin-top:4px;">€{{ m.earnings|floatformat:2 }}</div>

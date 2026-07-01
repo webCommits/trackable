@@ -249,3 +249,14 @@ class Profile(models.Model):
 
         # Return newest first
         return list(reversed(rows))
+
+    def get_cumulative_balance(self, year, month):
+        """Zeitkonto through the given month, including previous monthly balances."""
+        rows = self.get_monthly_account_rows(until_year=year, until_month=month)
+        selected = next(
+            (row for row in rows if row["year"] == year and row["month"] == month),
+            None,
+        )
+        if selected:
+            return selected["cumulative_balance"]
+        return rows[0]["cumulative_balance"] if rows else 0

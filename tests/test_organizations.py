@@ -989,3 +989,56 @@ class WeeklyCalendarEntryTest(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context["total_hours"], 8.0)
+
+    def test_employee_profile_detail_exposes_cumulative_time_account(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 15),
+            start_time=time(9, 0),
+            end_time=time(17, 0),
+            entry_type=ENTRY_TYPE_ACTUAL,
+        )
+        resp = self.client.get(
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"year": 2026, "month": 7},
+        )
+        self.assertEqual(resp.status_code, 200)
+        may_balance = round(8.0 - 173.92, 2)
+        june_balance = round(0 - 173.92, 2)
+        july_balance = round(0 - 173.92, 2)
+        self.assertEqual(resp.context["balance"], july_balance)
+        self.assertEqual(
+            resp.context["cumulative_balance"],
+            round(may_balance + june_balance + july_balance, 2),
+        )
+        self.assertContains(resp, "Monthly balance")
+        self.assertContains(resp, "Time account")
+
+    def test_employee_detail_month_cards_include_cumulative_time_account(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+        TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(2026, 5, 15),
+            start_time=time(9, 0),
+            end_time=time(17, 0),
+            entry_type=ENTRY_TYPE_ACTUAL,
+        )
+        resp = self.client.get(reverse("employee_detail", kwargs={"user_id": self.employee.id}))
+        self.assertEqual(resp.status_code, 200)
+        months = resp.context["profile_data"][0]["months"]
+        july = next(row for row in months if row["year"] == 2026 and row["month"] == 7)
+        may_balance = round(8.0 - 173.92, 2)
+        june_balance = round(0 - 173.92, 2)
+        july_balance = round(0 - 173.92, 2)
+        self.assertEqual(july["balance"], july_balance)
+        self.assertEqual(
+            july["cumulative_balance"],
+            round(may_balance + june_balance + july_balance, 2),
+        )
+        self.assertContains(resp, "Time account")
