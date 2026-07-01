@@ -319,3 +319,144 @@ class TimeAccountTests(TestCase):
         self.assertEqual(entry.entry_type, ENTRY_TYPE_ACTUAL)
         hours = self.profile.get_monthly_hours(2026, 5)
         self.assertEqual(hours, 8.0)
+
+
+class MonthlyAccountRowsTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser", password="test123", email="test@example.com"
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+            title="Engineer",
+            position="Dev",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+
+    def _make_entry(self, year, month, day, start_h, end_h, entry_type=ENTRY_TYPE_ACTUAL):
+        return TimeEntry.objects.create(
+            profile=self.profile,
+            date=date(year, month, day),
+            start_time=time(start_h, 0),
+            end_time=time(end_h, 0),
+            entry_type=entry_type,
+        )
+
+    def test_empty_no_contract_no_entries_starts_at_until_month(self):
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=6)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["year"], 2026)
+        self.assertEqual(rows[0]["month"], 6)
+
+    def test_planned_only_no_contract_start_does_not_extend_range(self):
+        self._make_entry(2026, 5, 15, 9, 17, entry_type=ENTRY_TYPE_PLANNED)
+        self._make_entry(2026, 6, 10, 9, 17, entry_type=ENTRY_TYPE_PLANNED)
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=7)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["year"], 2026)
+        self.assertEqual(rows[0]["month"], 7)
+        self.assertEqual(rows[0]["hours"], 0.0)
+
+    def test_balance_is_monthly_not_cumulative(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+        self._make_entry(2026, 5, 10, 9, 17)
+        self._make_entry(2026, 5, 15, 9, 17)
+        self._make_entry(2026, 6, 5, 9, 17)
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=6)
+        self.assertEqual(len(rows), 2)
+
+        june = rows[0]
+        may = rows[1]
+        self.assertEqual(may["month"], 5)
+        self.assertEqual(may["hours"], 16.0)
+        self.assertEqual(may["target_hours"], 173.92)
+        self.assertEqual(may["balance"], round(16.0 - 173.92, 2))
+        self.assertEqual(may["cumulative_balance"], round(16.0 - 173.92, 2))
+
+        self.assertEqual(june["month"], 6)
+        self.assertEqual(june["hours"], 8.0)
+        self.assertEqual(june["target_hours"], 173.92)
+        self.assertEqual(june["balance"], round(8.0 - 173.92, 2))
+        may_balance = round(16.0 - 173.92, 2)
+        june_balance = round(8.0 - 173.92, 2)
+        self.assertEqual(june["cumulative_balance"], round(may_balance + june_balance, 2))
+        self.assertNotEqual(june["balance"], june["cumulative_balance"])
+
+    def test_cumulative_carries_deficit_forward(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+        self._make_entry(2026, 5, 10, 9, 17)
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=6)
+        self.assertEqual(len(rows), 2)
+
+        may_balance = round(8.0 - 173.92, 2)
+        june_balance = round(0 - 173.92, 2)
+
+        june = rows[0]
+        may = rows[1]
+        self.assertEqual(may["cumulative_balance"], may_balance)
+        self.assertEqual(june["cumulative_balance"], round(may_balance + june_balance, 2))
+
+    def test_rows_newest_first(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+        self._make_entry(2026, 5, 10, 9, 17)
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=7)
+        self.assertGreaterEqual(len(rows), 2)
+        self.assertEqual(rows[0]["month"], 7)
+        for i in range(len(rows) - 1):
+            self.assertGreater(rows[i]["year"] * 100 + rows[i]["month"],
+                               rows[i + 1]["year"] * 100 + rows[i + 1]["month"])
+
+    def test_no_entry_months_included(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.save()
+        self._make_entry(2026, 5, 10, 9, 17)
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=6)
+        self.assertEqual(len(rows), 2)
+        self.assertIn(rows[0]["month"], (5, 6))
+        self.assertIn(rows[1]["month"], (5, 6))
+        self.assertNotEqual(rows[0]["month"], rows[1]["month"])
+        june_row = next(r for r in rows if r["month"] == 6)
+        self.assertEqual(june_row["hours"], 0.0)
+
+    def test_contract_start_excludes_earlier_months(self):
+        self.profile.contract_start_date = date(2026, 6, 1)
+        self.profile.save()
+        self._make_entry(2026, 4, 10, 9, 17)
+        self._make_entry(2026, 5, 15, 9, 17)
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=7)
+        month_nums = {r["month"] for r in rows}
+        self.assertNotIn(4, month_nums)
+        self.assertNotIn(5, month_nums)
+        self.assertIn(6, month_nums)
+
+    def test_contract_end_clamps_later_months(self):
+        self.profile.contract_start_date = date(2026, 5, 1)
+        self.profile.contract_end_date = date(2026, 6, 15)
+        self.profile.save()
+        self._make_entry(2026, 5, 10, 9, 17)
+        self._make_entry(2026, 7, 5, 9, 17)
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=7)
+        month_nums = {r["month"] for r in rows}
+        self.assertIn(5, month_nums)
+        self.assertIn(6, month_nums)
+        self.assertNotIn(7, month_nums)
+
+    def test_with_actual_entry_no_contract_start(self):
+        self._make_entry(2026, 5, 10, 9, 17)
+        rows = self.profile.get_monthly_account_rows(until_year=2027, until_month=3)
+        self.assertGreaterEqual(len(rows), 1)
+        first_row = rows[0]
+        self.assertEqual(first_row["month"], 3)
+        self.assertEqual(first_row["year"], 2027)
+        self.assertEqual(first_row["hours"], 0.0)
+        self.assertIsNotNone(first_row["cumulative_balance"])

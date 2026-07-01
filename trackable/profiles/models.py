@@ -161,3 +161,91 @@ class Profile(models.Model):
         actual = self.get_monthly_hours(year, month)
         target = self.get_target_hours(year, month)
         return round(float(actual) - float(target), 2)
+
+    def _month_range(self, start_year, start_month, end_year, end_month):
+        """Generate all (year, month) tuples from start to end inclusive, oldest first."""
+        months = []
+        y, m = start_year, start_month
+        while (y, m) <= (end_year, end_month):
+            months.append((y, m))
+            if m == 12:
+                y += 1
+                m = 1
+            else:
+                m += 1
+        return months
+
+    def get_monthly_account_rows(self, until_year=None, until_month=None):
+        """Return monthly account rows for display (newest first).
+
+        Each row is a dict compatible with existing views:
+        year, month, month_name, hours, target_hours, balance,
+        cumulative_balance, earnings.
+
+        Cumulative balance is computed chronologically (oldest → newest),
+        then rows are returned newest first.
+        """
+        from datetime import datetime
+        from django.utils import timezone
+        from trackable.timetracking.models import ENTRY_TYPE_ACTUAL
+
+        # Determine end month
+        if until_year is not None and until_month is not None:
+            end_year, end_month = until_year, until_month
+        else:
+            now = timezone.now().date()
+            end_year, end_month = now.year, now.month
+
+        # Determine start month
+        if self.contract_start_date is not None:
+            start_year, start_month = self.contract_start_date.year, self.contract_start_date.month
+        else:
+            # Earliest actual time entry month
+            earliest = (
+                self.time_entries.filter(entry_type=ENTRY_TYPE_ACTUAL)
+                .order_by("date")
+                .values_list("date", flat=True)
+                .first()
+            )
+            if earliest is not None:
+                start_year, start_month = earliest.year, earliest.month
+            else:
+                start_year, start_month = end_year, end_month
+
+        # Clamp end to contract_end_date if set
+        if self.contract_end_date is not None:
+            if self.contract_end_date.year < end_year or (
+                self.contract_end_date.year == end_year and self.contract_end_date.month < end_month
+            ):
+                end_year, end_month = self.contract_end_date.year, self.contract_end_date.month
+
+        # If start > end, return empty
+        if (start_year, start_month) > (end_year, end_month):
+            return []
+
+        # All months oldest→newest
+        all_months = self._month_range(start_year, start_month, end_year, end_month)
+
+        # Compute rows chronologically
+        rows = []
+        cumulative = 0.0
+        for y, m in all_months:
+            hours = self.get_monthly_hours(y, m)
+            target = self.get_target_hours(y, m)
+            balance = self.get_balance(y, m)
+            earnings = self.get_monthly_earnings(y, m)
+            cumulative += balance
+            month_label = datetime(y, m, 1).strftime("%B %Y")
+            rows.append({
+                "year": y,
+                "month": m,
+                "month_name": month_label,
+                "hours": float(hours),
+                "target_hours": target,
+                "balance": balance,
+                "cumulative_balance": round(cumulative, 2),
+                "earnings": float(earnings),
+            })
+
+        # Return newest first
+        return list(reversed(rows))
