@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load profile_hours_minutes %}
 {% block title %}{{ employee.get_full_name|default:employee.username }} – {% trans "Employee" %}{% endblock %}
 
 {% block content %}
@@ -29,6 +30,34 @@
                         {% endif %}
                         · €{{ pd.profile.hourly_rate|floatformat:2 }}/h
                     </div>
+                    <details style="margin-top:10px;">
+                        <summary class="btn btn-secondary btn-sm" style="display:inline-flex; cursor:pointer; list-style:none;">
+                            {% trans "Edit target hours" %}
+                        </summary>
+                        <form method="post" action="/org/employees/{{ employee.id }}/profiles/{{ pd.profile.id }}/set-target-hours/"
+                              style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:10px; padding:10px; border:1px solid var(--ctp-surface1); border-radius:8px; background:var(--ctp-base);">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="/org/employees/{{ employee.id }}/">
+                            <label style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "Target period" %}</label>
+                            <select name="target_hours_period" style="padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text);">
+                                <option value="weekly"{% if pd.profile.target_hours_period == "weekly" %} selected{% endif %}>{% trans "Weekly" %}</option>
+                                <option value="monthly"{% if pd.profile.target_hours_period == "monthly" %} selected{% endif %}>{% trans "Monthly" %}</option>
+                            </select>
+                            {% split_hours_minutes pd.profile.weekly_hours as weekly_hours_minutes %}
+                            <label style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "Weekly hours" %}</label>
+                            <input type="number" name="weekly_target_hours_hours" min="0" max="168" value="{{ weekly_hours_minutes.0 }}" style="width:70px; padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text);">
+                            <span style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "h" %}</span>
+                            <input type="number" name="weekly_target_hours_minutes" min="0" max="59" value="{{ weekly_hours_minutes.1 }}" style="width:70px; padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text);">
+                            <span style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "min" %}</span>
+                            {% split_hours_minutes pd.profile.monthly_target_hours as monthly_hours_minutes %}
+                            <label style="color:var(--ctp-subtext0); font-size:.85rem; margin-left:8px;">{% trans "Monthly hours" %}</label>
+                            <input type="number" name="monthly_target_hours_hours" min="0" max="999" value="{{ monthly_hours_minutes.0 }}" style="width:70px; padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text);">
+                            <span style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "h" %}</span>
+                            <input type="number" name="monthly_target_hours_minutes" min="0" max="59" value="{{ monthly_hours_minutes.1 }}" style="width:70px; padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text);">
+                            <span style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "min" %}</span>
+                            <button type="submit" class="btn btn-primary btn-sm">{% trans "Save" %}</button>
+                        </form>
+                    </details>
                 </div>
                 {% if pd.active_timer %}
                 {% if pd.active_timer.is_paused %}

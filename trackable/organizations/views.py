@@ -264,6 +264,15 @@ def set_target_hours(request, user_id, profile_id):
     )
     employee = employee_membership.user
     profile = get_object_or_404(Profile, pk=profile_id, user=employee)
+    next_url = request.POST.get("next", "")
+    redirect_url = (
+        next_url if next_url.startswith("/") and not next_url.startswith("//") else None
+    )
+
+    def _redirect_back():
+        if redirect_url:
+            return redirect(redirect_url)
+        return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
 
     period = request.POST.get("target_hours_period") or TARGET_HOURS_WEEKLY
 
@@ -272,7 +281,7 @@ def set_target_hours(request, user_id, profile_id):
         minutes_str = request.POST.get("monthly_target_hours_minutes", "").strip()
         if hours_str == "" and minutes_str == "":
             messages.error(request, _("Monthly target hours are required."))
-            return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
+            return _redirect_back()
         try:
             hours = int(hours_str) if hours_str != "" else 0
             minutes = int(minutes_str) if minutes_str != "" else 0
@@ -285,7 +294,7 @@ def set_target_hours(request, user_id, profile_id):
             profile.weekly_target_hours = None
         except (ValueError, TypeError):
             messages.error(request, _("Invalid value for target hours."))
-            return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
+            return _redirect_back()
     else:
         hours_str = request.POST.get("weekly_target_hours_hours", "").strip()
         minutes_str = request.POST.get("weekly_target_hours_minutes", "").strip()
@@ -294,7 +303,7 @@ def set_target_hours(request, user_id, profile_id):
 
         if hours_str == "" and minutes_str == "":
             messages.error(request, _("Weekly hours are required."))
-            return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
+            return _redirect_back()
         else:
             try:
                 hours = int(hours_str) if hours_str != "" else 0
@@ -306,11 +315,11 @@ def set_target_hours(request, user_id, profile_id):
                 profile.weekly_target_hours = None
             except (ValueError, TypeError):
                 messages.error(request, _("Invalid value for target hours."))
-                return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
+                return _redirect_back()
 
     profile.save()
     messages.success(request, _("Target hours updated."))
-    return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
+    return _redirect_back()
 
 
 @login_required

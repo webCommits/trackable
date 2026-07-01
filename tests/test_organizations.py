@@ -1118,3 +1118,31 @@ class WeeklyCalendarEntryTest(TestCase):
             round(may_balance + june_balance + july_balance, 2),
         )
         self.assertContains(resp, "Time account")
+
+    def test_employee_detail_shows_target_hours_editor(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.get(reverse("employee_detail", kwargs={"user_id": self.employee.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Edit target hours")
+        self.assertContains(response, "Target period")
+
+    def test_set_target_hours_redirects_to_employee_detail_when_requested(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "target_hours_period": TARGET_HOURS_MONTHLY,
+                "monthly_target_hours_hours": "78",
+                "monthly_target_hours_minutes": "15",
+                "next": reverse("employee_detail", kwargs={"user_id": self.employee.id}),
+            },
+        )
+        self.assertRedirects(
+            response,
+            reverse("employee_detail", kwargs={"user_id": self.employee.id}),
+        )
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.target_hours_period, TARGET_HOURS_MONTHLY)
