@@ -76,11 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
         link.setAttribute('aria-current', 'page');
     });
 
-    const dateInput = document.querySelector('input[type="date"]');
-    if (dateInput && !dateInput.value) {
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.value = today;
-    }
+    const defaultTodayInputs = document.querySelectorAll('input[type="date"][data-default-today]');
+    defaultTodayInputs.forEach(function(input) {
+        if (!input.value) {
+            const today = new Date().toISOString().split('T')[0];
+            input.value = today;
+        }
+    });
 
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
