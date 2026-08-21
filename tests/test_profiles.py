@@ -523,11 +523,27 @@ class MonthlyAccountRowsTests(TestCase):
         june_row = next(r for r in rows if r["month"] == 6)
         self.assertEqual(june_row["hours"], 0.0)
 
-    def test_contract_start_excludes_earlier_months(self):
+    def test_contract_start_does_not_hide_months_with_entries(self):
+        """Months with actual time entries must never be hidden by contract_start_date,
+        even if they fall before it (e.g. entries logged before the contract was set up)."""
         self.profile.contract_start_date = date(2026, 6, 1)
         self.profile.save()
         self._make_entry(2026, 4, 10, 9, 17)
         self._make_entry(2026, 5, 15, 9, 17)
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=7)
+        month_nums = {r["month"] for r in rows}
+        self.assertIn(4, month_nums)
+        self.assertIn(5, month_nums)
+        self.assertIn(6, month_nums)
+
+    def test_contract_start_excludes_earlier_months_without_entries(self):
+        """Without any actual time entries before contract_start_date, earlier
+        months are still excluded (only entries, not planned rows, extend the range)."""
+        self.profile.contract_start_date = date(2026, 6, 1)
+        self.profile.save()
+        self._make_entry(2026, 4, 10, 9, 17, entry_type=ENTRY_TYPE_PLANNED)
+        self._make_entry(2026, 5, 15, 9, 17, entry_type=ENTRY_TYPE_PLANNED)
 
         rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=7)
         month_nums = {r["month"] for r in rows}

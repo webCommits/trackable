@@ -241,17 +241,21 @@ class Profile(models.Model):
             now = timezone.now().date()
             end_year, end_month = now.year, now.month
 
+        # Earliest actual time entry month
+        earliest = (
+            self.time_entries.filter(entry_type=ENTRY_TYPE_ACTUAL)
+            .order_by("date")
+            .values_list("date", flat=True)
+            .first()
+        )
+
         # Determine start month
         if self.contract_start_date is not None:
             start_year, start_month = self.contract_start_date.year, self.contract_start_date.month
+            if earliest is not None and (earliest.year, earliest.month) < (start_year, start_month):
+                # Never hide months that already have actual time entries.
+                start_year, start_month = earliest.year, earliest.month
         else:
-            # Earliest actual time entry month
-            earliest = (
-                self.time_entries.filter(entry_type=ENTRY_TYPE_ACTUAL)
-                .order_by("date")
-                .values_list("date", flat=True)
-                .first()
-            )
             if earliest is not None:
                 start_year, start_month = earliest.year, earliest.month
             else:
