@@ -10,8 +10,13 @@ from trackable.profiles.models import Profile
 
 @login_required
 def profile_list(request):
-    profiles = request.user.profiles.all()
-    return render(request, "profiles/list.html", {"profiles": profiles})
+    profiles = request.user.profiles.filter(archived_at__isnull=True)
+    archived_profiles = request.user.profiles.filter(archived_at__isnull=False)
+    return render(
+        request,
+        "profiles/list.html",
+        {"profiles": profiles, "archived_profiles": archived_profiles},
+    )
 
 
 @login_required
@@ -108,4 +113,26 @@ def profile_delete(request, pk):
         profile.delete()
         messages.success(request, _("Profile was deleted."))
         return redirect("profile_list")
+    return redirect("profile_detail", pk=pk)
+
+
+@login_required
+def profile_archive(request, pk):
+    profile = get_object_or_404(Profile, pk=pk, user=request.user)
+    if request.method == "POST":
+        profile.archived_at = timezone.now()
+        profile.save()
+        messages.success(request, _("Profile was archived."))
+        return redirect("profile_list")
+    return redirect("profile_detail", pk=pk)
+
+
+@login_required
+def profile_unarchive(request, pk):
+    profile = get_object_or_404(Profile, pk=pk, user=request.user)
+    if request.method == "POST":
+        profile.archived_at = None
+        profile.save()
+        messages.success(request, _("Profile was unarchived."))
+        return redirect("profile_detail", pk=pk)
     return redirect("profile_detail", pk=pk)

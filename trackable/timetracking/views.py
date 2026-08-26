@@ -30,7 +30,9 @@ NOTES_MAX_LENGTH = 1000
 
 @login_required
 def home(request):
-    profiles = request.user.profiles.all()
+    all_profiles = request.user.profiles.all()
+    profiles = all_profiles.filter(archived_at__isnull=True)
+    has_archived = all_profiles.filter(archived_at__isnull=False).exists()
     active_timers = {
         timer.profile_id: timer
         for timer in ActiveTimer.objects.filter(user=request.user).select_related(
@@ -39,7 +41,7 @@ def home(request):
     }
     has_org = hasattr(request.user, "organization_membership")
     can_edit = can_edit_time_entries(request.user)
-    if profiles.count() == 0:
+    if all_profiles.count() == 0:
         return redirect("profile_create")
     return render(
         request,
@@ -49,6 +51,7 @@ def home(request):
             "active_timers": active_timers,
             "has_org": has_org,
             "can_edit": can_edit,
+            "has_archived": has_archived,
         },
     )
 

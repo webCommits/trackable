@@ -12,8 +12,9 @@ class ProfileAdmin(admin.ModelAdmin):
         "hourly_rate",
         "user",
         "created_at",
+        "archived_at",
     ]
-    list_filter = ["created_at", "user"]
+    list_filter = ["created_at", "archived_at", "user"]
     search_fields = ["title", "position", "internal_notes"]
     fieldsets = [
         (

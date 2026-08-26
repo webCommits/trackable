@@ -63,6 +63,12 @@
     <div class="empty-state-icon">👋</div>
     <h2>{% trans "Welcome to trackable!" %}</h2>
     <p class="empty-state-text">{% trans "Start by creating your first profile. A profile represents a work project, client, or position you want to track time for." %}</p>
+    {% if has_archived %}
+    <p class="empty-state-text">
+        {% trans "You have archived profiles." %}
+        <a href="/profiles/">{% trans "Manage profiles" %}</a>
+    </p>
+    {% endif %}
     <div class="empty-state-actions">
         <a href="/profiles/create/" class="btn btn-primary btn-lg">+ {% trans "Create profile" %}</a>
         {% if not has_org %}

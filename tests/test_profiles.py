@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
 from datetime import date, time
 from trackable.profiles.models import (
     AVERAGE_WEEKS_PER_MONTH,
@@ -602,3 +603,126 @@ class MonthlyAccountRowsTests(TestCase):
         today = next(day for day in response.context["week_days"] if day["is_today"])
         self.assertEqual(today["entry_count"], 0)
         self.assertEqual(today["total_hours"], 0)
+
+
+class ProfileArchiveTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpass123"
+        )
+        self.other_user = User.objects.create_user(
+            username="otheruser", email="other@example.com", password="testpass123"
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+            title="Software Developer",
+            position="Senior Developer",
+            weekly_hours=40,
+            hourly_rate=75.50,
+        )
+        self.client.login(username="testuser", password="testpass123")
+
+    def test_post_archive_sets_archived_at_and_redirects_to_list(self):
+        response = self.client.post(
+            reverse("profile_archive", kwargs={"pk": self.profile.pk})
+        )
+        self.assertRedirects(response, reverse("profile_list"))
+        self.profile.refresh_from_db()
+        self.assertIsNotNone(self.profile.archived_at)
+        self.assertTrue(self.profile.is_archived)
+
+    def test_post_unarchive_clears_archived_at_and_redirects_to_detail(self):
+        self.profile.archived_at = timezone.now()
+        self.profile.save()
+
+        response = self.client.post(
+            reverse("profile_unarchive", kwargs={"pk": self.profile.pk})
+        )
+        self.assertRedirects(
+            response, reverse("profile_detail", kwargs={"pk": self.profile.pk})
+        )
+        self.profile.refresh_from_db()
+        self.assertIsNone(self.profile.archived_at)
+        self.assertFalse(self.profile.is_archived)
+
+    def test_get_archive_does_not_archive(self):
+        response = self.client.get(
+            reverse("profile_archive", kwargs={"pk": self.profile.pk})
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertIsNone(self.profile.archived_at)
+
+    def test_archiving_another_users_profile_returns_404(self):
+        other_profile = Profile.objects.create(
+            user=self.other_user,
+            title="Other Job",
+            position="Other Position",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+        response = self.client.post(
+            reverse("profile_archive", kwargs={"pk": other_profile.pk})
+        )
+        self.assertEqual(response.status_code, 404)
+        other_profile.refresh_from_db()
+        self.assertIsNone(other_profile.archived_at)
+
+    def test_profile_list_context_separates_active_and_archived(self):
+        archived_profile = Profile.objects.create(
+            user=self.user,
+            title="Old Job",
+            position="Old Position",
+            weekly_hours=40,
+            hourly_rate=50,
+            archived_at=timezone.now(),
+        )
+
+        response = self.client.get(reverse("profile_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(archived_profile, response.context["profiles"])
+        self.assertIn(self.profile, response.context["profiles"])
+        self.assertIn(archived_profile, response.context["archived_profiles"])
+
+    def test_home_hides_archived_profile(self):
+        self.profile.archived_at = timezone.now()
+        self.profile.save()
+        active_profile = Profile.objects.create(
+            user=self.user,
+            title="Active Job",
+            position="Active Position",
+            weekly_hours=40,
+            hourly_rate=50,
+        )
+
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.profile, response.context["profiles"])
+        self.assertIn(active_profile, response.context["profiles"])
+
+    def test_home_with_only_archived_profiles_not_redirected(self):
+        self.profile.archived_at = timezone.now()
+        self.profile.save()
+
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["profiles"]), 0)
+        self.assertTrue(response.context["has_archived"])
+
+    def test_add_entry_still_works_for_archived_profile(self):
+        self.profile.archived_at = timezone.now()
+        self.profile.save()
+
+        response = self.client.post(
+            reverse("add_entry", kwargs={"profile_id": self.profile.pk}),
+            {
+                "date": date.today(),
+                "start_time": "09:00",
+                "end_time": "17:00",
+                "pause_duration": 1,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(TimeEntry.objects.filter(profile=self.profile).exists())

@@ -7,4 +7,6 @@ urlpatterns = [
     path("<int:pk>/", views.profile_detail, name="profile_detail"),
     path("<int:pk>/edit/", views.profile_edit, name="profile_edit"),
     path("<int:pk>/delete/", views.profile_delete, name="profile_delete"),
+    path("<int:pk>/archive/", views.profile_archive, name="profile_archive"),
+    path("<int:pk>/unarchive/", views.profile_unarchive, name="profile_unarchive"),
 ]

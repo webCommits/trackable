@@ -36,12 +36,44 @@
     </div>
     {% endfor %}
 </div>
-{% else %}
+{% elif not archived_profiles %}
 <div class="content" style="text-align:center; padding:60px 20px; max-width:480px; margin:0 auto;">
     <div style="font-size:2.5rem; margin-bottom:18px;">🗂</div>
     <h2 style="margin-bottom:10px;">{% trans "No profile yet" %}</h2>
     <p style="color:var(--ctp-subtext0); margin-bottom:28px;">{% trans "Create your first work profile to start tracking time." %}</p>
     <a href="/profiles/create/" class="btn btn-primary btn-lg">+ {% trans "Create profile" %}</a>
+</div>
+{% endif %}
+
+{% if archived_profiles %}
+<h2 style="margin: 32px 0 12px; color: var(--ctp-mauve);">{% trans "Archived profiles" %}</h2>
+<div style="display:flex; flex-direction:column; gap:10px;">
+    {% for profile in archived_profiles %}
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:16px 20px; margin-bottom:0; opacity:.65;">
+        <div style="flex:1; min-width:180px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;">
+                <span style="font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ctp-mauve);">{{ profile.position }}</span>
+                <span class="badge" style="font-size:.65rem;">{% trans "Archived" %}</span>
+            </div>
+            <div style="font-weight:600; font-size:.95rem; color:var(--ctp-text);">{{ profile.title }}</div>
+        </div>
+        <div style="display:flex; gap:24px; flex-wrap:wrap; row-gap:4px; font-size:.82rem; color:var(--ctp-subtext0);">
+            {% if profile.target_hours_period == "monthly" and profile.monthly_target_hours %}
+            <span>🕐 {{ profile.monthly_target_hours|floatformat:2 }}h / {% trans "month" %}</span>
+            {% else %}
+            <span>🕐 {{ profile.get_weekly_target_display_hours|floatformat:1 }}h / {% trans "week" %}</span>
+            {% endif %}
+            <span>💶 {{ profile.hourly_rate|floatformat:2 }} €/h</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+            <a href="/profiles/{{ profile.id }}/" class="btn btn-secondary btn-sm">{% trans "Open" %}</a>
+            <form method="post" action="/profiles/{{ profile.id }}/unarchive/" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary btn-sm">{% trans "Unarchive" %}</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}
 {% endblock %}

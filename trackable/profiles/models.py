@@ -51,12 +51,17 @@ class Profile(models.Model):
     internal_notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    archived_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.title} - {self.position}"
+
+    @property
+    def is_archived(self):
+        return self.archived_at is not None
 
     def get_monthly_entries(self, year, month):
         from django.utils import timezone

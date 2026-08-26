@@ -7,11 +7,27 @@
 <div class="content">
     <div class="page-actions" style="align-items:center;">
         <div class="page-actions-title">
-            <h1 style="color: var(--ctp-mauve); margin-bottom: 5px;">{{ profile.title }}</h1>
+            <h1 style="color: var(--ctp-mauve); margin-bottom: 5px;">
+                {{ profile.title }}
+                {% if profile.is_archived %}
+                <span class="badge" style="font-size:.65rem; vertical-align:middle;">{% trans "Archived" %}</span>
+                {% endif %}
+            </h1>
             <p style="color: var(--ctp-subtext0);">{{ profile.position }}</p>
         </div>
         <div class="page-actions-buttons">
             <a href="/profiles/{{ profile.id }}/edit/" class="btn btn-secondary" style="min-height:44px;">✏ {% trans "Edit profile" %}</a>
+            {% if profile.is_archived %}
+            <form method="post" action="/profiles/{{ profile.id }}/unarchive/" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary" style="min-height:44px;">{% trans "Unarchive" %}</button>
+            </form>
+            {% else %}
+            <form method="post" action="/profiles/{{ profile.id }}/archive/" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary" style="min-height:44px;">{% trans "Archive" %}</button>
+            </form>
+            {% endif %}
             <form method="post" action="/profiles/{{ profile.id }}/delete/" style="display:inline;" onsubmit="return confirm('{% trans "Really delete this profile? All time entries will be lost." %}')">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-danger-light" style="min-height:44px;">🗑 {% trans "Delete" %}</button>

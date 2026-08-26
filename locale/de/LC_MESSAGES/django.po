@@ -1860,6 +1860,27 @@ msgstr "Profil wurde erfolgreich aktualisiert!"
 msgid "Profile was deleted."
 msgstr "Profil wurde gelöscht."
 
+msgid "Profile was archived."
+msgstr "Profil wurde archiviert."
+
+msgid "Profile was unarchived."
+msgstr "Profil wurde dearchiviert."
+
+msgid "Archive"
+msgstr "Archivieren"
+
+msgid "Unarchive"
+msgstr "Dearchivieren"
+
+msgid "Archived"
+msgstr "Archiviert"
+
+msgid "Archived profiles"
+msgstr "Archivierte Profile"
+
+msgid "You have archived profiles."
+msgstr "Sie haben archivierte Profile."
+
 msgid "What did you work on? (optional)"
 msgstr "Was wurde gemacht? (optional)"
 
