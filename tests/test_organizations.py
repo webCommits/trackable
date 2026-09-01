@@ -891,6 +891,73 @@ class SetTargetHoursTest(TestCase):
         target = self.profile.get_target_hours(2026, 5)
         self.assertEqual(target, 130.44)  # 30 × 4,348 = 130,44
 
+    def test_set_target_hours_with_valid_from_creates_prospective_change(self):
+        """A valid-from month creates history and keeps past months unchanged."""
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "weekly_target_hours_hours": "30",
+                "weekly_target_hours_minutes": "0",
+                "target_hours_valid_from": "2026-07",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+
+        # Profile fields updated to the newest configured values.
+        self.assertEqual(float(self.profile.weekly_hours), 30.0)
+
+        # Baseline + prospective change record created.
+        self.assertEqual(self.profile.target_hours_changes.count(), 2)
+        baseline = self.profile.target_hours_changes.get(valid_from__isnull=True)
+        self.assertEqual(float(baseline.weekly_hours), 40.0)
+        change = self.profile.target_hours_changes.get(valid_from=date(2026, 7, 1))
+        self.assertEqual(float(change.weekly_hours), 30.0)
+
+        # Past month keeps the old target; future month uses the new one.
+        self.assertEqual(self.profile.get_target_hours(2026, 6), 173.92)
+        self.assertEqual(self.profile.get_target_hours(2026, 7), 130.44)
+
+    def test_set_target_hours_without_valid_from_is_retroactive(self):
+        """Omitting target_hours_valid_from keeps the pre-existing retroactive behavior."""
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"weekly_target_hours_hours": "30", "weekly_target_hours_minutes": "0"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.target_hours_changes.exists())
+        self.assertEqual(float(self.profile.weekly_hours), 30.0)
+        self.assertEqual(self.profile.get_target_hours(2026, 6), 130.44)
+        self.assertEqual(self.profile.get_target_hours(2026, 7), 130.44)
+
+    def test_set_target_hours_invalid_valid_from_redirects_with_error(self):
+        """An unparsable target_hours_valid_from aborts without changing anything."""
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "weekly_target_hours_hours": "30",
+                "weekly_target_hours_minutes": "0",
+                "target_hours_valid_from": "not-a-month",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.weekly_hours), 40.0)
+        self.assertFalse(self.profile.target_hours_changes.exists())
+
 
 class OrganizationBrandingTest(TestCase):
     def setUp(self):

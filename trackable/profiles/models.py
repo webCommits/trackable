@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import F, Q
 
 
 AVERAGE_WEEKS_PER_MONTH = 4.348
@@ -130,31 +131,65 @@ class Profile(models.Model):
                 count += 1
         return count
 
-    def get_full_month_target_hours(self):
-        """Full-month target hours before contract pro-rating."""
+    def _get_target_hours_config(self, year, month):
+        """Config (profile or TargetHoursChange) effective for the given month."""
+        import calendar
+        from datetime import date
+
+        last_day = calendar.monthrange(year, month)[1]
+        month_end = date(year, month, last_day)
+
+        change = (
+            self.target_hours_changes.filter(
+                Q(valid_from__isnull=True) | Q(valid_from__lte=month_end)
+            )
+            .order_by(F("valid_from").desc(nulls_last=True))
+            .first()
+        )
+        return change or self
+
+    def get_full_month_target_hours(self, year=None, month=None):
+        """Full-month target hours before contract pro-rating.
+
+        When year and month are given, uses the target-hours config that was
+        effective for that month (see TargetHoursChange); otherwise uses the
+        profile's current values.
+        """
+        config = self if year is None or month is None else self._get_target_hours_config(year, month)
+
         if (
-            self.target_hours_period == TARGET_HOURS_MONTHLY
-            and self.monthly_target_hours is not None
+            config.target_hours_period == TARGET_HOURS_MONTHLY
+            and config.monthly_target_hours is not None
         ):
-            return float(self.monthly_target_hours)
+            return float(config.monthly_target_hours)
 
         weekly = (
-            float(self.weekly_target_hours)
-            if self.weekly_target_hours is not None
-            else float(self.weekly_hours)
+            float(config.weekly_target_hours)
+            if config.weekly_target_hours is not None
+            else float(config.weekly_hours)
         )
         return weekly * AVERAGE_WEEKS_PER_MONTH
 
     def get_weekly_target_display_hours(self):
-        """Weekly-equivalent target hours for display."""
+        """Weekly-equivalent target hours for display.
+
+        History-aware: reflects the config effective for the current month,
+        so a still-future change doesn't leak into "current" displays and a
+        past change is picked up once its month arrives.
+        """
+        from django.utils import timezone
+
+        today = timezone.localdate()
+        config = self._get_target_hours_config(today.year, today.month)
+
         if (
-            self.target_hours_period == TARGET_HOURS_MONTHLY
-            and self.monthly_target_hours is not None
+            config.target_hours_period == TARGET_HOURS_MONTHLY
+            and config.monthly_target_hours is not None
         ):
-            return round(float(self.monthly_target_hours) / AVERAGE_WEEKS_PER_MONTH, 2)
-        if self.weekly_target_hours is not None:
-            return float(self.weekly_target_hours)
-        return float(self.weekly_hours)
+            return round(float(config.monthly_target_hours) / AVERAGE_WEEKS_PER_MONTH, 2)
+        if config.weekly_target_hours is not None:
+            return float(config.weekly_target_hours)
+        return float(config.weekly_hours)
 
     def get_target_hours(self, year, month):
         """Target hours (Soll) for this profile in a given month.
@@ -167,7 +202,7 @@ class Profile(models.Model):
         import calendar
         from datetime import date
 
-        full_target = self.get_full_month_target_hours()
+        full_target = self.get_full_month_target_hours(year, month)
 
         _, last_day = calendar.monthrange(year, month)
         month_start = date(year, month, 1)
@@ -314,3 +349,137 @@ class Profile(models.Model):
         if selected:
             return selected["cumulative_balance"]
         return rows[0]["cumulative_balance"] if rows else 0
+
+    def apply_target_hours_change(
+        self,
+        *,
+        period,
+        weekly_hours,
+        weekly_target_hours,
+        monthly_target_hours,
+        valid_from,
+    ):
+        """Set target hours, optionally effective from a given month onwards.
+
+        If valid_from is None, the change applies retroactively to all
+        months (pre-existing behavior): history is cleared and the values
+        are written directly onto the profile.
+
+        If valid_from is a date (normalized to the first of its month), the
+        change only applies from that month onwards; earlier months keep
+        whatever target hours were effective before.
+        """
+        from django.db import transaction
+
+        with transaction.atomic():
+            if valid_from is None:
+                self.target_hours_changes.all().delete()
+                self.target_hours_period = period
+                self.weekly_hours = weekly_hours
+                self.weekly_target_hours = weekly_target_hours
+                self.monthly_target_hours = monthly_target_hours
+                self.save()
+                return
+
+            valid_from = valid_from.replace(day=1)
+
+            # No-op fast path: the config already effective for that month
+            # already matches the requested values.
+            current = self._get_target_hours_config(valid_from.year, valid_from.month)
+            if (
+                current.target_hours_period == period
+                and current.weekly_hours == weekly_hours
+                and current.weekly_target_hours == weekly_target_hours
+                and current.monthly_target_hours == monthly_target_hours
+            ):
+                return
+
+            if not self.target_hours_changes.exists():
+                # Snapshot the current profile values as the baseline, so
+                # months before valid_from keep the old target.
+                TargetHoursChange.objects.create(
+                    profile=self,
+                    valid_from=None,
+                    target_hours_period=self.target_hours_period,
+                    weekly_hours=self.weekly_hours,
+                    weekly_target_hours=self.weekly_target_hours,
+                    monthly_target_hours=self.monthly_target_hours,
+                )
+
+            TargetHoursChange.objects.update_or_create(
+                profile=self,
+                valid_from=valid_from,
+                defaults={
+                    "target_hours_period": period,
+                    "weekly_hours": weekly_hours,
+                    "weekly_target_hours": weekly_target_hours,
+                    "monthly_target_hours": monthly_target_hours,
+                },
+            )
+
+            # Re-sync the profile's own fields from the config effective for
+            # TODAY's month (not simply the newest record) — a future-dated
+            # change must not leak into "current" displays before its month
+            # arrives.
+            from django.utils import timezone
+
+            today = timezone.localdate()
+            config = self._get_target_hours_config(today.year, today.month)
+            if config is not self:
+                self.target_hours_period = config.target_hours_period
+                self.weekly_hours = config.weekly_hours
+                self.weekly_target_hours = config.weekly_target_hours
+                self.monthly_target_hours = config.monthly_target_hours
+                self.save()
+
+
+class TargetHoursChange(models.Model):
+    """A target-hours configuration effective from a given month onwards.
+
+    A record with valid_from=None is the baseline: the values that were
+    effective "since the beginning" before any prospective change was made.
+    Field names mirror Profile's target-hours fields so a change record and
+    the profile itself can be used interchangeably as a target-hours config.
+    """
+
+    profile = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name="target_hours_changes"
+    )
+    valid_from = models.DateField(
+        null=True,
+        blank=True,
+        help_text="First day of the month this change is effective from. "
+        "Empty means baseline, valid since the beginning.",
+    )
+    target_hours_period = models.CharField(
+        max_length=10,
+        choices=TARGET_HOURS_PERIOD_CHOICES,
+        default=TARGET_HOURS_WEEKLY,
+    )
+    weekly_hours = models.DecimalField(max_digits=6, decimal_places=4)
+    weekly_target_hours = models.DecimalField(
+        max_digits=6, decimal_places=4, null=True, blank=True
+    )
+    monthly_target_hours = models.DecimalField(
+        max_digits=7, decimal_places=4, null=True, blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["profile", "valid_from"],
+                name="uniq_target_hours_change_per_month",
+                condition=Q(valid_from__isnull=False),
+            ),
+            models.UniqueConstraint(
+                fields=["profile"],
+                name="uniq_target_hours_baseline",
+                condition=Q(valid_from__isnull=True),
+            ),
+        ]
+
+    def __str__(self):
+        label = self.valid_from.strftime("%Y-%m") if self.valid_from else "baseline"
+        return f"{self.profile} – {label}"

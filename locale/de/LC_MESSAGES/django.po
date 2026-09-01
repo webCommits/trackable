@@ -944,6 +944,19 @@ msgstr "Wöchentliche Soll-Stunden"
 msgid "from profile"
 msgstr "vom Profil"
 
+msgid "Valid from"
+msgstr "Gültig ab"
+
+msgid "Target hours history"
+msgstr "Verlauf der Soll-Stunden"
+
+#, python-format
+msgid "From %(month)s"
+msgstr "Ab %(month)s"
+
+msgid "Until then"
+msgstr "Bis dahin"
+
 msgid "Contract"
 msgstr "Vertrag"
 
@@ -1223,6 +1236,9 @@ msgstr "Stundenlohn (€)"
 
 msgid "Target hours are calculated from this date."
 msgstr "Soll-Stunden werden ab diesem Datum berechnet."
+
+msgid "Leave empty to change all months retroactively."
+msgstr "Leer lassen, um alle Monate rückwirkend zu ändern."
 
 msgid "Optional. Leave empty for open-ended contracts."
 msgstr "Optional. Leer lassen bei unbefristeten Verträgen."

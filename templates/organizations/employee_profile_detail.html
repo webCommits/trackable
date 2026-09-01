@@ -60,12 +60,38 @@
                value="{{ monthly_target_hours_minutes.1 }}"
                style="width:70px; padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text); margin:0 4px 0 8px;">
         <span style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "min" %}</span>
+        <label style="color:var(--ctp-subtext0); font-size:.85rem; margin-left:12px;">{% trans "Valid from" %}:</label>
+        <input type="month" name="target_hours_valid_from" value="{% now "Y-m" %}"
+               style="padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text); margin:0 4px 0 8px;">
         <button type="submit" class="btn btn-primary btn-sm">{% trans "Save" %}</button>
         <button type="button" class="btn btn-secondary btn-sm"
                 onclick="this.closest('form').style.display='none'; document.querySelector('[onclick*=\'target-hours-form\']').style.display='inline'; return false;">
             {% trans "Cancel" %}
         </button>
     </form>
+    {% if target_hours_changes %}
+    <div style="margin-top:10px; font-size:.82rem; color:var(--ctp-subtext0);">
+        <strong>{% trans "Target hours history" %}:</strong>
+        <ul style="margin:4px 0 0 18px; padding:0;">
+            {% for change in target_hours_changes %}
+            <li>
+                {% if change.valid_from %}
+                    {% blocktrans with month=change.valid_from|date:"F Y" %}From {{ month }}{% endblocktrans %}:
+                {% else %}
+                    {% trans "Until then" %}:
+                {% endif %}
+                {% if change.target_hours_period == "monthly" and change.monthly_target_hours %}
+                    {{ change.monthly_target_hours|floatformat:2 }}h/{% trans "month" %}
+                {% elif change.weekly_target_hours %}
+                    {{ change.weekly_target_hours|floatformat:1 }}h/{% trans "week" %}
+                {% else %}
+                    {{ change.weekly_hours|floatformat:1 }}h/{% trans "week" %}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
     {% if profile.contract_start_date %}
     <p style="color:var(--ctp-subtext0); margin-bottom:5px; margin-top:10px;">
         <strong>{% trans "Contract" %}:</strong>
