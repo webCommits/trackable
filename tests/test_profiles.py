@@ -415,6 +415,267 @@ class TimeAccountTests(TestCase):
         self.assertEqual(hours, 8.0)
 
 
+class TargetHoursChangeTests(TestCase):
+    """Tests for the effective-from-month target-hours mechanism."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser2", password="test123", email="test2@example.com"
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+            title="Engineer",
+            position="Dev",
+            weekly_hours=20,
+            hourly_rate=50,
+        )
+
+    def test_prospective_change_keeps_past_month_and_changes_future_month(self):
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=30,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=date(2026, 7, 1),
+        )
+
+        # June kept the old target (20h/week)
+        self.assertEqual(self.profile.get_target_hours(2026, 6), round(20 * 4.348, 2))
+        # July onwards uses the new target (30h/week)
+        self.assertEqual(self.profile.get_target_hours(2026, 7), round(30 * 4.348, 2))
+
+        # A baseline record was created snapshotting the old values.
+        self.assertEqual(self.profile.target_hours_changes.count(), 2)
+        baseline = self.profile.target_hours_changes.get(valid_from__isnull=True)
+        self.assertEqual(baseline.weekly_hours, 20)
+        change = self.profile.target_hours_changes.get(valid_from=date(2026, 7, 1))
+        self.assertEqual(change.weekly_hours, 30)
+
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.weekly_hours, 30)
+
+    def test_prospective_change_normalizes_valid_from_to_first_of_month(self):
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=30,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=date(2026, 7, 15),
+        )
+        change = self.profile.target_hours_changes.get(valid_from__isnull=False)
+        self.assertEqual(change.valid_from, date(2026, 7, 1))
+
+    def test_retroactive_change_clears_history_and_changes_all_months(self):
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=30,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=date(2026, 7, 1),
+        )
+        self.assertTrue(self.profile.target_hours_changes.exists())
+
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=35,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=None,
+        )
+
+        self.assertFalse(self.profile.target_hours_changes.exists())
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.weekly_hours, 35)
+        self.assertEqual(self.profile.get_target_hours(2026, 6), round(35 * 4.348, 2))
+        self.assertEqual(self.profile.get_target_hours(2026, 7), round(35 * 4.348, 2))
+
+    def test_noop_when_values_unchanged(self):
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=20,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=date(2026, 7, 1),
+        )
+        self.assertEqual(self.profile.target_hours_changes.count(), 0)
+
+    def test_monthly_period_change_effective_from_month(self):
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_MONTHLY,
+            weekly_hours=round(78.26 / AVERAGE_WEEKS_PER_MONTH, 4),
+            weekly_target_hours=None,
+            monthly_target_hours=78.26,
+            valid_from=date(2026, 7, 1),
+        )
+
+        # June still uses the old weekly-derived target.
+        self.assertEqual(self.profile.get_target_hours(2026, 6), round(20 * 4.348, 2))
+        # July uses the new monthly target.
+        self.assertEqual(self.profile.get_target_hours(2026, 7), 78.26)
+
+    def test_cumulative_account_reflects_change_before_and_after(self):
+        from trackable.timetracking.models import ENTRY_TYPE_ACTUAL, TimeEntry
+        from datetime import datetime as dt
+
+        for day in (5, 12, 19, 26):
+            TimeEntry.objects.create(
+                profile=self.profile,
+                date=date(2026, 6, day),
+                start_time=dt.strptime("09:00", "%H:%M").time(),
+                end_time=dt.strptime("17:00", "%H:%M").time(),
+                entry_type=ENTRY_TYPE_ACTUAL,
+            )
+        for day in (3, 10, 17, 24, 31):
+            TimeEntry.objects.create(
+                profile=self.profile,
+                date=date(2026, 7, day),
+                start_time=dt.strptime("09:00", "%H:%M").time(),
+                end_time=dt.strptime("17:00", "%H:%M").time(),
+                entry_type=ENTRY_TYPE_ACTUAL,
+            )
+
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=30,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=date(2026, 7, 1),
+        )
+
+        rows = self.profile.get_monthly_account_rows(until_year=2026, until_month=7)
+        row_by_month = {(r["year"], r["month"]): r for r in rows}
+
+        june = row_by_month[(2026, 6)]
+        july = row_by_month[(2026, 7)]
+        self.assertEqual(june["target_hours"], round(20 * 4.348, 2))
+        self.assertEqual(july["target_hours"], round(30 * 4.348, 2))
+
+    @staticmethod
+    def _months_ahead(base_date, months):
+        year = base_date.year
+        month = base_date.month + months
+        while month > 12:
+            month -= 12
+            year += 1
+        return date(year, month, 1)
+
+    def test_future_dated_change_does_not_leak_into_current_values(self):
+        """A change effective several months from now must not affect
+        current-month displays or profile fields until its month arrives."""
+        today = timezone.localdate()
+        future_date = self._months_ahead(today, 3)
+
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=30,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=future_date,
+        )
+        self.profile.refresh_from_db()
+
+        # Current profile fields and display stay at the OLD value.
+        self.assertEqual(self.profile.weekly_hours, 20)
+        self.assertEqual(self.profile.get_weekly_target_display_hours(), 20.0)
+
+        # The future month uses the NEW value; the current month still uses
+        # the OLD value.
+        self.assertEqual(
+            self.profile.get_target_hours(future_date.year, future_date.month),
+            round(30 * 4.348, 2),
+        )
+        self.assertEqual(
+            self.profile.get_target_hours(today.year, today.month),
+            round(20 * 4.348, 2),
+        )
+
+    def test_apply_target_hours_change_same_month_twice_updates_row(self):
+        """Calling apply_target_hours_change twice with the same valid_from
+        updates the existing row instead of erroring or duplicating it."""
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=30,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=date(2026, 7, 1),
+        )
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=32,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=date(2026, 7, 1),
+        )
+
+        self.assertEqual(
+            self.profile.target_hours_changes.filter(valid_from=date(2026, 7, 1)).count(),
+            1,
+        )
+        change = self.profile.target_hours_changes.get(valid_from=date(2026, 7, 1))
+        self.assertEqual(change.weekly_hours, 32)
+        self.assertEqual(self.profile.get_target_hours(2026, 7), round(32 * 4.348, 2))
+
+
+class ProfileEditRetroactiveTests(TestCase):
+    """profile_edit view: retroactive target-hours edits must clear history."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="editretro", password="test123", email="editretro@example.com"
+        )
+        self.client.login(username="editretro", password="test123")
+        self.profile = Profile.objects.create(
+            user=self.user,
+            title="Engineer",
+            position="Dev",
+            weekly_hours=20,
+            hourly_rate=50,
+        )
+
+    def test_retroactive_edit_clears_existing_history(self):
+        today = timezone.localdate()
+        future_date = TargetHoursChangeTests._months_ahead(today, 2)
+
+        # Create existing history: baseline (20h) + a future change (25h).
+        self.profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=25,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=future_date,
+        )
+        self.assertTrue(self.profile.target_hours_changes.exists())
+
+        response = self.client.post(
+            reverse("profile_edit", kwargs={"pk": self.profile.pk}),
+            {
+                "title": self.profile.title,
+                "position": self.profile.position,
+                "target_hours_period": TARGET_HOURS_WEEKLY,
+                "weekly_hours_hours": 35,
+                "weekly_hours_minutes": 0,
+                "hourly_rate": self.profile.hourly_rate,
+                "target_hours_valid_from": "",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.target_hours_changes.exists())
+        self.assertEqual(float(self.profile.weekly_hours), 35.0)
+
+        past_year, past_month = 2020, 1
+        self.assertEqual(
+            self.profile.get_target_hours(past_year, past_month),
+            round(35 * 4.348, 2),
+        )
+        self.assertEqual(
+            self.profile.get_target_hours(today.year, today.month),
+            round(35 * 4.348, 2),
+        )
+
+
 class MonthlyAccountRowsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(

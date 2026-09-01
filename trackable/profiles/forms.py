@@ -54,6 +54,12 @@ class ProfileForm(forms.ModelForm):
         label=_("Minutes"),
         widget=forms.NumberInput(attrs={"placeholder": _("e.g. 15"), "min": 0, "max": 59}),
     )
+    target_hours_valid_from = forms.DateField(
+        required=False,
+        input_formats=["%Y-%m"],
+        label=_("Valid from"),
+        widget=forms.DateInput(attrs={"type": "month"}),
+    )
 
     def __init__(self, *args, **kwargs):
         # Normalize German decimal commas (e.g. 50,00 -> 50.00) whether data is

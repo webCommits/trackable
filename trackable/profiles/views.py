@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from trackable.organizations.helpers import can_edit_time_entries
@@ -80,6 +82,10 @@ def profile_detail(request, pk):
         until_month=current_date.month,
     )
 
+    target_hours_changes = profile.target_hours_changes.order_by(
+        F("valid_from").asc(nulls_first=True)
+    )
+
     return render(request, "profiles/detail.html", {
         "profile": profile,
         "months": months,
@@ -89,6 +95,7 @@ def profile_detail(request, pk):
         "has_org": has_org,
         "can_log_time": can_log_time,
         "show_vacation": show_vacation,
+        "target_hours_changes": target_hours_changes,
     })
 
 
@@ -98,7 +105,48 @@ def profile_edit(request, pk):
     if request.method == "POST":
         form = ProfileForm(request.POST, instance=profile, user=request.user)
         if form.is_valid():
-            form.save()
+            old_period = profile.target_hours_period
+            old_weekly_hours = profile.weekly_hours
+            old_weekly_target_hours = profile.weekly_target_hours
+            old_monthly_target_hours = profile.monthly_target_hours
+
+            instance = form.save(commit=False)
+            valid_from = form.cleaned_data.get("target_hours_valid_from")
+            new_period = instance.target_hours_period
+            new_weekly_hours = instance.weekly_hours
+            new_weekly_target_hours = instance.weekly_target_hours
+            new_monthly_target_hours = instance.monthly_target_hours
+
+            target_hours_changed = (
+                new_period != old_period
+                or new_weekly_hours != old_weekly_hours
+                or new_weekly_target_hours != old_weekly_target_hours
+                or new_monthly_target_hours != old_monthly_target_hours
+            )
+
+            if target_hours_changed:
+                # Persist non-target-hours changes first, keeping the
+                # target-hours fields at their old values; the history-aware
+                # write path below applies the new target-hours values
+                # (valid_from=None means retroactive: clears history and
+                # writes the fields directly, matching the pre-existing
+                # behavior).
+                instance.target_hours_period = old_period
+                instance.weekly_hours = old_weekly_hours
+                instance.weekly_target_hours = old_weekly_target_hours
+                instance.monthly_target_hours = old_monthly_target_hours
+                with transaction.atomic():
+                    instance.save()
+                    profile.apply_target_hours_change(
+                        period=new_period,
+                        weekly_hours=new_weekly_hours,
+                        weekly_target_hours=new_weekly_target_hours,
+                        monthly_target_hours=new_monthly_target_hours,
+                        valid_from=valid_from,
+                    )
+            else:
+                instance.save()
+
             messages.success(request, _("Profile was updated successfully!"))
             return redirect("profile_detail", pk=profile.pk)
     else:

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.db.models import F
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from trackable.organizations.models import Organization, OrganizationMembership
@@ -276,6 +277,15 @@ def set_target_hours(request, user_id, profile_id):
 
     period = request.POST.get("target_hours_period") or TARGET_HOURS_WEEKLY
 
+    valid_from_str = request.POST.get("target_hours_valid_from", "").strip()
+    valid_from = None
+    if valid_from_str:
+        try:
+            valid_from = datetime.strptime(valid_from_str, "%Y-%m").date().replace(day=1)
+        except (ValueError, TypeError):
+            messages.error(request, _("Invalid value for target hours."))
+            return _redirect_back()
+
     if period == TARGET_HOURS_MONTHLY:
         hours_str = request.POST.get("monthly_target_hours_hours", "").strip()
         minutes_str = request.POST.get("monthly_target_hours_minutes", "").strip()
@@ -288,36 +298,40 @@ def set_target_hours(request, user_id, profile_id):
             target_hours = hours_and_minutes_to_decimal(hours, minutes)
             if target_hours > Decimal("999.9999"):
                 raise ValueError("Target hours too large")
-            profile.target_hours_period = TARGET_HOURS_MONTHLY
-            profile.monthly_target_hours = target_hours
-            profile.weekly_hours = monthly_to_weekly_equivalent(target_hours)
-            profile.weekly_target_hours = None
         except (ValueError, TypeError):
             messages.error(request, _("Invalid value for target hours."))
             return _redirect_back()
+        profile.apply_target_hours_change(
+            period=TARGET_HOURS_MONTHLY,
+            weekly_hours=monthly_to_weekly_equivalent(target_hours),
+            weekly_target_hours=None,
+            monthly_target_hours=target_hours,
+            valid_from=valid_from,
+        )
     else:
         hours_str = request.POST.get("weekly_target_hours_hours", "").strip()
         minutes_str = request.POST.get("weekly_target_hours_minutes", "").strip()
-        profile.target_hours_period = TARGET_HOURS_WEEKLY
-        profile.monthly_target_hours = None
 
         if hours_str == "" and minutes_str == "":
             messages.error(request, _("Weekly hours are required."))
             return _redirect_back()
-        else:
-            try:
-                hours = int(hours_str) if hours_str != "" else 0
-                minutes = int(minutes_str) if minutes_str != "" else 0
-                target_hours = hours_and_minutes_to_decimal(hours, minutes)
-                if target_hours > Decimal("99.9999"):
-                    raise ValueError("Target hours too large")
-                profile.weekly_hours = target_hours
-                profile.weekly_target_hours = None
-            except (ValueError, TypeError):
-                messages.error(request, _("Invalid value for target hours."))
-                return _redirect_back()
+        try:
+            hours = int(hours_str) if hours_str != "" else 0
+            minutes = int(minutes_str) if minutes_str != "" else 0
+            target_hours = hours_and_minutes_to_decimal(hours, minutes)
+            if target_hours > Decimal("99.9999"):
+                raise ValueError("Target hours too large")
+        except (ValueError, TypeError):
+            messages.error(request, _("Invalid value for target hours."))
+            return _redirect_back()
+        profile.apply_target_hours_change(
+            period=TARGET_HOURS_WEEKLY,
+            weekly_hours=target_hours,
+            weekly_target_hours=None,
+            monthly_target_hours=None,
+            valid_from=valid_from,
+        )
 
-    profile.save()
     messages.success(request, _("Target hours updated."))
     return _redirect_back()
 
@@ -419,6 +433,10 @@ def employee_profile_detail(request, user_id, profile_id):
 
     show_actions = can_manage_profile_time_entries(request.user, profile)
 
+    target_hours_changes = profile.target_hours_changes.order_by(
+        F("valid_from").asc(nulls_first=True)
+    )
+
     return render(
         request,
         "organizations/employee_profile_detail.html",
@@ -435,6 +453,7 @@ def employee_profile_detail(request, user_id, profile_id):
             "total_earnings": total_earnings,
             "target_hours": target_hours,
             "balance": balance,
+            "target_hours_changes": target_hours_changes,
             "cumulative_balance": cumulative_balance,
             "total_vacation_days": total_vacation_days,
             "available_months": available_months,

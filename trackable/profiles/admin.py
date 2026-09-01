@@ -1,5 +1,5 @@
 from django.contrib import admin
-from trackable.profiles.models import Profile
+from trackable.profiles.models import Profile, TargetHoursChange
 from trackable.core.admin_site import custom_admin_site
 
 
@@ -32,3 +32,17 @@ class ProfileAdmin(admin.ModelAdmin):
         ),
         ("Internal", {"fields": ["internal_notes"], "classes": ["collapse"]}),
     ]
+
+
+@admin.register(TargetHoursChange, site=custom_admin_site)
+class TargetHoursChangeAdmin(admin.ModelAdmin):
+    list_display = [
+        "profile",
+        "valid_from",
+        "target_hours_period",
+        "weekly_hours",
+        "weekly_target_hours",
+        "monthly_target_hours",
+    ]
+    list_filter = ["target_hours_period"]
+    search_fields = ["profile__title", "profile__position"]

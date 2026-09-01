@@ -61,6 +61,16 @@
             {% for error in form.monthly_target_hours_minutes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
             <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Use this when the employee's target is defined per month." %}</small>
         </div>
+        {% if edit %}
+        <div class="form-group{% if form.target_hours_valid_from.errors %} has-error{% endif %}">
+            <label for="{{ form.target_hours_valid_from.id_for_label }}">{% trans "Valid from" %}</label>
+            <input type="month" name="{{ form.target_hours_valid_from.html_name }}"
+                   id="{{ form.target_hours_valid_from.id_for_label }}"
+                   value="{% now "Y-m" %}">
+            {% for error in form.target_hours_valid_from.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Leave empty to change all months retroactively." %}</small>
+        </div>
+        {% endif %}
         <div class="form-group{% if form.hourly_rate.errors %} has-error{% endif %}">
             <label for="{{ form.hourly_rate.id_for_label }}">{% trans "Hourly rate (€)" %}</label>
             {{ form.hourly_rate }}
