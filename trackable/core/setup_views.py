@@ -1,6 +1,10 @@
+import secrets
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.views import redirect_to_login
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -13,17 +17,30 @@ def setup_step1(request):
     config = SiteConfiguration.get()
     if config.setup_completed:
         return redirect("login")
-    
+
+    # Optional shared secret gate (SETUP_TOKEN env var). If unset, behaves
+    # exactly as before. If set, the whole step (including the "admin
+    # already exists" info page below) requires the correct token on both
+    # GET (query string) and POST (hidden form field), so an attacker can't
+    # even observe setup state without it.
+    setup_token = getattr(settings, "SETUP_TOKEN", "")
+    if setup_token:
+        token = request.POST.get("token", "") if request.method == "POST" else request.GET.get("token", "")
+        if not secrets.compare_digest(token, setup_token):
+            return render(request, "core/setup/token_required.html", status=403)
+    else:
+        token = ""
+
     # If superuser already exists (e.g., created via CLI), show info page
     if User.objects.filter(is_superuser=True).exists():
         return render(request, "core/setup/admin_exists.html")
-    
+
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
         password_confirm = request.POST.get("password_confirm", "")
-        
+
         errors = []
         if not username:
             errors.append(_("Username is required."))
@@ -38,17 +55,17 @@ def setup_step1(request):
                 validate_password(password)
             except ValidationError as e:
                 errors.extend(e.messages)
-        
+
         if User.objects.filter(username=username).exists():
             errors.append(_("Username is already taken."))
         if email and User.objects.filter(email=email).exists():
             errors.append(_("Email is already in use."))
-        
+
         if errors:
             for error in errors:
                 messages.error(request, error)
-            return render(request, "core/setup/step1.html")
-        
+            return render(request, "core/setup/step1.html", {"token": token})
+
         user = User.objects.create(
             username=username,
             email=email,
@@ -59,13 +76,13 @@ def setup_step1(request):
         )
         user.set_password(password)
         user.save()
-        
+
         # Auto-login the admin
         login(request, user)
         messages.success(request, _("Admin account created! Now configure your settings."))
         return redirect("setup_step2")
-    
-    return render(request, "core/setup/step1.html")
+
+    return render(request, "core/setup/step1.html", {"token": token})
 
 
 def setup_step2(request):
@@ -73,10 +90,16 @@ def setup_step2(request):
     config = SiteConfiguration.get()
     if config.setup_completed:
         return redirect("login")
-    
+
+    # Only an authenticated superuser may view or complete this step —
+    # otherwise anyone could (re)configure SMTP credentials, allowed hosts,
+    # and registration settings before an admin even logs in.
+    if not (request.user.is_authenticated and request.user.is_superuser):
+        return redirect_to_login(request.get_full_path())
+
     if not User.objects.filter(is_superuser=True).exists():
         return redirect("setup_step1")
-    
+
     if request.method == "POST":
         config.registration_enabled = request.POST.get("registration_enabled") == "on"
         

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Setup token required" %}{% endblock %}
+{% block content %}
+<div class="content" style="max-width: 480px; margin: 60px auto; text-align:center;">
+    <h2 style="color:var(--ctp-mauve); margin-bottom:16px;">{% trans "Setup token required" %}</h2>
+    <p style="color:var(--ctp-subtext0); margin-bottom:16px; font-size:1.1em;">
+        {% trans "This instance requires a valid setup token to access the setup wizard." %}
+    </p>
+    <p style="color:var(--ctp-overlay2);">
+        {% trans "Ask the server administrator for the current SETUP_TOKEN value, or check the server logs and environment configuration." %}
+    </p>
+</div>
+{% endblock %}

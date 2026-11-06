@@ -131,3 +131,9 @@ BACKUP_SCHEDULE = config("BACKUP_SCHEDULE", default="weekly")
 BACKUP_FILENAME = config("BACKUP_FILENAME", default="db_backup.sqlite3")
 MONTHLY_EMAIL_TIME = config("MONTHLY_EMAIL_TIME", default="23:59")
 DISABLE_REGISTRATION = config("DISABLE_REGISTRATION", default=False, cast=bool)
+
+# Optional shared secret required to access the first-run setup wizard
+# (trackable.core.setup_views.setup_step1). Leave empty (default) to keep
+# the previous behavior of the wizard being reachable by anyone until the
+# first admin account is created.
+SETUP_TOKEN = config("SETUP_TOKEN", default="")

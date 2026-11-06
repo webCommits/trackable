@@ -657,6 +657,21 @@ msgstr ""
 msgid "Complete setup"
 msgstr "Setup abschließen"
 
+msgid "Setup token required"
+msgstr "Setup-Token erforderlich"
+
+msgid "This instance requires a valid setup token to access the setup wizard."
+msgstr ""
+"Für diese Instanz ist ein gültiges Setup-Token erforderlich, um auf den "
+"Setup-Assistenten zuzugreifen."
+
+msgid ""
+"Ask the server administrator for the current SETUP_TOKEN value, or check "
+"the server logs and environment configuration."
+msgstr ""
+"Fragen Sie den Server-Administrator nach dem aktuellen SETUP_TOKEN-Wert "
+"oder prüfen Sie die Server-Logs und die Umgebungskonfiguration."
+
 msgid "Confirm your email address"
 msgstr "Bestätigen Sie Ihre E-Mail-Adresse"
 

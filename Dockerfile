@@ -25,9 +25,20 @@ COPY . .
 
 RUN mkdir -p /app/data/backups
 
+# Start script for the "cron" service: snapshots the container's environment
+# into /etc/trackable-cron.env before starting cron, since Debian cron does
+# not otherwise pass it to the jobs below (see scripts/cron-start.sh).
+COPY scripts/cron-start.sh /usr/local/bin/trackable-cron-start
+RUN chmod 0755 /usr/local/bin/trackable-cron-start
+
 # Crontab zur Buildzeit als root einrichten
-RUN echo '0 2 * * 0 root cd /app && /usr/local/bin/python manage.py backup_db >> /var/log/cron.log 2>&1' > /etc/cron.d/trackable \
-    && echo '59 23 * * * root [ "$(date +\%d -d tomorrow)" = "01" ] && cd /app && /usr/local/bin/python manage.py send_monthly_emails >> /var/log/cron.log 2>&1' >> /etc/cron.d/trackable \
+# Jobs source /etc/trackable-cron.env first (written by trackable-cron-start)
+# so they run with the container's real settings module/secrets instead of
+# manage.py's bare DJANGO_SETTINGS_MODULE=trackable.settings.dev default.
+# Grouped in a subshell so a missing/failed source is captured in the log
+# too, instead of silently vanishing into cron's (absent) mail delivery.
+RUN echo '0 2 * * 0 root ( . /etc/trackable-cron.env && cd /app && /usr/local/bin/python manage.py backup_db ) >> /var/log/cron.log 2>&1' > /etc/cron.d/trackable \
+    && echo '59 23 * * * root ( . /etc/trackable-cron.env && [ "$(date +\%d -d tomorrow)" = "01" ] && cd /app && /usr/local/bin/python manage.py send_monthly_emails ) >> /var/log/cron.log 2>&1' >> /etc/cron.d/trackable \
     && chmod 0644 /etc/cron.d/trackable \
     && touch /var/log/cron.log
 

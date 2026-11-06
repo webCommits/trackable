@@ -47,7 +47,7 @@ if SECRET_KEY.startswith("django-insecure-"):
     )
 
 # ── ALLOWED_HOSTS: dynamische Konfiguration für Coolify und Compose ──────────
-from urllib.parse import urlparse
+from trackable.settings.hosts import hosts_from_fqdn_list
 
 _hosts = config("ALLOWED_HOSTS", default="").strip()
 ALLOWED_HOSTS = [h.strip() for h in _hosts.split(",") if h.strip()]
@@ -60,13 +60,13 @@ if _subdomain and _domain:
     if _full_domain not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(_full_domain)
 
-# Auto-add Coolify domains if present
+# Auto-add Coolify domains if present. SERVICE_FQDN_APP_8000 may or may not
+# include a scheme (Coolify v4.6+ omits it, e.g. "app.example.com:8000") and
+# may be a comma-separated list of multiple domains.
 coolify_domains = config("SERVICE_FQDN_APP_8000", default="").strip()
-if coolify_domains:
-    for url in coolify_domains.split(","):
-        parsed = urlparse(url.strip())
-        if parsed.hostname and parsed.hostname not in ALLOWED_HOSTS:
-            ALLOWED_HOSTS.append(parsed.hostname)
+for _host in hosts_from_fqdn_list(coolify_domains):
+    if _host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_host)
 
 if not ALLOWED_HOSTS:
     raise RuntimeError(

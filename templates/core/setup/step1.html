@@ -9,6 +9,7 @@
     </p>
     <form method="post" novalidate>
         {% csrf_token %}
+        {% if token %}<input type="hidden" name="token" value="{{ token }}">{% endif %}
         <div class="form-group">
             <label for="id_username">{% trans "Username" %}</label>
             <input type="text" name="username" id="id_username" required

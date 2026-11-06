@@ -212,6 +212,8 @@ Migrations, static files, and translations are applied automatically on rebuild.
 > ```
 >
 > Existing logged-in users and admin accounts are not affected.
+>
+> Only the account-creation step (step 1) is reachable before an admin exists; the second configuration step always requires being logged in as that admin. On a public-facing first deploy, you can additionally set the `SETUP_TOKEN` env var so step 1 itself requires a secret token (passed as `?token=...`) before anyone can create the first admin account.
 
 ---
 
@@ -360,6 +362,7 @@ python manage.py runserver
 | `MONTHLY_EMAIL_TIME` | `23:59` | Time to send monthly reports (HH:MM) | No (optional) |
 | `SUBDOMAIN` | `trackable` | Subdomain for Traefik routing | No (Standalone only) |
 | `DOMAIN_NAME` | &mdash; | Base domain for Traefik routing (e.g., `example.com`) | No (Standalone only) |
+| `SETUP_TOKEN` | &mdash; (empty) | Optional shared secret required to access the first-run setup wizard at `/setup/` | No (optional, recommended for public-facing first deploys) |
 
 ---
 

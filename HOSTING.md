@@ -233,6 +233,8 @@ docker exec -it trackable-app python manage.py createsuperuser
 
 Danach unter `https://deine-domain.com/admin/` weitere Benutzer anlegen. Eine öffentliche Registrierung gibt es nicht.
 
+> **Hinweis:** Alternativ kann der erste Admin auch über den Setup-Assistenten unter `/setup/` angelegt werden. Mit der optionalen Umgebungsvariable `SETUP_TOKEN` lässt sich dieser erste Schritt zusätzlich mit einem Token absichern (Aufruf dann als `/setup/?token=...`); Schritt 2 des Assistenten erfordert ohnehin immer eine Anmeldung als der soeben erstellte Admin.
+
 ## Wartung und Überwachung
 
 ### Logs prüfen

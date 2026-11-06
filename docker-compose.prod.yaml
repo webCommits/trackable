@@ -22,6 +22,7 @@ services:
       - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
       - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
       - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
+      - 'SETUP_TOKEN=${SETUP_TOKEN:-}'
     expose:
       - '8000'
     networks:
@@ -71,10 +72,15 @@ services:
       - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
       - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
       - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
+      - 'SETUP_TOKEN=${SETUP_TOKEN:-}'
     user: root
     networks:
       - coolify
-    command: cron -f -L /var/log/cron.log
+    # trackable-cron-start snapshots this container's environment to
+    # /etc/trackable-cron.env (root-only) before starting cron, since
+    # Debian cron otherwise runs jobs with none of it (see Dockerfile /
+    # scripts/cron-start.sh).
+    command: trackable-cron-start
     restart: unless-stopped
 
 volumes:
