@@ -1,0 +1,92 @@
+# docker-compose.coolify.yaml
+#
+# NUR für Coolify v4 ("Docker Compose"-Resource, Build aus diesem Git-Repo).
+# Coolify übernimmt Routing/TLS (Traefik-Labels), Netzwerke und Container-Namen
+# automatisch anhand der in der Coolify-UI für den Service "app" konfigurierten
+# Domain. Deshalb enthält diese Datei bewusst KEINE container_name-, labels-
+# oder networks-Einträge und KEIN externes "coolify"-Netzwerk.
+#
+# Setup in Coolify:
+#   1. Neue Resource vom Typ "Docker Compose" anlegen und dieses Repo verbinden.
+#   2. Diese Datei als Compose-Datei auswählen.
+#   3. Für den Service "app" die gewünschte Domain in der Coolify-UI setzen
+#      (Coolify setzt darüber automatisch SERVICE_FQDN_APP_8000 und die
+#      Traefik-Labels/Netzwerke).
+#   4. Alle benötigten Umgebungsvariablen (SECRET_KEY, ALLOWED_HOSTS, EMAIL_*,
+#      etc.) in der Coolify-UI als Environment Variables setzen.
+services:
+  app:
+    build: .
+    volumes:
+      - 'db_data:/app/data'
+      - 'media_data:/app/media'
+    environment:
+      - SERVICE_FQDN_APP_8000
+      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
+      - PYTHONUNBUFFERED=1
+      - 'SECRET_KEY=${SECRET_KEY:-}'
+      - 'DEBUG=${DEBUG:-False}'
+      - 'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}'
+      - 'DISABLE_REGISTRATION=${DISABLE_REGISTRATION:-False}'
+      - 'EMAIL_HOST=${EMAIL_HOST:-}'
+      - 'EMAIL_PORT=${EMAIL_PORT:-587}'
+      - 'EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}'
+      - 'EMAIL_HOST_USER=${EMAIL_HOST_USER:-}'
+      - 'EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}'
+      - 'DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}'
+      - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
+      - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
+      - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
+    expose:
+      - '8000'
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py compilemessages &&
+             gunicorn trackable.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    restart: unless-stopped
+    # Kein curl/wget im Image (siehe Dockerfile), daher Healthcheck via Python/urllib.
+    # /health/ ist von SECURE_SSL_REDIRECT ausgenommen (SECURE_REDIRECT_EXEMPT in
+    # trackable/settings/prod.py) und 127.0.0.1/localhost sind dort in ALLOWED_HOSTS
+    # aufgenommen, daher funktioniert der Request über Plain-HTTP auf 127.0.0.1.
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  cron:
+    build: .
+    volumes:
+      - 'db_data:/app/data'
+      - 'media_data:/app/media'
+    environment:
+      - DJANGO_SETTINGS_MODULE=trackable.settings.prod
+      - PYTHONUNBUFFERED=1
+      - 'SECRET_KEY=${SECRET_KEY:-}'
+      - 'DEBUG=${DEBUG:-False}'
+      - 'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}'
+      - 'DISABLE_REGISTRATION=${DISABLE_REGISTRATION:-False}'
+      - 'EMAIL_HOST=${EMAIL_HOST:-}'
+      - 'EMAIL_PORT=${EMAIL_PORT:-587}'
+      - 'EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}'
+      - 'EMAIL_HOST_USER=${EMAIL_HOST_USER:-}'
+      - 'EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}'
+      - 'DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}'
+      - 'BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}'
+      - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
+      - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
+    user: root
+    command: cron -f -L /var/log/cron.log
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    driver: local
+  media_data:
+    driver: local
