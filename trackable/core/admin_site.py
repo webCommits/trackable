@@ -8,7 +8,7 @@ from django.contrib.auth.admin import (
 from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from trackable.core.email import send_mail
+from trackable.core.email import send_mail, get_effective_from_email
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -39,7 +39,7 @@ class TrackableAdminSite(AdminSite):
                             "This is a test email from your Trackable instance.\n\n"
                             "If you received this email, your email configuration is working correctly."
                         ),
-                        settings.DEFAULT_FROM_EMAIL,
+                        get_effective_from_email(),
                         [recipient],
                         fail_silently=False,
                     )
@@ -64,7 +64,7 @@ class TrackableAdminSite(AdminSite):
                 "email_host": settings.EMAIL_HOST,
                 "email_port": settings.EMAIL_PORT,
                 "email_use_tls": settings.EMAIL_USE_TLS,
-                "default_from_email": settings.DEFAULT_FROM_EMAIL,
+                "default_from_email": get_effective_from_email(),
             },
         )
 

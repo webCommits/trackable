@@ -14,6 +14,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.units import inch
+from trackable.core.email import get_effective_connection, get_effective_from_email
 from trackable.core.reporting import (
     parse_monthly_report_day,
     report_period,
@@ -77,6 +78,19 @@ class Command(BaseCommand):
 
         users = User.objects.filter(is_active=True)
 
+        from_email = get_effective_from_email()
+        # Not opened here on purpose: the SMTP backend opens and closes the
+        # connection per message, so one dropped connection can't fail all
+        # remaining reports. None means Django's default connection (env).
+        connection = None if dry_run else get_effective_connection()
+
+        self._send_reports_for_users(
+            users, start, end, label, report_day, dry_run, from_email, connection
+        )
+
+    def _send_reports_for_users(
+        self, users, start, end, label, report_day, dry_run, from_email, connection
+    ):
         for user in users:
             employee_name = self.employee_name(user)
             profiles = list(user.profiles.all())
@@ -136,9 +150,10 @@ class Command(BaseCommand):
                     email = EmailMessage(
                         subject=f"Monatsbericht - {employee_name} - {label}",
                         body=text_message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        from_email=from_email,
                         to=to,
                         bcc=bcc,
+                        connection=connection,
                     )
                     email.attach(
                         self.pdf_filename(

@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from trackable.core.email import send_mail
+from trackable.core.email import send_mail, get_effective_from_email
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -61,7 +61,7 @@ def password_reset_request(request):
             send_mail(
                 "Passwort zurücksetzen - Trackable",
                 text_message,
-                settings.DEFAULT_FROM_EMAIL,
+                get_effective_from_email(),
                 [email],
                 html_message=html_message,
                 fail_silently=False,
@@ -172,7 +172,7 @@ def register(request):
             send_mail(
                 _("Confirm your email - Trackable"),
                 text_message,
-                settings.DEFAULT_FROM_EMAIL,
+                get_effective_from_email(),
                 [user.email],
                 html_message=html_message,
                 fail_silently=False,
