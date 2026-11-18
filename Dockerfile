@@ -29,6 +29,12 @@ COPY . .
 # chown below switches the app to running as appuser.
 RUN mkdir -p /app/data/backups /app/media
 
+# Compile translations into the image so every container has them. The app
+# service also runs compilemessages on start, but the cron service (which
+# sends the monthly report emails) doesn't, so without this its mails were
+# always English.
+RUN find /app/locale -name '*.po' -exec sh -c 'msgfmt -o "${1%.po}.mo" "$1"' _ {} \;
+
 # Start script for the "cron" service: snapshots the container's environment
 # into /etc/trackable-cron.env before starting cron, since Debian cron does
 # not otherwise pass it to the jobs below (see scripts/cron-start.sh).
