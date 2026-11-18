@@ -64,20 +64,29 @@ class Profile(models.Model):
     def is_archived(self):
         return self.archived_at is not None
 
-    def get_monthly_entries(self, year, month):
-        from django.utils import timezone
-        import calendar
-        from datetime import datetime
+    def get_entries_between(self, start_date, end_date):
+        """Actual time entries with date in [start_date, end_date] (inclusive)."""
         from trackable.timetracking.models import ENTRY_TYPE_ACTUAL
 
-        last_day = calendar.monthrange(year, month)[1]
-        start_date = datetime(year, month, 1)
-        end_date = datetime(year, month, last_day, 23, 59, 59)
-
         return self.time_entries.filter(
-            date__range=[start_date.date(), end_date.date()],
+            date__range=[start_date, end_date],
             entry_type=ENTRY_TYPE_ACTUAL,
         )
+
+    def get_monthly_entries(self, year, month):
+        import calendar
+        from datetime import date
+
+        last_day = calendar.monthrange(year, month)[1]
+        return self.get_entries_between(date(year, month, 1), date(year, month, last_day))
+
+    def get_hours_between(self, start_date, end_date):
+        entries = self.get_entries_between(start_date, end_date)
+        return sum(entry.hours_worked for entry in entries)
+
+    def get_earnings_between(self, start_date, end_date):
+        hours = self.get_hours_between(start_date, end_date)
+        return hours * self.hourly_rate
 
     def get_monthly_hours(self, year, month):
         entries = self.get_monthly_entries(year, month)

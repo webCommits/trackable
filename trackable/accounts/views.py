@@ -130,6 +130,7 @@ def profile_settings(request):
         "accounts/settings.html",
         {
             "user": request.user,
+            "monthly_report_day": settings.MONTHLY_REPORT_DAY,
         },
     )
 

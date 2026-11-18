@@ -35,10 +35,13 @@ RUN chmod 0755 /usr/local/bin/trackable-cron-start
 # Jobs source /etc/trackable-cron.env first (written by trackable-cron-start)
 # so they run with the container's real settings module/secrets instead of
 # manage.py's bare DJANGO_SETTINGS_MODULE=trackable.settings.dev default.
+# send_monthly_emails runs daily and decides itself whether today (in
+# settings.TIME_ZONE) is a send day. Containers run in UTC: 21:30 UTC is
+# 22:30 CET / 23:30 CEST, i.e. still on the send day in Germany.
 # Grouped in a subshell so a missing/failed source is captured in the log
 # too, instead of silently vanishing into cron's (absent) mail delivery.
 RUN echo '0 2 * * 0 root ( . /etc/trackable-cron.env && cd /app && /usr/local/bin/python manage.py backup_db ) >> /var/log/cron.log 2>&1' > /etc/cron.d/trackable \
-    && echo '59 23 * * * root ( . /etc/trackable-cron.env && [ "$(date +\%d -d tomorrow)" = "01" ] && cd /app && /usr/local/bin/python manage.py send_monthly_emails ) >> /var/log/cron.log 2>&1' >> /etc/cron.d/trackable \
+    && echo '30 21 * * * root ( . /etc/trackable-cron.env && cd /app && /usr/local/bin/python manage.py send_monthly_emails ) >> /var/log/cron.log 2>&1' >> /etc/cron.d/trackable \
     && chmod 0644 /etc/cron.d/trackable \
     && touch /var/log/cron.log
 

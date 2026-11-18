@@ -88,6 +88,16 @@ msgstr ""
 "Sie erhalten am letzten Tag jedes Monats automatisch eine E-Mail mit einer "
 "Zusammenfassung aller Arbeitszeiten."
 
+#, python-format
+msgid ""
+"You will receive an automated email on the %(day)sth of each month, "
+"covering the period from the %(next_day)sth of the previous month through "
+"that day, with a summary of all your working hours."
+msgstr ""
+"Sie erhalten am %(day)s. jedes Monats automatisch eine E-Mail, die den "
+"Zeitraum vom %(next_day)s. des Vormonats bis zu diesem Tag mit einer "
+"Zusammenfassung aller Arbeitszeiten abdeckt."
+
 msgid "Save"
 msgstr "Speichern"
 
@@ -1772,6 +1782,27 @@ msgstr "Eigenes CSS"
 
 msgid "Beliebige CSS-Regeln, nach den Standard-Styles geladen."
 msgstr "Beliebige CSS-Regeln, die nach den Standard-Styles geladen werden."
+
+# organizations/models.py – monthly report email
+msgid "E-Mail-Adresse für Monatsberichte"
+msgstr "E-Mail-Adresse für Monatsberichte"
+
+msgid "Erhält eine Kopie aller Monatsberichte der Mitglieder dieser Organisation."
+msgstr "Erhält eine Kopie aller Monatsberichte der Mitglieder dieser Organisation."
+
+msgid ""
+"Erhält eine Kopie aller Monatsberichte der Mitglieder dieser Organisation. "
+"Leer lassen, um keine Kopie zu erhalten."
+msgstr ""
+"Erhält eine Kopie aller Monatsberichte der Mitglieder dieser Organisation. "
+"Leer lassen, um keine Kopie zu erhalten."
+
+# organizations/branding.html
+msgid "Monthly Reports"
+msgstr "Monatsberichte"
+
+msgid "Optionally receive a copy of every member's monthly report email."
+msgstr "Optional eine Kopie der Monatsbericht-E-Mail jedes Mitglieds erhalten."
 
 msgid "You are already part of an organization."
 msgstr "Sie sind bereits Mitglied einer Organisation."

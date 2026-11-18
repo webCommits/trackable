@@ -20,6 +20,7 @@ class OrganizationBrandingForm(forms.ModelForm):
         fields = [
             "logo", "favicon", "apple_touch_icon",
             "primary_color", "accent_color", "custom_css",
+            "monthly_report_email",
         ]
         widgets = {
             "primary_color": forms.TextInput(attrs={
@@ -36,6 +37,9 @@ class OrganizationBrandingForm(forms.ModelForm):
                 "placeholder": _("/* Custom CSS rules */"),
                 "style": "font-family:monospace; font-size:.88rem;",
             }),
+            "monthly_report_email": forms.EmailInput(attrs={
+                "placeholder": "berichte@firma.de",
+            }),
         }
         help_texts = {
             "logo": _("Empfohlen: 180×40 px, PNG oder SVG. Ersetzt das Logo in der Navigationsleiste."),
@@ -44,7 +48,16 @@ class OrganizationBrandingForm(forms.ModelForm):
             "primary_color": _("Hex-Farbe (#RRGGBB). Überschreibt primäre UI-Akzente (Buttons, Badges)."),
             "accent_color": _("Hex-Farbe (#RRGGBB). Überschreibt sekundäre Akzente (Links, Hover)."),
             "custom_css": _("Beliebige CSS-Regeln (z. B. .btn-primary { background: #xyz; }). Wird nach allen Standard-Styles geladen."),
+            "monthly_report_email": _("Erhält eine Kopie aller Monatsberichte der Mitglieder dieser Organisation. Leer lassen, um keine Kopie zu erhalten."),
         }
+
+    # Fields rendered in their own "Monthly reports" section in the template,
+    # separate from the branding fields above.
+    monthly_report_fields = ["monthly_report_email"]
+    branding_fields = [
+        "logo", "favicon", "apple_touch_icon",
+        "primary_color", "accent_color", "custom_css",
+    ]
 
 
 class OrganizationForm(forms.ModelForm):

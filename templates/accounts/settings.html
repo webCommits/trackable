@@ -14,7 +14,13 @@
                 <input type="checkbox" name="email_notifications_enabled" {% if user.email_notifications_enabled %}checked{% endif %}>
                 <span>
                     {% trans "Enable monthly email reports" %}
-                    <small style="display:block; margin-top:4px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ctp-subtext0);">{% trans "You will receive an automated email on the last day of each month with a summary of all your working hours." %}</small>
+                    <small style="display:block; margin-top:4px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ctp-subtext0);">
+                        {% if monthly_report_day %}
+                        {% blocktrans with day=monthly_report_day next_day=monthly_report_day|add:1 %}You will receive an automated email on the {{ day }}th of each month, covering the period from the {{ next_day }}th of the previous month through that day, with a summary of all your working hours.{% endblocktrans %}
+                        {% else %}
+                        {% trans "You will receive an automated email on the last day of each month with a summary of all your working hours." %}
+                        {% endif %}
+                    </small>
                 </span>
             </label>
         </div>

@@ -100,6 +100,12 @@ DEFAULT_FROM_EMAIL=noreply@trackable.deine-domain.com
 BACKUP_SCHEDULE=weekly
 BACKUP_FILENAME=db_backup.sqlite3
 MONTHLY_EMAIL_TIME=23:59
+# Optional: Tag im Monat (1-28), an dem der Monatsbericht verschickt wird.
+# Leer = letzter Tag des Monats, deckt den Kalendermonat ab (Standard).
+# Gesetzt (z. B. 24) = dieser Tag jeden Monats, deckt den Zeitraum seit dem
+# Tag danach im Vormonat ab. Eine Kopie an eine Organisations-E-Mail-Adresse
+# kann zusätzlich unter Branding-Einstellungen hinterlegt werden.
+MONTHLY_REPORT_DAY=
 ```
 
 ### 3. Docker Compose starten

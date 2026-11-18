@@ -130,6 +130,19 @@ LOGOUT_REDIRECT_URL = "/"
 BACKUP_SCHEDULE = config("BACKUP_SCHEDULE", default="weekly")
 BACKUP_FILENAME = config("BACKUP_FILENAME", default="db_backup.sqlite3")
 MONTHLY_EMAIL_TIME = config("MONTHLY_EMAIL_TIME", default="23:59")
+# Day of the month (1-28) on which the monthly report email is sent, with
+# the report covering the period since the last send day. Empty (default)
+# keeps the previous behavior: send on the last day of the month, covering
+# that calendar month. Parsed leniently here so an invalid value does not
+# crash Django startup; trackable.core.reporting.parse_monthly_report_day
+# re-parses (and raises) when the send_monthly_emails command actually runs.
+MONTHLY_REPORT_DAY_RAW = config("MONTHLY_REPORT_DAY", default="")
+try:
+    from trackable.core.reporting import parse_monthly_report_day as _parse_monthly_report_day
+
+    MONTHLY_REPORT_DAY = _parse_monthly_report_day(MONTHLY_REPORT_DAY_RAW)
+except ValueError:
+    MONTHLY_REPORT_DAY = None
 DISABLE_REGISTRATION = config("DISABLE_REGISTRATION", default=False, cast=bool)
 
 # Optional shared secret required to access the first-run setup wizard

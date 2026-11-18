@@ -86,6 +86,13 @@ class Organization(models.Model):
         help_text=_("Beliebige CSS-Regeln, nach den Standard-Styles geladen."),
     )
 
+    # ── Monthly reports ──
+    monthly_report_email = models.EmailField(
+        blank=True, default="",
+        verbose_name=_("E-Mail-Adresse für Monatsberichte"),
+        help_text=_("Erhält eine Kopie aller Monatsberichte der Mitglieder dieser Organisation."),
+    )
+
     class Meta:
         ordering = ["name"]
 

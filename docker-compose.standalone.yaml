@@ -23,6 +23,7 @@ services:
       - BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-weekly}
       - BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}
       - MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}
+      - MONTHLY_REPORT_DAY=${MONTHLY_REPORT_DAY:-}
       - 'SETUP_TOKEN=${SETUP_TOKEN:-}'
       - SUBDOMAIN=${SUBDOMAIN:-trackable}
       - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
