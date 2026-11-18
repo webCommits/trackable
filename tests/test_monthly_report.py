@@ -163,6 +163,100 @@ class SendMonthlyEmailsCommandTest(TestCase):
         call_command("send_monthly_emails", "--date", "2026-11-30")
         self.assertEqual(len(mail.outbox), 0)
 
+    @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    def test_subject_contains_full_name(self):
+        self.user.first_name = "Jean-Marcel"
+        self.user.last_name = "Dreßen"
+        self.user.save()
+        self._add_entry(date(2026, 11, 15))
+        call_command("send_monthly_emails", "--date", "2026-11-30")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Jean-Marcel Dreßen", mail.outbox[0].subject)
+        self.assertNotIn("Developer", mail.outbox[0].subject)
+
+    @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    def test_subject_falls_back_to_username_without_full_name(self):
+        self._add_entry(date(2026, 11, 15))
+        call_command("send_monthly_emails", "--date", "2026-11-30")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("employee", mail.outbox[0].subject)
+
+    @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    def test_attachment_filename_calendar_mode(self):
+        self.user.first_name = "Jean-Marcel"
+        self.user.last_name = "Dreßen"
+        self.user.save()
+        self._add_entry(date(2026, 11, 15))
+        call_command("send_monthly_emails", "--date", "2026-11-30")
+        self.assertEqual(len(mail.outbox), 1)
+        filenames = [name for name, _, _ in mail.outbox[0].attachments]
+        self.assertIn("arbeitszeiten_Jean-Marcel_Dreßen_2026_11.pdf", filenames)
+
+    @override_settings(MONTHLY_REPORT_DAY_RAW="24")
+    def test_attachment_filename_cutoff_mode(self):
+        self.user.first_name = "Jean-Marcel"
+        self.user.last_name = "Dreßen"
+        self.user.save()
+        self._add_entry(date(2026, 11, 24))
+        call_command("send_monthly_emails", "--date", "2026-11-24")
+        self.assertEqual(len(mail.outbox), 1)
+        filenames = [name for name, _, _ in mail.outbox[0].attachments]
+        self.assertIn("arbeitszeiten_Jean-Marcel_Dreßen_2026-11-24.pdf", filenames)
+
+    @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    def test_attachment_filename_multiple_profiles_gets_title_suffix(self):
+        second_profile = Profile.objects.create(
+            user=self.user,
+            title="Freelance",
+            position="Consultant",
+            weekly_hours=10,
+            hourly_rate=80,
+        )
+        self._add_entry(date(2026, 11, 15))
+        TimeEntry.objects.create(
+            profile=second_profile,
+            date=date(2026, 11, 16),
+            start_time=time(9, 0),
+            end_time=time(12, 0),
+            pause_duration=0,
+        )
+        call_command("send_monthly_emails", "--date", "2026-11-30")
+        self.assertEqual(len(mail.outbox), 2)
+        filenames = sorted(
+            name for email in mail.outbox for name, _, _ in email.attachments
+        )
+        self.assertEqual(
+            filenames,
+            [
+                "arbeitszeiten_employee_Developer_2026_11.pdf",
+                "arbeitszeiten_employee_Freelance_2026_11.pdf",
+            ],
+        )
+
+    @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    def test_html_body_contains_employee_name(self):
+        self.user.first_name = "Jean-Marcel"
+        self.user.last_name = "Dreßen"
+        self.user.save()
+        self._add_entry(date(2026, 11, 15))
+        call_command("send_monthly_emails", "--date", "2026-11-30")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Jean-Marcel Dreßen", mail.outbox[0].body)
+
+    @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    def test_name_with_markup_characters_does_not_crash_pdf(self):
+        self.user.first_name = "<Jean>"
+        self.user.last_name = "& Marcel"
+        self.user.save()
+        self._add_entry(date(2026, 11, 15))
+        call_command("send_monthly_emails", "--date", "2026-11-30")
+        self.assertEqual(len(mail.outbox), 1)
+        attachments = mail.outbox[0].attachments
+        self.assertEqual(len(attachments), 1)
+        _, content, mimetype = attachments[0]
+        self.assertEqual(mimetype, "application/pdf")
+        self.assertTrue(content.startswith(b"%PDF"))
+
 
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",

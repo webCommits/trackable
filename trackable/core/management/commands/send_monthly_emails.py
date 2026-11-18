@@ -5,6 +5,8 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
 import html2text
+import re
+from xml.sax.saxutils import escape
 from datetime import datetime, date
 import io
 from reportlab.lib.pagesizes import landscape, A4
@@ -76,7 +78,10 @@ class Command(BaseCommand):
         users = User.objects.filter(is_active=True)
 
         for user in users:
-            for profile in user.profiles.all():
+            employee_name = self.employee_name(user)
+            profiles = list(user.profiles.all())
+            multiple_profiles = len(profiles) > 1
+            for profile in profiles:
                 entries = list(profile.get_entries_between(start, end))
 
                 if not entries:
@@ -102,7 +107,7 @@ class Command(BaseCommand):
 
                 if dry_run:
                     self.stdout.write(
-                        f"[dry-run] {user.username} / {profile.title} | "
+                        f"[dry-run] {user.username} ({employee_name}) / {profile.title} | "
                         f"period {label} | entries={len(entries)} | "
                         f"hours={total_hours} | to={to} | bcc={bcc}"
                     )
@@ -113,6 +118,7 @@ class Command(BaseCommand):
                     {
                         "user": user,
                         "profile": profile,
+                        "employee_name": employee_name,
                         "month_name": label,
                         "total_hours": total_hours,
                         "total_earnings": total_earnings,
@@ -125,17 +131,24 @@ class Command(BaseCommand):
 
                 try:
                     pdf_buffer = self.generate_pdf(
-                        profile, label, start, end, entries
+                        profile, employee_name, label, start, end, entries
                     )
                     email = EmailMessage(
-                        subject=f"Monatsbericht - {profile.title} - {label}",
+                        subject=f"Monatsbericht - {employee_name} - {label}",
                         body=text_message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=to,
                         bcc=bcc,
                     )
                     email.attach(
-                        self.pdf_filename(profile, report_day, start, end),
+                        self.pdf_filename(
+                            employee_name,
+                            profile,
+                            report_day,
+                            start,
+                            end,
+                            multiple_profiles,
+                        ),
                         pdf_buffer.getvalue(),
                         "application/pdf",
                     )
@@ -179,12 +192,32 @@ class Command(BaseCommand):
 
         return to, bcc
 
-    def pdf_filename(self, profile, report_day, start, end):
-        if report_day is None:
-            return f"arbeitszeiten_{profile.title}_{start.year}_{start.month}.pdf"
-        return f"arbeitszeiten_{profile.title}_{end.isoformat()}.pdf"
+    def employee_name(self, user):
+        """Human-readable name for a user, falling back to the username."""
+        return user.get_full_name().strip() or user.username
 
-    def generate_pdf(self, profile, label, start, end, entries):
+    def safe_filename_part(self, value):
+        """Sanitize a string for use in a filename.
+
+        Runs of characters outside [\\w.-] (unicode word chars allowed) are
+        collapsed to a single underscore, and leading/trailing underscores
+        are stripped.
+        """
+        return re.sub(r"[^\w.-]+", "_", value, flags=re.UNICODE).strip("_")
+
+    def pdf_filename(self, employee_name, profile, report_day, start, end, multiple_profiles=False):
+        safe_name = self.safe_filename_part(employee_name)
+        if report_day is None:
+            suffix = f"{start.year}_{start.month}"
+        else:
+            suffix = end.isoformat()
+
+        if multiple_profiles:
+            safe_title = self.safe_filename_part(profile.title)
+            return f"arbeitszeiten_{safe_name}_{safe_title}_{suffix}.pdf"
+        return f"arbeitszeiten_{safe_name}_{suffix}.pdf"
+
+    def generate_pdf(self, profile, employee_name, label, start, end, entries):
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=landscape(A4))
         elements = []
@@ -198,8 +231,13 @@ class Command(BaseCommand):
             spaceAfter=20,
         )
 
-        elements.append(Paragraph(f"{profile.title} - {label}", title_style))
-        elements.append(Paragraph(f"{profile.position}", styles["Normal"]))
+        elements.append(
+            Paragraph(
+                f"{escape(employee_name)} - {escape(profile.title)} - {escape(label)}",
+                title_style,
+            )
+        )
+        elements.append(Paragraph(escape(f"{profile.position}"), styles["Normal"]))
         elements.append(Spacer(1, 20))
 
         total_hours = profile.get_hours_between(start, end)
