@@ -106,6 +106,9 @@ MONTHLY_EMAIL_TIME=23:59
 # Tag danach im Vormonat ab. Eine Kopie an eine Organisations-E-Mail-Adresse
 # kann zusätzlich unter Branding-Einstellungen hinterlegt werden.
 MONTHLY_REPORT_DAY=
+# Optional: Standardsprache (en/de). Gilt, wenn der Browser keine Sprache
+# vorgibt, und für E-Mails vom Cron (z. B. Monatsberichte).
+LANGUAGE_CODE=en
 
 # Optional: Django selbst liefert /media/ (hochgeladene Logos/Favicons) aus,
 # wenn DEBUG=False. Auf False setzen, falls ein Reverse Proxy das übernimmt.

@@ -23,6 +23,7 @@ services:
       - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
       - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
       - 'MONTHLY_REPORT_DAY=${MONTHLY_REPORT_DAY:-}'
+      - 'LANGUAGE_CODE=${LANGUAGE_CODE:-en}'
       - 'SETUP_TOKEN=${SETUP_TOKEN:-}'
     expose:
       - '8000'
@@ -74,6 +75,7 @@ services:
       - 'BACKUP_FILENAME=${BACKUP_FILENAME:-db_backup.sqlite3}'
       - 'MONTHLY_EMAIL_TIME=${MONTHLY_EMAIL_TIME:-23:59}'
       - 'MONTHLY_REPORT_DAY=${MONTHLY_REPORT_DAY:-}'
+      - 'LANGUAGE_CODE=${LANGUAGE_CODE:-en}'
       - 'SETUP_TOKEN=${SETUP_TOKEN:-}'
     user: root
     networks:

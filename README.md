@@ -361,6 +361,7 @@ python manage.py runserver
 | `BACKUP_FILENAME` | `db_backup.sqlite3` | Backup file name | No (optional) |
 | `MONTHLY_EMAIL_TIME` | `23:59` | Time to send monthly reports (HH:MM) | No (optional) |
 | `MONTHLY_REPORT_DAY` | &mdash; (empty) | Day of the month (1-28) the monthly report is sent on. Empty = send on the last day of the month, covering that calendar month (previous behavior). Set (e.g. `24`) to send on that day every month instead, covering the period since the day after that day in the previous month. Organization managers can also set an org-wide "monthly report copy" address under Branding settings, which receives a BCC (or becomes the only recipient, if the employee has notifications disabled) of every member's report. | No (optional) |
+| `LANGUAGE_CODE` | `en` | Default language (`en` or `de`). Used when the browser sends no supported language and for emails sent by cron (e.g. monthly reports). | No (optional) |
 | `SUBDOMAIN` | `trackable` | Subdomain for Traefik routing | No (Standalone only) |
 | `DOMAIN_NAME` | &mdash; | Base domain for Traefik routing (e.g., `example.com`) | No (Standalone only) |
 | `SETUP_TOKEN` | &mdash; (empty) | Optional shared secret required to access the first-run setup wizard at `/setup/` | No (optional, recommended for public-facing first deploys) |

@@ -715,14 +715,14 @@ msgstr "Hallo"
 
 #, python-format
 msgid ""
-"here is your monthly report for <strong>%(profile.title)s</strong> in "
-"<strong>%(month_name)s</strong>:"
+"here is your report for <strong>%(title)s</strong> for the period <strong>"
+"%(period)s</strong>:"
 msgstr ""
-"hier ist Ihr monatlicher Bericht für <strong>%(profile.title)s</strong> im "
-"<strong>%(month_name)s</strong>:"
+"hier ist Ihr Bericht für <strong>%(title)s</strong> für den Zeitraum "
+"<strong>%(period)s</strong>:"
 
 msgid "Profile"
-msgstr "Profile"
+msgstr "Profil"
 
 msgid "Position"
 msgstr "Stelle"

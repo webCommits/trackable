@@ -234,6 +234,15 @@ class SendMonthlyEmailsCommandTest(TestCase):
         )
 
     @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    @override_settings(MONTHLY_REPORT_DAY_RAW="")
+    def test_body_contains_profile_title(self):
+        """Regression: blocktrans used {{ profile.title }}, which rendered empty."""
+        self._add_entry(date(2026, 11, 15))
+        call_command("send_monthly_emails", "--date", "2026-11-30")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(self.profile.title, mail.outbox[0].body)
+        self.assertNotIn("****", mail.outbox[0].body)
+
     def test_html_body_contains_employee_name(self):
         self.user.first_name = "Jean-Marcel"
         self.user.last_name = "Dreßen"

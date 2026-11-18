@@ -93,7 +93,7 @@
         </div>
         <div class="content">
             <p>{% trans "Hello" %} {{ user.first_name|default:user.username }},</p>
-            <p>{% blocktrans %}here is your monthly report for <strong>{{ profile.title }}</strong> in <strong>{{ month_name }}</strong>:{% endblocktrans %}</p>
+            <p>{% blocktrans with title=profile.title period=month_name %}here is your report for <strong>{{ title }}</strong> for the period <strong>{{ period }}</strong>:{% endblocktrans %}</p>
 
             <div class="summary">
                 <div class="summary-item">
@@ -109,7 +109,7 @@
                     <span class="summary-value">{{ profile.position }}</span>
                 </div>
                 <div class="summary-item">
-                    <span class="summary-label">{% trans "Month" %}</span>
+                    <span class="summary-label">{% trans "Period" %}</span>
                     <span class="summary-value">{{ month_name }}</span>
                 </div>
                 <div class="summary-item">

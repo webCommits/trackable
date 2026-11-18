@@ -88,7 +88,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en"  # default: English
+# Default language: used when the browser sends no supported language and
+# for everything rendered outside a request (e.g. monthly report emails sent
+# by cron). One of LANGUAGES below.
+LANGUAGE_CODE = config("LANGUAGE_CODE", default="en")
 LANGUAGES = [
     ("en", "English"),
     ("de", "Deutsch"),
