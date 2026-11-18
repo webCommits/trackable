@@ -18,6 +18,11 @@ urlpatterns = [
         name="set_target_hours",
     ),
     path(
+        "employees/<int:user_id>/profiles/<int:profile_id>/set-hourly-rate/",
+        views.set_hourly_rate,
+        name="set_hourly_rate",
+    ),
+    path(
         "employees/<int:user_id>/profiles/<int:profile_id>/set-contract-dates/",
         views.set_contract_dates,
         name="set_contract_dates",

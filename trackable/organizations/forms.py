@@ -125,6 +125,15 @@ class EmployeeCreateForm(forms.ModelForm):
         widget=forms.DateInput(attrs={"type": "date"}),
         help_text=_("Optional. Leave empty for open-ended contracts."),
     )
+    hourly_rate = forms.DecimalField(
+        label=_("Hourly rate (€)"),
+        required=False,
+        min_value=Decimal("0"),
+        max_digits=10,
+        decimal_places=2,
+        initial=Decimal("0"),
+        widget=forms.TextInput(attrs={"placeholder": _("e.g. 50,00")}),
+    )
 
     class Meta:
         model = User
@@ -136,12 +145,34 @@ class EmployeeCreateForm(forms.ModelForm):
             "last_name": _("Last name"),
         }
 
+    def __init__(self, *args, **kwargs):
+        # Normalize German decimal commas (e.g. 50,00 -> 50.00) for hourly_rate,
+        # same as ProfileForm.
+        if args:
+            data = args[0]
+            if hasattr(data, "copy"):
+                data = data.copy()
+                if "hourly_rate" in data and isinstance(data["hourly_rate"], str):
+                    data["hourly_rate"] = data["hourly_rate"].replace(",", ".")
+                args = (data,) + args[1:]
+        else:
+            data = kwargs.get("data")
+            if data:
+                data = data.copy()
+                if "hourly_rate" in data and isinstance(data["hourly_rate"], str):
+                    data["hourly_rate"] = data["hourly_rate"].replace(",", ".")
+                kwargs["data"] = data
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
         pw = cleaned_data.get("temp_password")
         pw_confirm = cleaned_data.get("temp_password_confirm")
         if pw and pw_confirm and pw != pw_confirm:
             raise forms.ValidationError(_("Passwords do not match."))
+
+        if cleaned_data.get("hourly_rate") is None:
+            cleaned_data["hourly_rate"] = Decimal("0")
 
         start = cleaned_data.get("contract_start_date")
         end = cleaned_data.get("contract_end_date")

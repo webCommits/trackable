@@ -30,6 +30,20 @@ set -eu
 ENV_FILE=/etc/trackable-cron.env
 TMP_FILE="${ENV_FILE}.tmp.$$"
 
+fix_media_ownership() {
+    # Self-heal pre-existing root-owned media volumes (created before /app/media
+    # existed in the image, or by some other root-owned process) so the app
+    # container, which runs as appuser, can write uploads to them again.
+    # Top-level directory only - NOT recursive - to keep this cheap and safe
+    # to run on every cron-container start.
+    # Best-effort: under `set -eu` a failing chown would otherwise abort this
+    # script and keep cron from ever starting, so don't let it fail the script.
+    if [ -d /app/media ] && id appuser >/dev/null 2>&1; then
+        chown appuser:appuser /app/media 2>/dev/null \
+            || echo "trackable-cron-start: warning: could not chown /app/media" >&2
+    fi
+}
+
 snapshot_env() {
     # Ensure the snapshot is never created world/group readable, even for
     # the brief moment before the explicit chmod below.
@@ -47,6 +61,7 @@ snapshot_env() {
 }
 
 snapshot_env
+fix_media_ownership
 
 if [ "${1:-}" = "--env-only" ]; then
     exit 0

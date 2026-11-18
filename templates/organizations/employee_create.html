@@ -74,6 +74,11 @@
             {% for error in form.monthly_target_hours_minutes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
             <small class="text-muted" style="display: block; margin-top: 4px;">{% trans "Use this when the employee's target is defined per month." %}</small>
         </div>
+        <div class="form-group{% if form.hourly_rate.errors %} has-error{% endif %}">
+            <label for="{{ form.hourly_rate.id_for_label }}">{% trans "Hourly rate (€)" %}</label>
+            {{ form.hourly_rate }}
+            {% for error in form.hourly_rate.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </div>
         <div class="form-group{% if form.contract_start_date.errors %} has-error{% endif %}">
             <label for="{{ form.contract_start_date.id_for_label }}">{% trans "Contract start date" %}</label>
             {{ form.contract_start_date }}

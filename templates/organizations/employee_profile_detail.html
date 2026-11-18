@@ -69,6 +69,25 @@
             {% trans "Cancel" %}
         </button>
     </form>
+    <p style="color:var(--ctp-subtext0); margin-bottom:5px; margin-top:10px;">
+        <strong>{% trans "Hourly rate" %}:</strong>
+        €{{ profile.hourly_rate|floatformat:2 }}
+        <a href="#" onclick="document.getElementById('hourly-rate-form').style.display='block'; this.style.display='none'; return false;"
+           style="margin-left:10px; font-size:.85rem; color:var(--ctp-blue); cursor:pointer;">✏ {% trans "Edit" %}</a>
+    </p>
+    <form id="hourly-rate-form" method="post" action="/org/employees/{{ employee.id }}/profiles/{{ profile.id }}/set-hourly-rate/"
+          style="display:none; margin-top:10px;">
+        {% csrf_token %}
+        <label style="color:var(--ctp-subtext0); font-size:.85rem;">{% trans "Hourly rate (€)" %}:</label>
+        <input type="text" name="hourly_rate" value="{{ profile.hourly_rate|floatformat:2 }}"
+               placeholder="{% trans 'e.g. 50,00' %}"
+               style="width:100px; padding:6px 10px; border-radius:6px; border:1px solid var(--ctp-overlay0); background:var(--ctp-mantle); color:var(--ctp-text); margin:0 8px 0 4px;">
+        <button type="submit" class="btn btn-primary btn-sm">{% trans "Save hourly rate" %}</button>
+        <button type="button" class="btn btn-secondary btn-sm"
+                onclick="this.closest('form').style.display='none'; document.querySelector('[onclick*=\'hourly-rate-form\']').style.display='inline'; return false;">
+            {% trans "Cancel" %}
+        </button>
+    </form>
     {% if target_hours_changes %}
     <div style="margin-top:10px; font-size:.82rem; color:var(--ctp-subtext0);">
         <strong>{% trans "Target hours history" %}:</strong>

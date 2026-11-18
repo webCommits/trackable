@@ -200,6 +200,47 @@ class OrganizationViewTest(TestCase):
         self.assertIsNone(profile.contract_start_date)
         self.assertIsNone(profile.contract_end_date)
 
+    def test_employee_create_with_hourly_rate(self):
+        response = self.client.post(
+            reverse("employee_create"),
+            {
+                "username": "rateemp",
+                "email": "rateemp@example.com",
+                "first_name": "Rate",
+                "last_name": "Emp",
+                "temp_password": "temppass123",
+                "temp_password_confirm": "temppass123",
+                "weekly_hours_hours": "40",
+                "weekly_hours_minutes": "0",
+                "hourly_rate": "45,50",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(username="rateemp")
+        profile = user.profiles.first()
+        self.assertIsNotNone(profile)
+        self.assertEqual(float(profile.hourly_rate), 45.50)
+
+    def test_employee_create_without_hourly_rate_defaults_to_zero(self):
+        response = self.client.post(
+            reverse("employee_create"),
+            {
+                "username": "noratemp",
+                "email": "noratemp@example.com",
+                "first_name": "No",
+                "last_name": "Rate",
+                "temp_password": "temppass123",
+                "temp_password_confirm": "temppass123",
+                "weekly_hours_hours": "40",
+                "weekly_hours_minutes": "0",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(username="noratemp")
+        profile = user.profiles.first()
+        self.assertIsNotNone(profile)
+        self.assertEqual(float(profile.hourly_rate), 0.0)
+
     def test_employee_detail(self):
         employee = User.objects.create_user(
             username="employee", email="emp@example.com", password="pass123"
@@ -957,6 +998,291 @@ class SetTargetHoursTest(TestCase):
         self.profile.refresh_from_db()
         self.assertEqual(float(self.profile.weekly_hours), 40.0)
         self.assertFalse(self.profile.target_hours_changes.exists())
+
+    def test_set_target_hours_rejects_open_redirect_scheme_relative(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "weekly_target_hours_hours": "30",
+                "weekly_target_hours_minutes": "0",
+                "next": "/\\evil.com",
+            },
+        )
+        self.assertRedirects(
+            response,
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+        )
+
+    def test_set_target_hours_rejects_open_redirect_absolute_url(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "weekly_target_hours_hours": "30",
+                "weekly_target_hours_minutes": "0",
+                "next": "https://evil.com",
+            },
+        )
+        self.assertRedirects(
+            response,
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+        )
+
+    def test_set_target_hours_honors_safe_next_url(self):
+        self.client.login(username="manager", password="pass123")
+        safe_next = reverse("employee_detail", kwargs={"user_id": self.employee.id})
+        response = self.client.post(
+            reverse("set_target_hours", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {
+                "weekly_target_hours_hours": "30",
+                "weekly_target_hours_minutes": "0",
+                "next": safe_next,
+            },
+        )
+        self.assertRedirects(response, safe_next)
+
+
+class SetHourlyRateTest(TestCase):
+    """Tests for the set_hourly_rate manager view."""
+
+    def setUp(self):
+        self.client = Client()
+        self.manager = User.objects.create_user(
+            username="manager", email="manager@example.com", password="pass123"
+        )
+        self.employee = User.objects.create_user(
+            username="employee", email="emp@example.com", password="pass123"
+        )
+        self.org = Organization.objects.create(
+            name="Acme Corp", created_by=self.manager
+        )
+        self.manager_membership = OrganizationMembership.objects.create(
+            user=self.manager, organization=self.org, role="manager"
+        )
+        self.employee_membership = OrganizationMembership.objects.create(
+            user=self.employee, organization=self.org, role="employee"
+        )
+        self.profile = Profile.objects.create(
+            user=self.employee,
+            title="Dev",
+            position="Engineer",
+            weekly_hours=40,
+            hourly_rate=20,
+        )
+
+    def test_set_hourly_rate_requires_login(self):
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "30"},
+        )
+        self.assertRedirects(
+            response,
+            f"/accounts/login/?next=/org/employees/{self.employee.id}/profiles/{self.profile.id}/set-hourly-rate/",
+        )
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 20.0)
+
+    def test_set_hourly_rate_requires_manager(self):
+        self.client.login(username="employee", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "30"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 20.0)
+
+    def test_set_hourly_rate_updates_with_dot_decimal(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "35.50"},
+        )
+        self.assertRedirects(
+            response,
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+        )
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 35.50)
+
+    def test_set_hourly_rate_updates_with_comma_decimal(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "42,75"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 42.75)
+
+    def test_set_hourly_rate_rejects_negative_value(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "-5"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 20.0)
+
+    def test_set_hourly_rate_rejects_non_numeric_value(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "not-a-number"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 20.0)
+
+    def test_set_hourly_rate_rejects_value_exceeding_model_digits(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "123456789.99"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 20.0)
+
+    def test_set_hourly_rate_rejects_non_finite_values(self):
+        """NaN/Infinity parse as valid Decimals but must not reach the
+        `< 0` comparison (which would raise InvalidOperation -> 500)."""
+        self.client.login(username="manager", password="pass123")
+        for value in ["NaN", "nan", "sNaN", "Infinity", "-Infinity"]:
+            with self.subTest(value=value):
+                response = self.client.post(
+                    reverse("set_hourly_rate", kwargs={
+                        "user_id": self.employee.id,
+                        "profile_id": self.profile.id,
+                    }),
+                    {"hourly_rate": value},
+                )
+                self.assertEqual(response.status_code, 302)
+                self.profile.refresh_from_db()
+                self.assertEqual(float(self.profile.hourly_rate), 20.0)
+
+    def test_set_hourly_rate_wrong_org_manager_cant_set(self):
+        """Manager of org A cannot change the hourly rate of org B's employee."""
+        other_mgr = User.objects.create_user(
+            username="othermgr", password="pass123"
+        )
+        other_org = Organization.objects.create(name="Other Corp", slug="other", created_by=other_mgr)
+        OrganizationMembership.objects.create(
+            user=other_mgr, organization=other_org, role="manager"
+        )
+        self.client.login(username="othermgr", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "30"},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.profile.refresh_from_db()
+        self.assertEqual(float(self.profile.hourly_rate), 20.0)
+
+    def test_set_hourly_rate_get_not_allowed(self):
+        self.client.login(username="manager", password="pass123")
+        response = self.client.get(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+        )
+        self.assertEqual(response.status_code, 405)
+
+    def test_set_hourly_rate_rejects_open_redirect_scheme_relative(self):
+        """A `next` value like //evil.com must not be honored as a redirect
+        target (it's scheme-relative and points off-site)."""
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "30", "next": "/\\evil.com"},
+        )
+        self.assertRedirects(
+            response,
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+        )
+
+    def test_set_hourly_rate_rejects_open_redirect_absolute_url(self):
+        """A `next` value pointing to an absolute off-site URL must fall
+        back to the default redirect instead of being honored."""
+        self.client.login(username="manager", password="pass123")
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "30", "next": "https://evil.com"},
+        )
+        self.assertRedirects(
+            response,
+            reverse("employee_profile_detail", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+        )
+
+    def test_set_hourly_rate_honors_safe_next_url(self):
+        """A `next` value pointing back into our own site is honored."""
+        self.client.login(username="manager", password="pass123")
+        safe_next = reverse("employee_detail", kwargs={"user_id": self.employee.id})
+        response = self.client.post(
+            reverse("set_hourly_rate", kwargs={
+                "user_id": self.employee.id,
+                "profile_id": self.profile.id,
+            }),
+            {"hourly_rate": "30", "next": safe_next},
+        )
+        self.assertRedirects(response, safe_next)
 
 
 class OrganizationBrandingTest(TestCase):

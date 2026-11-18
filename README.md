@@ -364,6 +364,7 @@ python manage.py runserver
 | `SUBDOMAIN` | `trackable` | Subdomain for Traefik routing | No (Standalone only) |
 | `DOMAIN_NAME` | &mdash; | Base domain for Traefik routing (e.g., `example.com`) | No (Standalone only) |
 | `SETUP_TOKEN` | &mdash; (empty) | Optional shared secret required to access the first-run setup wizard at `/setup/` | No (optional, recommended for public-facing first deploys) |
+| `SERVE_MEDIA` | `True` | Whether Django itself serves `/media/` (uploaded org logos/favicons) when `DEBUG=False`. Set `False` if a reverse proxy serves media files instead | No (optional) |
 
 ---
 

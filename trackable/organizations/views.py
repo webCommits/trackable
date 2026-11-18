@@ -30,13 +30,32 @@ from trackable.timetracking.models import (
 )
 import json
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone as tz
+from django.utils.http import url_has_allowed_host_and_scheme
 import calendar
 
 from trackable.core.utils import hours_and_minutes_to_decimal
 from trackable.profiles.forms import monthly_to_weekly_equivalent
 from trackable.profiles.models import TARGET_HOURS_MONTHLY, TARGET_HOURS_WEEKLY
+
+
+def _safe_next_url(request, next_url):
+    """Return next_url if it's a safe, same-origin redirect target, else None.
+
+    Guards the "next" POST field used by set_target_hours/set_hourly_rate
+    against open-redirect payloads (e.g. "//evil.com", "https://evil.com").
+    """
+    if not next_url:
+        return None
+    if url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return None
 
 
 @login_required
@@ -182,7 +201,7 @@ def employee_create(request):
                 weekly_hours=form.cleaned_data["weekly_hours"],
                 target_hours_period=form.cleaned_data["target_hours_period"],
                 monthly_target_hours=form.cleaned_data["monthly_target_hours"],
-                hourly_rate=0,
+                hourly_rate=form.cleaned_data.get("hourly_rate") or 0,
                 contract_start_date=form.cleaned_data.get("contract_start_date"),
                 contract_end_date=form.cleaned_data.get("contract_end_date"),
             )
@@ -266,9 +285,7 @@ def set_target_hours(request, user_id, profile_id):
     employee = employee_membership.user
     profile = get_object_or_404(Profile, pk=profile_id, user=employee)
     next_url = request.POST.get("next", "")
-    redirect_url = (
-        next_url if next_url.startswith("/") and not next_url.startswith("//") else None
-    )
+    redirect_url = _safe_next_url(request, next_url)
 
     def _redirect_back():
         if redirect_url:
@@ -333,6 +350,63 @@ def set_target_hours(request, user_id, profile_id):
         )
 
     messages.success(request, _("Target hours updated."))
+    return _redirect_back()
+
+
+@login_required
+@org_manager_required
+@require_http_methods(["POST"])
+def set_hourly_rate(request, user_id, profile_id):
+    """Set the hourly rate for an employee's profile (manager only)."""
+    membership = request.user.organization_membership
+    organization = membership.organization
+
+    employee_membership = get_object_or_404(
+        OrganizationMembership,
+        organization=organization,
+        user_id=user_id,
+    )
+    employee = employee_membership.user
+    profile = get_object_or_404(Profile, pk=profile_id, user=employee)
+    next_url = request.POST.get("next", "")
+    redirect_url = _safe_next_url(request, next_url)
+
+    def _redirect_back():
+        if redirect_url:
+            return redirect(redirect_url)
+        return redirect("employee_profile_detail", user_id=user_id, profile_id=profile_id)
+
+    rate_str = request.POST.get("hourly_rate", "").strip().replace(",", ".")
+    if rate_str == "":
+        messages.error(request, _("Hourly rate is required."))
+        return _redirect_back()
+
+    try:
+        hourly_rate = Decimal(rate_str)
+    except InvalidOperation:
+        messages.error(request, _("Invalid value for hourly rate."))
+        return _redirect_back()
+
+    if not hourly_rate.is_finite():
+        messages.error(request, _("Invalid value for hourly rate."))
+        return _redirect_back()
+
+    if hourly_rate < 0:
+        messages.error(request, _("Invalid value for hourly rate."))
+        return _redirect_back()
+
+    field = Profile._meta.get_field("hourly_rate")
+    try:
+        for validator in field.validators:
+            validator(hourly_rate)
+    except DjangoValidationError:
+        messages.error(request, _("Invalid value for hourly rate."))
+        return _redirect_back()
+
+    profile.hourly_rate = hourly_rate
+    profile.save(update_fields=["hourly_rate"])
+
+    messages.success(request, _("Hourly rate updated."))
     return _redirect_back()
 
 

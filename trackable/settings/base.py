@@ -150,3 +150,9 @@ DISABLE_REGISTRATION = config("DISABLE_REGISTRATION", default=False, cast=bool)
 # the previous behavior of the wizard being reachable by anyone until the
 # first admin account is created.
 SETUP_TOKEN = config("SETUP_TOKEN", default="")
+
+# Whether Django itself serves /media/ (uploaded org logos/favicons) when
+# DEBUG is False. Default True so uploads keep working out of the box in
+# production; set to False if a reverse proxy (nginx/Caddy) serves media
+# files directly instead.
+SERVE_MEDIA = config("SERVE_MEDIA", default=True, cast=bool)

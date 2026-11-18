@@ -23,7 +23,11 @@ RUN uv pip install --system -r pyproject.toml
 
 COPY . .
 
-RUN mkdir -p /app/data/backups
+# Create /app/media here too: a fresh named volume mounted over a directory
+# that doesn't exist yet in the image is created by Docker as root, which
+# would make uploads (org logos/favicons) fail with PermissionError once the
+# chown below switches the app to running as appuser.
+RUN mkdir -p /app/data/backups /app/media
 
 # Start script for the "cron" service: snapshots the container's environment
 # into /etc/trackable-cron.env before starting cron, since Debian cron does

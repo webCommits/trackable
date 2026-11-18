@@ -106,6 +106,10 @@ MONTHLY_EMAIL_TIME=23:59
 # Tag danach im Vormonat ab. Eine Kopie an eine Organisations-E-Mail-Adresse
 # kann zusätzlich unter Branding-Einstellungen hinterlegt werden.
 MONTHLY_REPORT_DAY=
+
+# Optional: Django selbst liefert /media/ (hochgeladene Logos/Favicons) aus,
+# wenn DEBUG=False. Auf False setzen, falls ein Reverse Proxy das übernimmt.
+SERVE_MEDIA=True
 ```
 
 ### 3. Docker Compose starten

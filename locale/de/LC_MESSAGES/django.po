@@ -1841,6 +1841,18 @@ msgstr "Ungültiger Wert für Soll-Stunden."
 msgid "Weekly target hours updated."
 msgstr "Wöchentliche Soll-Stunden aktualisiert."
 
+msgid "Hourly rate is required."
+msgstr "Stundenlohn ist erforderlich."
+
+msgid "Invalid value for hourly rate."
+msgstr "Ungültiger Wert für den Stundenlohn."
+
+msgid "Hourly rate updated."
+msgstr "Stundenlohn aktualisiert."
+
+msgid "Save hourly rate"
+msgstr "Stundenlohn speichern"
+
 msgid "Invalid date format for contract start date."
 msgstr "Ungültiges Datumsformat für Vertragsstart."
 
